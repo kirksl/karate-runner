@@ -27,3 +27,5 @@ Goto the following path to configure this extension `Preferences > Settings > Se
 0.1.0 - Add support for Gradle and Maven.  Please note the first pom.xml(Maven) or build.gradle(Gradle) found when traversing backwards from the *.feature file being tested will be used to run all Maven and Gradle commands.  This will also constitute your project root directory.  Add support to automatically open any file(s) once tests finish running.  For example you may want specific html reports to automatically load into a browser.  Add a Karate Activity Bar to VSCode to enable management of build reports and tests in a central location.
 
 0.1.1 - Resolve project dependencies missing when publishing.
+
+0.1.2 - Connect to Github Repo.
