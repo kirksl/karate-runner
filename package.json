@@ -1,0 +1,176 @@
+{
+  "name": "karate-runner",
+  "displayName": "Karate Runner",
+  "description": "Run Karate Tests and open Build Reports from Codelens and Activity Bar.",
+  "icon": "resources/karate.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kirksl/karate-runner"
+  },
+  "version": "0.1.1",
+  "license": "MIT",
+  "author": {
+    "name": "Kirk Slota"
+  },
+  "publisher": "kirkslota",
+  "engines": {
+    "vscode": "^1.31.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "karate",
+    "intuit",
+    "rest",
+    "api",
+    "gatling"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./out/extension",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "karate-runner",
+          "title": "Karate Runner",
+          "icon": "resources/dark/karate.svg"
+        }
+      ]
+    },
+    "views": {
+      "karate-runner": [
+        {
+          "id": "karate-reports",
+          "name": "Build Reports"
+        },
+        {
+          "id": "karate-tests",
+          "name": "Tests"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "karateRunner.runKarateTest",
+        "title": "Run Karate Test"
+      },
+      {
+        "command": "karateRunner.openBuildReport",
+        "title": "Open Build Report"
+      },
+      {
+        "command": "karateRunner.refreshBuildReportsTree",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "karateRunner.refreshTestsTree",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "karateRunner.refreshBuildReportsTree",
+          "when": "view == karate-reports",
+          "group": "navigation"
+        },
+        {
+          "command": "karateRunner.refreshTestsTree",
+          "when": "view == karate-tests",
+          "group": "navigation"
+        }
+      ]
+    },
+    "configuration": {
+      "type": "object",
+      "title": "Karate Runner",
+      "properties": {
+        "karateRunner.karateRunner.default": {
+          "type": "string",
+          "default": "_SyncRunner",
+          "description": "Default Karate Runner to use for running Karate tests.",
+          "scope": "resource"
+        },
+        "karateRunner.karateRunner.promptToSpecify": {
+          "type": "boolean",
+          "default": true,
+          "description": "Prompt to specify Karate Runner before running Karate tests.",
+          "scope": "resource"
+        },
+        "karateRunner.buildDirectory.cleanBeforeEachRun": {
+          "type": "boolean",
+          "default": true,
+          "description": "Clean build directory before running Karate tests.",
+          "scope": "resource"
+        },
+        "karateRunner.buildReports.openAfterEachRun": {
+          "type": "boolean",
+          "default": false,
+          "description": "Open build reports in default program after running Karate tests.",
+          "scope": "resource"
+        },
+        "karateRunner.buildReports.toTarget": {
+          "type": "string",
+          "default": "**/{jacoco/test/html/index,cucumber-html-reports/overview-features,surefire-reports/timeline}.htm*",
+          "description": "Glob pattern to specify which reports to target relative to the project root path.",
+          "scope": "resource"
+        },
+        "karateRunner.buildReports.activityBarDisplayType": {
+          "type": "string",
+          "default": "Shallow",
+          "enum": [
+            "Shallow",
+            "Deep"
+          ],
+          "description": "Display reports as a flat list (Shallow) or natural directory structure (Deep) within Activity Bar.",
+          "scope": "resource"
+        },
+        "karateRunner.tests.toTarget": {
+          "type": "string",
+          "default": "**/src/test/**/*.feature",
+          "description": "Glob pattern to specify which Karate tests to target relative to the project root path.",
+          "scope": "resource"
+        },
+        "karateRunner.tests.activityBarDisplayType": {
+          "type": "string",
+          "default": "Shallow",
+          "enum": [
+            "Shallow",
+            "Deep"
+          ],
+          "description": "Display Karate tests as a flat list (Shallow) or natural directory structure (Deep) within Activity Bar.",
+          "scope": "resource"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+    "vscode": "^1.1.6",
+    "typescript": "^2.6.1",
+    "tslint": "^5.8.0",
+    "@types/node": "^7.0.43",
+    "@types/mocha": "^2.2.42"
+  },
+  "dependencies": {
+    "fs-extra": "^7.0.1",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.3"
+  }
+}
