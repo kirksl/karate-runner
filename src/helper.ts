@@ -64,8 +64,8 @@ async function getTestExecutionDetail(uri: vscode.Uri): Promise<TestExecutionDet
   let classPathArray = uri.fsPath.split(classPathRegExp);
 
   let document = await vscode.workspace.openTextDocument(uri);
-  let lineTestRegExp = new RegExp("^.*(Feature|Scenario|Scenario Outline):.*$");
-  let lineTagRegExp = new RegExp("^.*@.+$");
+  let lineTestRegExp = new RegExp("^\\s*(Feature|Scenario|Scenario Outline):.*$");
+  let lineTagRegExp = new RegExp("^\\s*@.+$");
   for (let line = 0; line < document.lineCount; line++)
   {
     let ted: TestExecutionDetail = 
@@ -101,7 +101,7 @@ async function getTestExecutionDetail(uri: vscode.Uri): Promise<TestExecutionDet
           ted.testTag = "";
         }
       }
-      let lineScenarioRegExp = new RegExp("^.*(Scenario|Scenario Outline):.*$");
+      let lineScenarioRegExp = new RegExp("^\\s*(Scenario|Scenario Outline):.*$");
       let lineScenarioMatch = lineText.match(lineScenarioRegExp);
       if(lineScenarioMatch !== null && lineScenarioMatch.index !== undefined)
       {

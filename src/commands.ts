@@ -22,6 +22,11 @@ async function runKarateTest(args)
         value: String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'))
       }
     );
+
+    if(karateRunner !== undefined && karateRunner !== "")
+    {
+      await vscode.workspace.getConfiguration().update('karateRunner.karateRunner.default', karateRunner)
+    }
   }
   else
   {
