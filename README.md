@@ -18,6 +18,8 @@ Goto the following path to configure this extension `Preferences > Settings > Se
 
 
 ## Release Notes
+0.2.0 - Add `Open In Editor` action for *.feature file nodes within Activity Bar Tests view.  Add `Collapse All` action to Build Reports and Tests views within Activity Bar.  Add support for Standalone execution mode via karate.jar.  Please note the first karate.jar(Standalone), pom.xml(Maven) or build.gradle(Gradle) found **in that order** when traversing backwards from the *.feature file will be used for execution.  This will also constitute your project root directory.
+
 0.1.3 - Hide tests that are commented from Codelens and Activity Bar.  Remember last Karate Runner when using `Prompt To Specify` Karate Runner popup.
 
 0.1.2 - Connect to Github Repo.

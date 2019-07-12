@@ -3,10 +3,10 @@ import fs = require("fs");
 import * as vscode from 'vscode';
 
 
-interface BuildPaths
+interface ProjectDetail
 {
 	projectRoot: string;
-	buildFile: string;
+  runFile: string;
 }
 
 interface TestExecutionDetail
@@ -15,41 +15,50 @@ interface TestExecutionDetail
   testTitle: string;
   testLine: number;
   karateOptions: string;
+  karateJarOptions: string;
   codelensTitle: string;
   codelensLine: number;
 }
 
-function getBuildPaths(uri: vscode.Uri): BuildPaths
+function getProjectDetail(uri: vscode.Uri): ProjectDetail
 {
+  let filePathArray = uri.fsPath.split(path.sep);
+  let projectRootPath = "";
+  let runFilePath = "";
+
+  for(let ndx = filePathArray.length - 1; ndx > 0; ndx--)
+  {
     let mavenBuildFile = "pom.xml";
     let gradleBuildFile = "build.gradle";
+    let karateJarFile = "karate.jar";
 
-    let filePathArray = uri.fsPath.split(path.sep);
-    let projectRootPath = "";
-    let buildFilePath = "";
-  
-    for(let ndx = filePathArray.length - 1; ndx > 0; ndx--)
+    filePathArray.pop();
+
+    let runFileTestPath = filePathArray.join(path.sep);
+
+    if(fs.existsSync(runFileTestPath + path.sep + karateJarFile))
     {
-      filePathArray.pop();
-  
-      let buildFileTestPath = filePathArray.join(path.sep);
-  
-      if(fs.existsSync(buildFileTestPath + path.sep + mavenBuildFile))
-      {
-        projectRootPath = buildFileTestPath;
-        buildFilePath = buildFileTestPath + path.sep + mavenBuildFile;
-        break;
-      }
-
-      if(fs.existsSync(buildFileTestPath + path.sep + gradleBuildFile))
-      {
-        projectRootPath = buildFileTestPath;
-        buildFilePath = buildFileTestPath + path.sep + gradleBuildFile;
-        break;
-      }
+      projectRootPath = runFileTestPath;
+      runFilePath = runFileTestPath + path.sep + karateJarFile;
+      break;
     }
 
-    return { projectRoot: projectRootPath, buildFile: buildFilePath };
+    if(fs.existsSync(runFileTestPath + path.sep + mavenBuildFile))
+    {
+      projectRootPath = runFileTestPath;
+      runFilePath = runFileTestPath + path.sep + mavenBuildFile;
+      break;
+    }
+
+    if(fs.existsSync(runFileTestPath + path.sep + gradleBuildFile))
+    {
+      projectRootPath = runFileTestPath;
+      runFilePath = runFileTestPath + path.sep + gradleBuildFile;
+      break;
+    }
+  }
+
+  return { projectRoot: projectRootPath, runFile: runFilePath };
 }
 
 async function getTestExecutionDetail(uri: vscode.Uri): Promise<TestExecutionDetail[]>
@@ -74,11 +83,13 @@ async function getTestExecutionDetail(uri: vscode.Uri): Promise<TestExecutionDet
       testTitle: "",
       testLine: 0,
       karateOptions: "",
+      karateJarOptions: "",
       codelensTitle: "",
       codelensLine: 0
     };
     
     ted.karateOptions = ("classpath:" + classPathArray[1]);
+    ted.karateJarOptions = uri.fsPath;
 
     let lineText = document.lineAt(line).text;
     let lineTestMatch = lineText.match(lineTestRegExp);
@@ -101,13 +112,14 @@ async function getTestExecutionDetail(uri: vscode.Uri): Promise<TestExecutionDet
           ted.testTag = "";
         }
       }
-      let lineScenarioRegExp = new RegExp("^\\s*(Scenario|Scenario Outline):.*$");
+      let lineScenarioRegExp = new RegExp("^\\s*(Scenario|Scenario Outline):(.*)$");
       let lineScenarioMatch = lineText.match(lineScenarioRegExp);
       if(lineScenarioMatch !== null && lineScenarioMatch.index !== undefined)
       {
         ted.testLine = (line + 1);
         ted.codelensTitle = scenarioTitle;
         ted.karateOptions += ":" + ted.testLine
+        ted.karateJarOptions = "-n \"" + lineScenarioMatch[2].trim() + "\" " + ted.karateJarOptions;
       }
       else
       {
@@ -122,4 +134,4 @@ async function getTestExecutionDetail(uri: vscode.Uri): Promise<TestExecutionDet
   return tedArray;
 }
 
-export { getBuildPaths, getTestExecutionDetail, BuildPaths, TestExecutionDetail };
+export { getProjectDetail, getTestExecutionDetail, ProjectDetail, TestExecutionDetail };

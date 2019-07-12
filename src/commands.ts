@@ -5,45 +5,55 @@ async function runKarateTest(args)
 {  
   let karateRunner = null;
   let karateOptions = String(args[0]);
-  let projectRootPath = String(args[1]);
-  let buildFilePath = String(args[2]);
+  let karateJarOptions = String(args[1]);
+  let projectRootPath = String(args[2]);
+  let runFilePath = String(args[3]);
 
-  if(buildFilePath == "")
+  let mavenCmd = "mvn";
+  let gradleCmd = "gradle";
+  let karateJarCmd = "java -jar karate.jar";
+  let mavenBuildFile = "pom.xml";
+  let gradleBuildFile = "build.gradle";
+  let standaloneBuildFile = "karate.jar";
+  let mavenBuildFileSwitch = "-f";
+  let gradleBuildFileSwitch = "-b";
+
+  let runPhases = null;
+  let runCommandPrefix = null;
+  let runCommand = null;
+
+
+  if(runFilePath == "")
   {
     return;
   }
 
-  if(Boolean(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('promptToSpecify')))
+  if(!runFilePath.toLowerCase().endsWith(standaloneBuildFile))
   {
-    karateRunner = await vscode.window.showInputBox
-    (
-      {
-        prompt: "Karate Runner",
-        value: String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'))
-      }
-    );
-
-    if(karateRunner !== undefined && karateRunner !== "")
+    if(Boolean(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('promptToSpecify')))
     {
-      await vscode.workspace.getConfiguration().update('karateRunner.karateRunner.default', karateRunner)
+      karateRunner = await vscode.window.showInputBox
+      (
+        {
+          prompt: "Karate Runner",
+          value: String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'))
+        }
+      );
+  
+      if(karateRunner !== undefined && karateRunner !== "")
+      {
+        await vscode.workspace.getConfiguration().update('karateRunner.karateRunner.default', karateRunner)
+      }
     }
-  }
-  else
-  {
-    karateRunner = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'));
-  }
+    else
+    {
+      karateRunner = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'));
+    }
 
-  if(karateRunner !== undefined && karateRunner !== "")
-  {
-    let mavenCmd = "mvn";
-    let gradleCmd = "gradle";
-    let mavenBuildFile = "pom.xml";
-    let gradleBuildFile = "build.gradle";
-    let mavenBuildFileSwitch = "-f";
-    let gradleBuildFileSwitch = "-b";
-
-    let runPhases = null;
-    let runCommandPrefix = null;
+    if(karateRunner === undefined || karateRunner === "")
+    {
+      return;
+    }
 
     if(Boolean(vscode.workspace.getConfiguration('karateRunner.buildDirectory').get('cleanBeforeEachRun')))
     {
@@ -53,84 +63,100 @@ async function runKarateTest(args)
     {
       runPhases = "test";
     }
-
-    if(buildFilePath.toLowerCase().endsWith(mavenBuildFile))
+  
+    if(runFilePath.toLowerCase().endsWith(mavenBuildFile))
     {
       runCommandPrefix = mavenCmd + " " + runPhases + " " + mavenBuildFileSwitch;
     }
-
-    if(buildFilePath.toLowerCase().endsWith(gradleBuildFile))
+  
+    if(runFilePath.toLowerCase().endsWith(gradleBuildFile))
     {
       runCommandPrefix = gradleCmd + " " + runPhases + " " + gradleBuildFileSwitch;
     }
-
+  
     if(runCommandPrefix == null)
     {
       return;
     }
 
-    let runCommand = runCommandPrefix + " \"" + buildFilePath + "\" -Dtest=" + karateRunner + " -Dkarate.options=\"" + karateOptions + "\""; 
-    let relativePattern = new vscode.RelativePattern(projectRootPath, String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget')));
-    let watcher = vscode.workspace.createFileSystemWatcher(relativePattern);
-    let reportUrisFound: vscode.Uri[] = [];
-
-    watcher.onDidCreate((e) => 
-    {
-      if(reportUrisFound.toString().indexOf(e.toString()) === -1)
-      {
-        reportUrisFound.push(e);
-      }
-    });
-
-    watcher.onDidChange((e) =>
-    {
-      if(reportUrisFound.toString().indexOf(e.toString()) === -1)
-      {
-        reportUrisFound.push(e);
-      }
-    });
-
-    let seo: vscode.ShellExecutionOptions = { cwd: projectRootPath }
-    let exec = new vscode.ShellExecution(runCommand, seo);
-    let task = new vscode.Task
-    (
-      { type: 'karate' },
-      vscode.TaskScope.Global,
-      'Karate Runner',
-      'karate',
-      exec,
-      []
-    );
-
-    /*
-    tasks.onDidStartTask((e) => 
-    {
-      if(e.execution.task.name == 'Karate Runner')
-      {
-      }
-    });
-    */
-  
-    vscode.tasks.onDidEndTask((e) => 
-    {
-      if(e.execution.task.name == 'Karate Runner')
-      {
-        watcher.dispose();
-
-        if(Boolean(vscode.workspace.getConfiguration('karateRunner.buildReports').get('openAfterEachRun')))
-        {
-          reportUrisFound.forEach((reportUri) => 
-          {
-            openBuildReport(reportUri);
-          });
-        }
-      }
-
-      reportUrisFound = [];
-    });
-
-    vscode.tasks.executeTask(task);
+    runCommand = runCommandPrefix + " \"" + runFilePath + "\" -Dtest=" + karateRunner + " -Dkarate.options=\"" + karateOptions + "\""; 
   }
+  else
+  {
+    let karateJarArgs = String(vscode.workspace.getConfiguration('karateRunner.karateJar').get('commandLineArgs'));
+
+    if(karateJarArgs !== undefined && karateJarArgs !== "")
+    {
+      karateJarArgs = karateJarArgs + " ";
+    }
+    else
+    {
+      karateJarArgs = "";
+    }
+
+    runCommand = karateJarCmd + " " + karateJarArgs + karateJarOptions;
+  }
+
+  let relativePattern = new vscode.RelativePattern(projectRootPath, String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget')));
+  let watcher = vscode.workspace.createFileSystemWatcher(relativePattern);
+  let reportUrisFound: vscode.Uri[] = [];
+
+  watcher.onDidCreate((e) => 
+  {
+    if(reportUrisFound.toString().indexOf(e.toString()) === -1)
+    {
+      reportUrisFound.push(e);
+    }
+  });
+
+  watcher.onDidChange((e) =>
+  {
+    if(reportUrisFound.toString().indexOf(e.toString()) === -1)
+    {
+      reportUrisFound.push(e);
+    }
+  });
+
+  let seo: vscode.ShellExecutionOptions = { cwd: projectRootPath }
+  let exec = new vscode.ShellExecution(runCommand, seo);
+  let task = new vscode.Task
+  (
+    { type: 'karate' },
+    vscode.TaskScope.Global,
+    'Karate Runner',
+    'karate',
+    exec,
+    []
+  );
+
+  /*
+  tasks.onDidStartTask((e) => 
+  {
+    if(e.execution.task.name == 'Karate Runner')
+    {
+    }
+  });
+  */
+
+  vscode.tasks.onDidEndTask((e) => 
+  {
+    if(e.execution.task.name == 'Karate Runner')
+    {
+      watcher.dispose();
+
+      if(Boolean(vscode.workspace.getConfiguration('karateRunner.buildReports').get('openAfterEachRun')))
+      {
+        reportUrisFound.forEach((reportUri) => 
+        {
+          openBuildReport(reportUri);
+        });
+      }
+    }
+
+    reportUrisFound = [];
+  });
+
+  vscode.tasks.executeTask(task);
 }
 
 function openBuildReport(reportUri)
@@ -138,4 +164,10 @@ function openBuildReport(reportUri)
   vscode.env.openExternal(reportUri);
 }
 
-export { runKarateTest, openBuildReport };
+function openFileInEditor(args)
+{
+  let fileUri = args.uri;
+  vscode.window.showTextDocument(fileUri);
+}
+
+export { runKarateTest, openBuildReport, openFileInEditor };

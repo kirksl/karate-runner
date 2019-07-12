@@ -1,10 +1,11 @@
 import providerCodeLens from "./providerCodeLens";
-import { runKarateTest, openBuildReport } from "./commands";
+import { runKarateTest, openBuildReport, openFileInEditor } from "./commands";
 import providerBuildReports from "./providerBuildReports";
 import providerKarateTests from "./providerKarateTests";
 import * as vscode from 'vscode';
 
-
+let buildReportsTreeView = null;
+let karateTestsTreeView = null;
 let buildReportsWatcher = null;
 let karateTestsWatcher = null;
 
@@ -19,10 +20,12 @@ export function activate(context: vscode.ExtensionContext)
   let openReportCommand = vscode.commands.registerCommand("karateRunner.openBuildReport", openBuildReport);
   let refreshReportsTreeCommand = vscode.commands.registerCommand("karateRunner.refreshBuildReportsTree", () => buildReportsProvider.refresh());
   let refreshTestsTreeCommand = vscode.commands.registerCommand("karateRunner.refreshTestsTree", () => karateTestsProvider.refresh());
+  let openFileCommand = vscode.commands.registerCommand("karateRunner.openFile", openFileInEditor);
 
   let registerCodeLensProvider = vscode.languages.registerCodeLensProvider(codeLensTarget, codeLensProvider);
-  let registerBuildReportsProvider = vscode.window.registerTreeDataProvider('karate-reports', buildReportsProvider);
-  let registerKarateTestsProvider = vscode.window.registerTreeDataProvider('karate-tests', karateTestsProvider);
+  
+  buildReportsTreeView = vscode.window.createTreeView('karate-reports', { showCollapseAll: true, treeDataProvider: buildReportsProvider });
+  karateTestsTreeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: karateTestsProvider });
 
   setupWatcher(
     buildReportsWatcher,
@@ -96,12 +99,13 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(refreshReportsTreeCommand);
   context.subscriptions.push(refreshTestsTreeCommand);
   context.subscriptions.push(registerCodeLensProvider);
-  context.subscriptions.push(registerBuildReportsProvider);
-  context.subscriptions.push(registerKarateTestsProvider);
+  context.subscriptions.push(openFileCommand);
 }
 
 export function deactivate()
 {
+  buildReportsTreeView.dispose();
+  karateTestsTreeView.dispose();
   buildReportsWatcher.dispose();
   karateTestsWatcher.dispose();
 }

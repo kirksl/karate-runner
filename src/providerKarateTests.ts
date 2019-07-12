@@ -1,4 +1,4 @@
-import { getBuildPaths, getTestExecutionDetail, BuildPaths, TestExecutionDetail } from "./helper";
+import { getProjectDetail, getTestExecutionDetail, ProjectDetail, TestExecutionDetail } from "./helper";
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -342,15 +342,16 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 			if(element.type === vscode.FileType.File)
 			{
 				let karateTests: Entry[] = [];
-				let buildPaths: BuildPaths = getBuildPaths(element.uri);
+				let projectDetail: ProjectDetail = getProjectDetail(element.uri);
 				let tedArray: TestExecutionDetail[] = await getTestExecutionDetail(element.uri);
 			
 				tedArray.forEach((ted) =>
 				{
 				  let commandArgs = new Array();
 				  commandArgs.push(ted.karateOptions);
-				  commandArgs.push(buildPaths.projectRoot);
-				  commandArgs.push(buildPaths.buildFile);
+				  commandArgs.push(ted.karateJarOptions);
+				  commandArgs.push(projectDetail.projectRoot);
+				  commandArgs.push(projectDetail.runFile);
 				  let karateTestCommand: vscode.Command = 
 				  {
 					arguments: [commandArgs],
@@ -380,7 +381,15 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 	
 				return karateTestFilesFiltered.map((karateTestFile) => 
 					(
-						{ uri: karateTestFile, type: vscode.FileType.File }
+						{
+							uri: karateTestFile,
+							type: vscode.FileType.File,
+							command: {
+								arguments: [karateTestFile],
+								command: "karateRunner.openFile",
+								title: "karateRunner.openFile"
+							}
+						}
 					)
 				);
 			}
@@ -402,7 +411,18 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 	
 				return childrenFiltered.map(([name, type]) => 
 					(
-						{ uri: vscode.Uri.file(path.join(element.uri.fsPath, name)), type: type }
+						{
+							uri: vscode.Uri.file(path.join(element.uri.fsPath, name)),
+							type: type,
+							command: (type === vscode.FileType.File) ?
+								{
+									arguments: [element.uri],
+									command: "karateRunner.openFile",
+									title: "karateRunner.openFile"
+								}
+								:
+								undefined
+						}
 					)
 				);
 			}
@@ -486,7 +506,12 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 				dark: path.join(__dirname, '..', 'resources', 'dark', 'karate-test.svg')
 			};
 			treeItem.command = element.command;
-			treeItem.contextValue = 'file';
+			treeItem.contextValue = 'test';
+		}
+		else if (element.type === vscode.FileType.File)
+		{
+			treeItem.command = element.command;
+			treeItem.contextValue = 'testFile';
 		}
 
 		return treeItem;
