@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.3.0",
+  "version": "0.3.1",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -126,8 +126,8 @@
       "properties": {
         "karateRunner.karateJar.commandLineArgs": {
           "type": "string",
-          "default": "",
-          "description": "Command line arguments to provide Karate.jar.  Karate Runner will provide scenario names via the -n switch and tests to run.  Only applies when using Karate.jar.",
+          "default": "java -cp karate.jar com.intuit.karate.Main",
+          "description": "Karate.jar command line.  Karate Runner will handle setting the command line with the feature file being tested and suffixing the feature file with a ':number' when running individual Scenarios.  Only applies when using Karate.jar.",
           "scope": "resource"
         },
         "karateRunner.karateRunner.default": {

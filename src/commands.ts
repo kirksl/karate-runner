@@ -25,7 +25,6 @@ async function runKarateTest(args)
 
   let mavenCmd = "mvn";
   let gradleCmd = "gradle";
-  let karateJarCmd = "java -jar karate.jar";
   let mavenBuildFile = "pom.xml";
   let gradleBuildFile = "build.gradle";
   let standaloneBuildFile = "karate.jar";
@@ -103,16 +102,12 @@ async function runKarateTest(args)
   {
     let karateJarArgs = String(vscode.workspace.getConfiguration('karateRunner.karateJar').get('commandLineArgs'));
 
-    if(karateJarArgs !== undefined && karateJarArgs !== "")
+    if(karateJarArgs === undefined || karateJarArgs === "")
     {
-      karateJarArgs = `${karateJarArgs} `;
-    }
-    else
-    {
-      karateJarArgs = "";
+      return;
     }
 
-    runCommand = `${karateJarCmd} ${karateJarArgs}${karateJarOptions}`;
+    runCommand = `${karateJarArgs} ${karateJarOptions}`;
   }
 
   let relativePattern = new vscode.RelativePattern(projectRootPath, String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget')));
