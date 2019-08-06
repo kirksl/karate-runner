@@ -423,7 +423,7 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<Entry>, vsc
 		let treeItem = new vscode.TreeItem
 		(
 			element.uri,
-			element.type === vscode.FileType.Directory ? vscode.TreeItemCollapsibleState.Expanded : vscode.TreeItemCollapsibleState.None
+			element.type === vscode.FileType.Directory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None
 		);
 
 		if (element.type === vscode.FileType.File)

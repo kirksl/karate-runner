@@ -18,6 +18,8 @@ Goto the following path to configure this extension `Preferences > Settings > Se
 
 
 ## Release Notes
+0.3.0 - Remove reliance on tests having to exist under `src/test/java` especially for karate.jar(Standalone).  Downstream this will simplify setting the property `Karate Runner > Tests: To Target` to something like `**/*.feature`.  Add `Run All Tests` action for every folder node that is an ancestor of a *.feature file within Activity Bar Tests view.  This will enable running all tests that are scoped below target folders and in scope based on the setting `Karate Runner > Tests: To Target`.
+
 0.2.0 - Add `Open In Editor` action for *.feature file nodes within Activity Bar Tests view.  Add `Collapse All` action to Build Reports and Tests views within Activity Bar.  Add support for Standalone execution mode via karate.jar.  Please note the first karate.jar(Standalone), pom.xml(Maven) or build.gradle(Gradle) found **in that order** when traversing backwards from the *.feature file will be used for execution.  This will also constitute your project root directory.
 
 0.1.3 - Hide tests that are commented from Codelens and Activity Bar.  Remember last Karate Runner when using `Prompt To Specify` Karate Runner popup.

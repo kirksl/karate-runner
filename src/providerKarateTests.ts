@@ -1,4 +1,4 @@
-import { getProjectDetail, getTestExecutionDetail, ProjectDetail, TestExecutionDetail } from "./helper";
+import { getTestExecutionDetail, TestExecutionDetail } from "./helper";
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -342,16 +342,15 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 			if(element.type === vscode.FileType.File)
 			{
 				let karateTests: Entry[] = [];
-				let projectDetail: ProjectDetail = getProjectDetail(element.uri);
-				let tedArray: TestExecutionDetail[] = await getTestExecutionDetail(element.uri);
+				let tedArray: TestExecutionDetail[] = await getTestExecutionDetail(element.uri, vscode.FileType.File);
 			
 				tedArray.forEach((ted) =>
 				{
 				  let commandArgs = new Array();
 				  commandArgs.push(ted.karateOptions);
 				  commandArgs.push(ted.karateJarOptions);
-				  commandArgs.push(projectDetail.projectRoot);
-				  commandArgs.push(projectDetail.runFile);
+				  commandArgs.push(element.uri);
+				  commandArgs.push(vscode.FileType.File);
 				  let karateTestCommand: vscode.Command = 
 				  {
 					arguments: [commandArgs],
@@ -385,7 +384,6 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 							uri: karateTestFile,
 							type: vscode.FileType.File,
 							command: {
-								arguments: [karateTestFile],
 								command: "karateRunner.openFile",
 								title: "karateRunner.openFile"
 							}
@@ -416,12 +414,14 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 							type: type,
 							command: (type === vscode.FileType.File) ?
 								{
-									arguments: [element.uri],
 									command: "karateRunner.openFile",
 									title: "karateRunner.openFile"
 								}
 								:
-								undefined
+								{
+									command: "karateRunner.runAllKarateTests",
+									title: "karateRunner.runAllKarateTests"
+								}
 						}
 					)
 				);
@@ -477,7 +477,7 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 		{
 			case vscode.FileType.Directory:
 			{
-				collapsibleState = vscode.TreeItemCollapsibleState.Expanded;
+				collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
 				break;
 			}
 			case vscode.FileType.File:
@@ -510,8 +510,11 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 		}
 		else if (element.type === vscode.FileType.File)
 		{
-			treeItem.command = element.command;
 			treeItem.contextValue = 'testFile';
+		}
+		else if (element.type === vscode.FileType.Directory)
+		{
+			treeItem.contextValue = 'testDirectory';
 		}
 
 		return treeItem;

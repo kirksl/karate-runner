@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.2.0",
+  "version": "0.3.0",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -84,6 +84,14 @@
           "light": "resources/light/open-file.svg",
           "dark": "resources/dark/open-file.svg"
         }
+      },
+      {
+        "command": "karateRunner.runAllKarateTests",
+        "title": "Run All Tests",
+        "icon": {
+          "light": "resources/light/run-all.svg",
+          "dark": "resources/dark/run-all.svg"
+        }
       }
     ],
     "menus": {
@@ -103,6 +111,11 @@
         {
           "command": "karateRunner.openFile",
           "when": "view == karate-tests && viewItem == testFile",
+          "group": "inline"
+        },
+        {
+          "command": "karateRunner.runAllKarateTests",
+          "when": "view == karate-tests && viewItem == testDirectory",
           "group": "inline"
         }
       ]
@@ -186,13 +199,13 @@
   "devDependencies": {
     "@types/glob": "^7.1.1",
     "@types/mocha": "^5.2.7",
-    "@types/node": "^12.0.12",
+    "@types/node": "^12.6.9",
     "@types/vscode": "^1.36.0",
     "glob": "^7.1.4",
-    "mocha": "^6.1.4",
-    "typescript": "3.5.2",
+    "mocha": "^6.2.0",
+    "typescript": "3.5.3",
     "tslint": "^5.18.0",
-    "vscode-test": "^1.0.0"
+    "vscode-test": "^1.1.0"
   },
   "dependencies": {
     "fs-extra": "^8.1.0",

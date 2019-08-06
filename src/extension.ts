@@ -1,5 +1,5 @@
 import providerCodeLens from "./providerCodeLens";
-import { runKarateTest, openBuildReport, openFileInEditor } from "./commands";
+import { runKarateTest, runAllKarateTests, openBuildReport, openFileInEditor } from "./commands";
 import providerBuildReports from "./providerBuildReports";
 import providerKarateTests from "./providerKarateTests";
 import * as vscode from 'vscode';
@@ -17,6 +17,7 @@ export function activate(context: vscode.ExtensionContext)
   let codeLensTarget = { language: "feature", scheme: "file" };
 
   let runTestCommand = vscode.commands.registerCommand("karateRunner.runKarateTest", runKarateTest);
+  let runAllCommand = vscode.commands.registerCommand("karateRunner.runAllKarateTests", runAllKarateTests);
   let openReportCommand = vscode.commands.registerCommand("karateRunner.openBuildReport", openBuildReport);
   let refreshReportsTreeCommand = vscode.commands.registerCommand("karateRunner.refreshBuildReportsTree", () => buildReportsProvider.refresh());
   let refreshTestsTreeCommand = vscode.commands.registerCommand("karateRunner.refreshTestsTree", () => karateTestsProvider.refresh());
@@ -95,6 +96,7 @@ export function activate(context: vscode.ExtensionContext)
   });
 
   context.subscriptions.push(runTestCommand);
+  context.subscriptions.push(runAllCommand);
   context.subscriptions.push(openReportCommand);
   context.subscriptions.push(refreshReportsTreeCommand);
   context.subscriptions.push(refreshTestsTreeCommand);

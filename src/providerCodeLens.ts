@@ -1,4 +1,4 @@
-import { getProjectDetail, getTestExecutionDetail, ProjectDetail, TestExecutionDetail } from "./helper";
+import { getTestExecutionDetail, TestExecutionDetail } from "./helper";
 import path = require("path");
 import * as vscode from 'vscode';
 
@@ -8,8 +8,7 @@ class ProviderCodeLens implements vscode.CodeLensProvider
   async provideCodeLenses(document: vscode.TextDocument): Promise<vscode.CodeLens[]>
   {
     let codeLensArray = [];
-    let projectDetail: ProjectDetail = getProjectDetail(document.uri);
-    let tedArray: TestExecutionDetail[] = await getTestExecutionDetail(document.uri);
+    let tedArray: TestExecutionDetail[] = await getTestExecutionDetail(document.uri, vscode.FileType.File);
 
     tedArray.forEach((ted) =>
     {
@@ -17,8 +16,8 @@ class ProviderCodeLens implements vscode.CodeLensProvider
       let commandArgs = new Array();
       commandArgs.push(ted.karateOptions);
       commandArgs.push(ted.karateJarOptions);
-      commandArgs.push(projectDetail.projectRoot);
-      commandArgs.push(projectDetail.runFile);
+      commandArgs.push(document.uri);
+      commandArgs.push(vscode.FileType.File);
       let codeLensCommand: vscode.Command = 
       {
         arguments: [commandArgs],
