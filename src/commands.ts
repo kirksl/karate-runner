@@ -135,7 +135,7 @@ async function runKarateTest(args)
   let task = new vscode.Task
   (
     { type: 'karate' },
-    vscode.TaskScope.Global,
+    vscode.TaskScope.Workspace,
     'Karate Runner',
     'karate',
     exec,

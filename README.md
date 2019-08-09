@@ -18,6 +18,8 @@ Goto the following path to configure this extension `Preferences > Settings > Se
 
 
 ## Release Notes
+0.3.2 - Resolve [task execution issue](https://github.com/kirksl/karate-runner/issues/3) introduced in vscode 1.37 with workaround.
+
 0.3.1 - Add option to specify entire karate.jar(Standalone) command in settings.
 
 0.3.0 - Remove reliance on tests having to exist under `src/test/java` especially for karate.jar(Standalone).  Downstream this will simplify setting the property `Karate Runner > Tests: To Target` to something like `**/*.feature`.  Add `Run All Tests` action for every folder node that is an ancestor of a *.feature file within Activity Bar Tests view.  This will enable running all tests that are scoped below target folders and in scope based on the setting `Karate Runner > Tests: To Target`.
