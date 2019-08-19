@@ -92,7 +92,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
         codelensLine: 0
       };
       
-      ted.karateOptions = `classpath:${uri.fsPath}`;
+      ted.karateOptions = uri.fsPath;
       ted.karateJarOptions = uri.fsPath;
   
       let lineText = document.lineAt(line).text;
@@ -185,7 +185,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
       testTag: "",
       testTitle: "",
       testLine: 0,
-      karateOptions: `classpath:${classPathNormalized}`,
+      karateOptions: classPathNormalized,
       karateJarOptions: classPathNormalized,
       codelensTitle: "",
       codelensLine: 0

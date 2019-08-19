@@ -18,6 +18,8 @@ Goto the following path to configure this extension `Preferences > Settings > Se
 
 
 ## Release Notes
+0.3.3 - Remove `classpath:` from command when referencing fully qualified path to test(s).
+
 0.3.2 - Resolve [task execution issue](https://github.com/kirksl/karate-runner/issues/3) introduced in vscode 1.37 with workaround.
 
 0.3.1 - Add option to specify entire karate.jar(Standalone) command in settings.
