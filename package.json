@@ -187,7 +187,29 @@
           "scope": "resource"
         }
       }
-    }
+    },
+    "breakpoints": [
+      {
+        "language": "feature"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "karate",
+        "label": "Karate Debug",
+        "configurationAttributes": {
+          "launch": {
+            "properties": {
+              "program": {
+                "type": "string",
+                "description": "Absolute path to a feature file",
+                "default": "${file}"
+              }
+            }
+          }
+        }
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
