@@ -200,7 +200,7 @@
         "configurationAttributes": {
           "launch": {
             "properties": {
-              "program": {
+              "feature": {
                 "type": "string",
                 "description": "Absolute path to a feature file",
                 "default": "${file}"

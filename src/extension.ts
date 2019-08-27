@@ -102,6 +102,31 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(refreshTestsTreeCommand);
   context.subscriptions.push(registerCodeLensProvider);
   context.subscriptions.push(openFileCommand);
+
+  context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('karate', {
+    createDebugAdapterDescriptor: (session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined) => {
+      let seo: vscode.ShellExecutionOptions = { cwd: vscode.workspace.rootPath };
+      let exec = new vscode.ShellExecution('java -jar karate.jar -d 4711', seo);
+      let task = new vscode.Task
+      (
+        { type: 'karate' },
+        vscode.TaskScope.Workspace,
+        'Karate Runner',
+        'karate',
+        exec,
+        []
+      );    
+      function sleep(time) {
+        return new Promise(resolve => {
+          setTimeout(resolve, time)
+        })
+      }            
+      return vscode.tasks.executeTask(task)
+       .then(() => sleep(5000))
+       .then(() => new vscode.DebugAdapterServer(4711));   
+    }
+  }));
+
 }
 
 export function deactivate()
