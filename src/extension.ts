@@ -2,6 +2,7 @@ import providerCodeLens from "./providerCodeLens";
 import { runKarateTest, runAllKarateTests, openBuildReport, openFileInEditor } from "./commands";
 import providerBuildReports from "./providerBuildReports";
 import providerKarateTests from "./providerKarateTests";
+import fs = require("fs");
 import * as vscode from 'vscode';
 
 let buildReportsTreeView = null;
@@ -105,7 +106,19 @@ export function activate(context: vscode.ExtensionContext)
 
   context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('karate', {
     createDebugAdapterDescriptor: (session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined) => {
-      let seo: vscode.ShellExecutionOptions = { cwd: vscode.workspace.rootPath };
+      let projectRootPath = vscode.workspace.rootPath;
+      let relativePattern = new vscode.RelativePattern(projectRootPath, '**/karate-debug-port.txt');
+      let watcher = vscode.workspace.createFileSystemWatcher(relativePattern);
+      let watcherPromise = new Promise<number>(resolve => {
+        watcher.onDidChange(e => {
+          let portFilePath = e.fsPath;
+          let portString = fs.readFileSync(portFilePath, { encoding: 'utf8' });
+          console.log("debug server ready on port:", portString);
+          watcher.dispose();          
+          resolve(parseInt(portString));
+        });
+      });
+      let seo: vscode.ShellExecutionOptions = { cwd: projectRootPath };
       let exec = new vscode.ShellExecution('java -jar karate.jar -d 4711', seo);
       let task = new vscode.Task
       (
@@ -115,15 +128,10 @@ export function activate(context: vscode.ExtensionContext)
         'karate',
         exec,
         []
-      );    
-      function sleep(time) {
-        return new Promise(resolve => {
-          setTimeout(resolve, time)
-        })
-      }            
+      );            
       return vscode.tasks.executeTask(task)
-       .then(() => sleep(5000))
-       .then(() => new vscode.DebugAdapterServer(4711));   
+       .then(() => watcherPromise)
+       .then(port => new vscode.DebugAdapterServer(port));   
     }
   }));
 
