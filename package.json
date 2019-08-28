@@ -196,18 +196,49 @@
     "debuggers": [
       {
         "type": "karate",
-        "label": "Karate Debug",
+        "label": "Karate (debug)",
         "configurationAttributes": {
           "launch": {
+            "required": [
+              "feature",
+              "karateCli"
+            ],
             "properties": {
               "feature": {
                 "type": "string",
-                "description": "Absolute path to a feature file",
-                "default": "${file}"
+                "description": "Path to a Karate feature file",
+                "default": "^\"\\${file}\""
+              },
+              "karateCli": {
+                "type": "string",
+                "description": "Command to start debug server",
+                "default": "java -jar karate.jar -d"
               }
             }
           }
-        }
+        },
+        "initialConfigurations": [
+          {
+            "type": "karate",
+            "name": "Karate (debug)",
+            "request": "launch",
+            "feature": "${file}",
+            "karateCli": "java -jar karate.jar -d"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Karate (debug): Maven",
+            "description": "Karate (debug) for a Maven project",
+            "body": {
+              "type": "karate",
+              "name": "Karate (debug)",
+              "request": "launch",
+              "feature": "^\"\\${file}\"",
+              "karateCli": "mvn exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='-d' -Dexec.classpathScope=test"
+            }
+          }
+        ]
       }
     ]
   },

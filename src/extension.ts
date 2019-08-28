@@ -111,15 +111,14 @@ export function activate(context: vscode.ExtensionContext)
       let watcher = vscode.workspace.createFileSystemWatcher(relativePattern);
       let watcherPromise = new Promise<number>(resolve => {
         watcher.onDidChange(e => {
-          let portFilePath = e.fsPath;
-          let portString = fs.readFileSync(portFilePath, { encoding: 'utf8' });
+          let portString = fs.readFileSync(e.fsPath, { encoding: 'utf8' });
           console.log("debug server ready on port:", portString);
           watcher.dispose();          
           resolve(parseInt(portString));
         });
       });
       let seo: vscode.ShellExecutionOptions = { cwd: projectRootPath };
-      let exec = new vscode.ShellExecution('java -jar karate.jar -d 4711', seo);
+      let exec = new vscode.ShellExecution(session.configuration.karateCli, seo);
       let task = new vscode.Task
       (
         { type: 'karate' },
