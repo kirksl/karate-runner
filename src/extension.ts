@@ -109,13 +109,16 @@ export function activate(context: vscode.ExtensionContext)
       let projectRootPath = vscode.workspace.rootPath;
       let relativePattern = new vscode.RelativePattern(projectRootPath, '**/karate-debug-port.txt');
       let watcher = vscode.workspace.createFileSystemWatcher(relativePattern);
-      let watcherPromise = new Promise<number>(resolve => {
-        watcher.onDidChange(e => {
+      let watcherPromise = new Promise<number>((resolve, reject) => {
+        let onReady = (e: vscode.Uri) => {
           let portString = fs.readFileSync(e.fsPath, { encoding: 'utf8' });
           console.log("debug server ready on port:", portString);
-          watcher.dispose();          
+          watcher.dispose();
           resolve(parseInt(portString));
-        });
+        };
+        setTimeout(() => reject(new Error("timed out waiting for debug server")), 5000);
+        watcher.onDidCreate(onReady);
+        watcher.onDidChange(onReady);
       });
       let seo: vscode.ShellExecutionOptions = { cwd: projectRootPath };
       let exec = new vscode.ShellExecution(session.configuration.karateCli, seo);
