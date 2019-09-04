@@ -1,13 +1,13 @@
 {
   "name": "karate-runner",
   "displayName": "Karate Runner",
-  "description": "Run Karate Tests and open Build Reports from Codelens and Activity Bar.",
+  "description": "Run/Debug Karate Tests and open Build Reports from Codelens and Activity Bar.",
   "icon": "resources/karate.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.3.3",
+  "version": "0.4.0",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -220,7 +220,7 @@
         "initialConfigurations": [
           {
             "type": "karate",
-            "name": "Karate (debug)",
+            "name": "Karate (debug): Standalone",
             "request": "launch",
             "feature": "${file}",
             "karateCli": "java -jar karate.jar -d"
@@ -232,10 +232,21 @@
             "description": "Karate (debug) for a Maven project",
             "body": {
               "type": "karate",
-              "name": "Karate (debug)",
+              "name": "Karate (debug): Maven",
               "request": "launch",
               "feature": "^\"\\${file}\"",
-              "karateCli": "mvn exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='-d' -Dexec.classpathScope=test"
+              "karateCli": "mvn -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='-d' -Dexec.classpathScope=test"
+            }
+          },
+          {
+            "label": "Karate (debug): Gradle",
+            "description": "Karate (debug) for a Gradle project",
+            "body": {
+              "type": "karate",
+              "name": "Karate (debug): Gradle",
+              "request": "launch",
+              "feature": "^\"\\${file}\"",
+              "karateCli": "gradle -b build.gradle karateDebug -DmainClass=com.intuit.karate.cli.Main --args='-d'"
             }
           }
         ]

@@ -1,6 +1,6 @@
 # Karate Runner
 
-This extension will enable you to run Karate Tests and open Build Reports from Codelens and Activity Bar.
+This extension will enable you to run/debug Karate Tests and open Build Reports from Codelens and Activity Bar.
 
 A Codelens will be added above each `Feature:`, `Scenario:` and `Scenario Outline:` keyword within each Karate feature file.  Clicking on the Codelens for a Feature test will run all Scenario and Scenario Outlines within the target feature file.  Clicking on the Codelens for a Scenario or Scenario Outline test will run only that Scenario or Scenario Outline.
 
@@ -9,15 +9,45 @@ A Karate Activity Bar will be added to VSCode.  Clicking on the Activity Bar wil
 *Note: Karate Features and Scenarios marked with exclusions such as `@KarateOptions(tags = {"~@ignore"})` will not be run.*
 
 
-## Setup
-Please make sure you are running VSCode version 1.31.0 or greater. (Required)
+## General Setup
+Please make sure you are using `VSCode Version 1.36.0` or greater. (Required)
 
-Please make sure you are using Karate version 0.9.3 or greater in your Karate projects. (Required)
+Please make sure you are using `Karate Version 0.9.3` or greater in your Karate projects. (Required)
 
 Goto the following path to configure this extension `Preferences > Settings > Search for Karate Runner`.
 
+## Debug Setup
+Please make sure you are using `Karate Version 0.9.5` or greater in your Karate projects.  (Required to enable debug mode)
+
+*Note the remaining steps are subject to change as VSCode and other tools involved evolve.*
+
+#### Setup VSCode
+- Click `Debug` icon in Activity Bar to open debugger.
+- Click `Gear/Cog` icon at the top and click `Karate (debug)` to open launch.json.
+- Click `Add Configuration` button to add debug configurations as needed.
+  - Click `Karate (debug): Gradle` to add Gradle debug.
+  - Click `Karate (debug): Maven` to add Maven debug.
+- Next to `Gear/Cog` icon expand dropdown and select debug configuration to use.
+
+#### Setup Gradle (If applicable)
+- Open build.gradle for target project.
+- Add the following task to build.gradle.
+    ```java
+    task karateDebug(type: JavaExec) {
+        classpath = sourceSets.test.runtimeClasspath
+        main = System.properties.getProperty('mainClass')
+    }
+    ```
+
+#### Debug Feature File
+- Open a feature file.
+- Set breakpoints within feature file as needed.
+- Ensure feature file is currently displayed in editor. (Required)
+- Start debugging.
 
 ## Release Notes
+0.4.0 - Add option to debug feature files.  This feature requires `Karate Version 0.9.5`.
+
 0.3.3 - Remove `classpath:` from command when referencing fully qualified path to test(s).
 
 0.3.2 - Resolve [task execution issue](https://github.com/kirksl/karate-runner/issues/3) introduced in vscode 1.37 with workaround.
