@@ -144,7 +144,7 @@ export function activate(context: vscode.ExtensionContext)
         setTimeout(() =>
         {
           reject(new Error("Aborting debugger.  Timed out waiting for debug server port."))
-        }, 30000);
+        }, 120000);
       });
 
       watcher.onDidCreate((e) => 
