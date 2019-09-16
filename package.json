@@ -235,7 +235,7 @@
               "name": "Karate (debug): Maven",
               "request": "launch",
               "feature": "^\"\\${file}\"",
-              "karateCli": "mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='-d' -Dexec.classpathScope='test'"
+              "karateCli": "mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args='-d' -Dexec.classpathScope=test"
             }
           },
           {
