@@ -1,13 +1,13 @@
 {
   "name": "karate-runner",
   "displayName": "Karate Runner",
-  "description": "Run Karate Tests and open Build Reports from Codelens and Activity Bar.",
+  "description": "Run/Debug Karate Tests and open Build Reports from Codelens and Activity Bar.",
   "icon": "resources/karate.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.3.3",
+  "version": "0.4.0",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -187,7 +187,71 @@
           "scope": "resource"
         }
       }
-    }
+    },
+    "breakpoints": [
+      {
+        "language": "feature"
+      }
+    ],
+    "debuggers": [
+      {
+        "type": "karate",
+        "label": "Karate (debug)",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "feature",
+              "karateCli"
+            ],
+            "properties": {
+              "feature": {
+                "type": "string",
+                "description": "Path to a Karate feature file",
+                "default": "^\"\\${file}\""
+              },
+              "karateCli": {
+                "type": "string",
+                "description": "Command to start debug server",
+                "default": "java -jar karate.jar -d"
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "karate",
+            "name": "Karate (debug): Standalone",
+            "request": "launch",
+            "feature": "${file}",
+            "karateCli": "java -jar karate.jar -d"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Karate (debug): Maven",
+            "description": "Karate (debug) for a Maven project",
+            "body": {
+              "type": "karate",
+              "name": "Karate (debug): Maven",
+              "request": "launch",
+              "feature": "^\"\\${file}\"",
+              "karateCli": "mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args='-d' -Dexec.classpathScope=test"
+            }
+          },
+          {
+            "label": "Karate (debug): Gradle",
+            "description": "Karate (debug) for a Gradle project",
+            "body": {
+              "type": "karate",
+              "name": "Karate (debug): Gradle",
+              "request": "launch",
+              "feature": "^\"\\${file}\"",
+              "karateCli": "gradle clean compileTestJava -b build.gradle karateExecute -DmainClass=com.intuit.karate.cli.Main --args='-d'"
+            }
+          }
+        ]
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
