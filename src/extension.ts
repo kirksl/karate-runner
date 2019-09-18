@@ -108,13 +108,15 @@ export function activate(context: vscode.ExtensionContext)
 
   context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('karate', {
     createDebugAdapterDescriptor: (session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined) => {
-      let featureFile = String(session.configuration.feature);
-      if(!featureFile.endsWith(".feature"))
+      let feature = String(session.configuration.feature);
+      let featureFile = feature.split(/\b\s+/).filter(e => e.endsWith(".feature"));
+
+      if(featureFile.length != 1)
       {
         throw new Error("Aborting debugger.  Feature file to debug is not in focus within the IDE.\n\nPlease click 'Cancel' and try again.");
       }
 
-      let projectDetail: ProjectDetail = getProjectDetail(vscode.Uri.file(featureFile), vscode.FileType.File);
+      let projectDetail: ProjectDetail = getProjectDetail(vscode.Uri.file(featureFile[0]), vscode.FileType.File);
       let projectRootPath = projectDetail.projectRoot;
 
       let relativePattern = new vscode.RelativePattern(projectRootPath, '**/karate-debug-port.txt');
@@ -144,7 +146,7 @@ export function activate(context: vscode.ExtensionContext)
         setTimeout(() =>
         {
           reject(new Error("Aborting debugger.  Timed out waiting for debug server port."))
-        }, 120000);
+        }, 60000);
       });
 
       watcher.onDidCreate((e) => 

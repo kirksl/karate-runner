@@ -46,6 +46,8 @@ Please make sure you are using `Karate Version 0.9.5` or greater in your Karate 
 - Start debugging.
 
 ## Release Notes
+0.4.1 - Add option to specify switches when debugging within `feature` property of `launch.json`.
+
 0.4.0 - Add option to debug feature files.  This feature requires `Karate Version 0.9.5`.  For Gradle users ensure you have setup a `karateExecute` task in `build.gradle` as defined above in the `Setup Gradle` steps.
 
 0.3.3 - Remove `classpath:` from command when referencing fully qualified path to test(s).
