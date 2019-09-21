@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.4.1",
+  "version": "0.4.2",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -53,6 +53,10 @@
       ]
     },
     "commands": [
+      {
+        "command": "karateRunner.getDebugFile",
+        "title": "Get File To Debug"
+      },
       {
         "command": "karateRunner.runKarateTest",
         "title": "Run Karate Test"
@@ -206,12 +210,17 @@
             "properties": {
               "feature": {
                 "type": "string",
-                "description": "Path to a Karate feature file",
-                "default": "^\"\\${file}\""
+                "description": "[feature]\n\nThis property is used to find project root if multiple projects are loaded in IDE.\nAdditionally used by Karate Debug Server if [karateOptions] property not specified.\n\nRecommend default setting which finds feature files opened in IDE.",
+                "default": "^\"\\${command:karateRunner.getDebugFile}\""
+              },
+              "karateOptions": {
+                "type": "string",
+                "description": "[karateOptions]\n\nThis property is used only by Karate Debug Server.\nOverrides [feature] property to enable advanced debugging and specifying all Karate Options(classpath, threads, tags).",
+                "default": ""
               },
               "karateCli": {
                 "type": "string",
-                "description": "Command to start debug server",
+                "description": "[karateCli]\n\nThis property specifies the command to start Karate Debug Server.",
                 "default": "java -jar karate.jar -d"
               }
             }
@@ -222,7 +231,8 @@
             "type": "karate",
             "name": "Karate (debug): Standalone",
             "request": "launch",
-            "feature": "${file}",
+            "feature": "${command:karateRunner.getDebugFile}",
+            "karateOptions": "",
             "karateCli": "java -jar karate.jar -d"
           }
         ],
@@ -234,7 +244,8 @@
               "type": "karate",
               "name": "Karate (debug): Maven",
               "request": "launch",
-              "feature": "^\"\\${file}\"",
+              "feature": "^\"\\${command:karateRunner.getDebugFile}\"",
+              "karateOptions": "",
               "karateCli": "mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args='-d' -Dexec.classpathScope=test"
             }
           },
@@ -245,7 +256,8 @@
               "type": "karate",
               "name": "Karate (debug): Gradle",
               "request": "launch",
-              "feature": "^\"\\${file}\"",
+              "feature": "^\"\\${command:karateRunner.getDebugFile}\"",
+              "karateOptions": "",
               "karateCli": "gradle clean compileTestJava -b build.gradle karateExecute -DmainClass=com.intuit.karate.cli.Main --args='-d'"
             }
           }

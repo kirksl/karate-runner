@@ -2,6 +2,47 @@ import { getProjectDetail, getTestExecutionDetail, ProjectDetail, TestExecutionD
 import * as vscode from 'vscode';
 
 
+async function getKarateDebugFile()
+{
+  let activeTextEditor = vscode.window.activeTextEditor;
+  if(activeTextEditor !== undefined)
+  {
+    let activeFile = activeTextEditor.document.fileName;
+    if(activeFile.endsWith(".feature"))
+    {
+      return activeFile;
+    }
+  
+    let openTextDocuments = vscode.workspace.textDocuments;
+    let openFeatureFiles = openTextDocuments.filter(e => e.fileName.endsWith(".feature"));
+  
+    if(openFeatureFiles.length == 1)
+    {
+      return openFeatureFiles[0].fileName;
+    }
+
+    if(openFeatureFiles.length > 1)
+    {
+      let quickPickItems = openFeatureFiles.map(e => e.fileName);
+      let quickPickOptions = <vscode.QuickPickOptions>
+      {
+        canPickMany: false,
+        ignoreFocusOut: true,
+        placeHolder: "Select feature file to debug..."
+      };
+
+      let quickPickFile = await vscode.window.showQuickPick(quickPickItems, quickPickOptions);
+
+      if(quickPickFile !== undefined)
+      {
+        return quickPickFile;
+      }
+    }
+  }
+
+  return "";
+}
+
 async function runAllKarateTests(args)
 {
   let tedArray: TestExecutionDetail[] = await getTestExecutionDetail(args.uri, args.type);
@@ -183,4 +224,4 @@ function openFileInEditor(args)
   vscode.window.showTextDocument(fileUri);
 }
 
-export { runKarateTest, runAllKarateTests, openBuildReport, openFileInEditor };
+export { getKarateDebugFile, runKarateTest, runAllKarateTests, openBuildReport, openFileInEditor };

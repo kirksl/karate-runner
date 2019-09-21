@@ -1,5 +1,5 @@
 import providerCodeLens from "./providerCodeLens";
-import { runKarateTest, runAllKarateTests, openBuildReport, openFileInEditor } from "./commands";
+import { getKarateDebugFile, runKarateTest, runAllKarateTests, openBuildReport, openFileInEditor } from "./commands";
 import { getProjectDetail, ProjectDetail } from "./helper";
 import providerBuildReports from "./providerBuildReports";
 import providerKarateTests from "./providerKarateTests";
@@ -19,6 +19,7 @@ export function activate(context: vscode.ExtensionContext)
   let codeLensProvider = new providerCodeLens();
   let codeLensTarget = { language: "feature", scheme: "file" };
 
+  let getDebugFile = vscode.commands.registerCommand("karateRunner.getDebugFile", getKarateDebugFile);
   let runTestCommand = vscode.commands.registerCommand("karateRunner.runKarateTest", runKarateTest);
   let runAllCommand = vscode.commands.registerCommand("karateRunner.runAllKarateTests", runAllKarateTests);
   let openReportCommand = vscode.commands.registerCommand("karateRunner.openBuildReport", openBuildReport);
@@ -98,6 +99,7 @@ export function activate(context: vscode.ExtensionContext)
     }
   });
 
+  context.subscriptions.push(getDebugFile);
   context.subscriptions.push(runTestCommand);
   context.subscriptions.push(runAllCommand);
   context.subscriptions.push(openReportCommand);
@@ -108,16 +110,19 @@ export function activate(context: vscode.ExtensionContext)
 
   context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('karate', {
     createDebugAdapterDescriptor: (session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined) => {
-      let feature = String(session.configuration.feature);
-      let featureFile = feature.split(/\b\s+/).filter(e => e.endsWith(".feature"));
+      let projectRootPath = "";
 
-      if(featureFile.length != 1)
+      let featureFile = String(session.configuration.feature);
+      featureFile = featureFile.replace(/^['"]|['"]$/g, '');
+      if(featureFile.endsWith(".feature"))
       {
-        throw new Error("Aborting debugger.  Feature file to debug is not in focus within the IDE.\n\nPlease click 'Cancel' and try again.");
+        let projectDetail: ProjectDetail = getProjectDetail(vscode.Uri.file(featureFile), vscode.FileType.File);
+        projectRootPath = projectDetail.projectRoot;
       }
-
-      let projectDetail: ProjectDetail = getProjectDetail(vscode.Uri.file(featureFile[0]), vscode.FileType.File);
-      let projectRootPath = projectDetail.projectRoot;
+      else
+      {
+        projectRootPath = vscode.workspace.rootPath;
+      }
 
       let relativePattern = new vscode.RelativePattern(projectRootPath, '**/karate-debug-port.txt');
       let watcher = vscode.workspace.createFileSystemWatcher(relativePattern);

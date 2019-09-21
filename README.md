@@ -19,7 +19,7 @@ Goto the following path to configure this extension `Preferences > Settings > Se
 ## Debug Setup
 Please make sure you are using `Karate Version 0.9.5` or greater in your Karate projects.  (Required to enable debug mode)
 
-*Note the remaining steps are subject to change as VSCode and other tools involved evolve.*
+*Note the following steps are subject to change as VSCode and other tools evolve.*
 
 #### Setup VSCode
 - Click `Debug` icon in Activity Bar to open debugger.
@@ -27,7 +27,10 @@ Please make sure you are using `Karate Version 0.9.5` or greater in your Karate 
 - Click `Add Configuration` button to add debug configurations as needed.
   - Click `Karate (debug): Gradle` to add Gradle debug.
   - Click `Karate (debug): Maven` to add Maven debug.
-- Next to `Gear/Cog` icon expand dropdown and select debug configuration to use.
+- Edit debug configurations as needed.
+  - Note `feature` property is used to find project root if multiple projects are loaded in IDE.  Additionally used by Karate Debug Server if `karateOptions` property not specified.  Recommend default setting which finds feature files opened in IDE.
+  - Note `karateOptions` is used only by Karate Debug Server.  Overrides `feature` property to enable advanced debugging and specifying all Karate Options(classpath, threads, tags).
+ - Next to `Gear/Cog` icon expand dropdown and select debug configuration to use.
 
 #### Setup Gradle (If applicable)
 - Open build.gradle for target project.
@@ -39,13 +42,14 @@ Please make sure you are using `Karate Version 0.9.5` or greater in your Karate 
     }
     ```
 
-#### Debug Feature File
-- Open a feature file.
-- Set breakpoints within feature file as needed.
-- Ensure feature file is currently displayed in editor. (Required)
+#### Debug Project
+- Set breakpoints within feature file(s).
+- Keep feature file(s) opened in editor. (when multiple projects loaded)
 - Start debugging.
 
 ## Release Notes
+0.4.2 - Remove reliance on feature files having to be `in focus` within IDE to start debugging.  See `Debug Setup` section for details.  Note new launch.json debug configurations will need to be setup.
+
 0.4.1 - Add option to specify switches when debugging within `feature` property of `launch.json`.
 
 0.4.0 - Add option to debug feature files.  This feature requires `Karate Version 0.9.5`.  For Gradle users ensure you have setup a `karateExecute` task in `build.gradle` as defined above in the `Setup Gradle` steps.
