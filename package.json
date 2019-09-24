@@ -54,6 +54,10 @@
     },
     "commands": [
       {
+        "command": "karateRunner.paste",
+        "title": "Karate Smart Paste"
+      },
+      {
         "command": "karateRunner.getDebugFile",
         "title": "Get File To Debug"
       },
@@ -276,16 +280,18 @@
     "@types/glob": "^7.1.1",
     "@types/mocha": "^5.2.7",
     "@types/node": "^12.6.9",
+    "@types/shell-quote": "^1.6.1",
     "@types/vscode": "^1.36.0",
     "glob": "^7.1.4",
     "mocha": "^6.2.0",
-    "typescript": "3.5.3",
     "tslint": "^5.18.0",
+    "typescript": "3.5.3",
     "vscode-test": "^1.1.0"
   },
   "dependencies": {
     "fs-extra": "^8.1.0",
     "mkdirp": "^0.5.1",
-    "rimraf": "^2.6.3"
+    "rimraf": "^2.6.3",
+    "parse-curl": "0.2.6"
   }
 }

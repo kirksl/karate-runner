@@ -5,12 +5,56 @@ import providerBuildReports from "./providerBuildReports";
 import providerKarateTests from "./providerKarateTests";
 import fs = require("fs");
 import * as vscode from 'vscode';
-import { join } from "path";
+import parse = require('parse-curl');
 
 let buildReportsTreeView = null;
 let karateTestsTreeView = null;
 let buildReportsWatcher = null;
 let karateTestsWatcher = null;
+
+const curlIgnores = ['accept-', 'upgrade-', 'user-', 'connection', 'referer', 'sec-', 'origin'];
+
+let curlIgnoreHeader = (header: string) => {
+  for (let ignore of curlIgnores) {
+    if (header.toLowerCase().startsWith(ignore)) {
+      return true;
+    }
+  }
+  return false;  
+}
+
+let convertCurl = (raw: string) => {
+  let steps: Array<string> = [];
+  const curl: object = parse(raw);
+  steps.push('* url \'' + curl['url'] + '\'');
+  const headers: object = curl['header'] || {};
+  for (let key of Object.keys(headers)) {
+    if (curlIgnoreHeader(key)) {
+      continue;
+    }
+    let val: string = headers[key];
+    steps.push('* header ' + key + ' = \'' + val + '\'');
+  }
+  let method: string = curl['method'];
+  steps.push('* method ' + method.toLowerCase());
+  return steps.join('\n');
+}
+
+let smartPaste = () => {
+  let editor = vscode.window.activeTextEditor;
+  let start = editor.selection.start;
+  vscode.commands.executeCommand('editor.action.clipboardPasteAction').then(() => {
+    let end = editor.selection.end;
+    let selection = new vscode.Selection(start.line, start.character, end.line, end.character);
+    let selectedText = editor.document.getText(selection).trim();
+    if (selectedText.startsWith('curl')) {
+      editor.edit((editBuilder: vscode.TextEditorEdit) => {
+        editBuilder.replace(selection, convertCurl(selectedText) + '\n');
+        editor.revealRange(new vscode.Range(start, start));
+      });
+    }
+  })
+}
 
 export function activate(context: vscode.ExtensionContext)
 {
@@ -107,6 +151,8 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(refreshTestsTreeCommand);
   context.subscriptions.push(openFileCommand);
   context.subscriptions.push(registerCodeLensProvider);
+
+  context.subscriptions.push(vscode.commands.registerCommand('karateRunner.paste', smartPaste));
 
   context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('karate', {
     createDebugAdapterDescriptor: (session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined) => {
