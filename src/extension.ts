@@ -12,7 +12,7 @@ let karateTestsTreeView = null;
 let buildReportsWatcher = null;
 let karateTestsWatcher = null;
 
-const curlIgnores = ['accept-', 'upgrade-', 'user-', 'connection', 'referer', 'sec-', 'origin'];
+const curlIgnores = ['accept-', 'upgrade-', 'user-', 'connection', 'referer', 'sec-', 'origin', 'host', 'content-length'];
 
 let curlIgnoreHeader = (header: string) => {
   for (let ignore of curlIgnores) {
@@ -25,7 +25,9 @@ let curlIgnoreHeader = (header: string) => {
 
 let convertCurl = (raw: string) => {
   let steps: Array<string> = [];
+  raw = raw.replace('--data-binary', '--data');
   const curl: object = parse(raw);
+  console.log(curl);
   steps.push('* url \'' + curl['url'] + '\'');
   const headers: object = curl['header'] || {};
   for (let key of Object.keys(headers)) {
@@ -36,6 +38,13 @@ let convertCurl = (raw: string) => {
     steps.push('* header ' + key + ' = \'' + val + '\'');
   }
   let method: string = curl['method'];
+  let body = curl['body'];
+  if (!body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
+    body = '\'\'';
+  }
+  if (body) {
+    steps.push('* request ' + body);
+  }
   steps.push('* method ' + method.toLowerCase());
   return steps.join('\n');
 }
