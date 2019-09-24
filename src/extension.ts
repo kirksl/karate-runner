@@ -27,7 +27,7 @@ let convertCurl = (raw: string) => {
   let steps: Array<string> = [];
   raw = raw.replace('--data-binary', '--data');
   const curl: object = parse(raw);
-  console.log(curl);
+  // console.log(curl);
   steps.push('* url \'' + curl['url'] + '\'');
   const headers: object = curl['header'] || {};
   for (let key of Object.keys(headers)) {
