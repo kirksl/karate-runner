@@ -339,7 +339,7 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 
 		if (element)
 		{
-			if(element.type === vscode.FileType.File)
+			if (element.type === vscode.FileType.File)
 			{
 				let karateTests: Entry[] = [];
 				let tedArray: TestExecutionDetail[] = await getTestExecutionDetail(element.uri, vscode.FileType.File);
@@ -371,7 +371,7 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 
 			let displayType = String(vscode.workspace.getConfiguration('karateRunner.tests').get('activityBarDisplayType'));
 
-			if(displayType === "Shallow")
+			if (displayType === "Shallow")
 			{
 				let karateTestFilesFiltered = karateTestFiles.filter((karateTestFile) =>
 				{
@@ -445,7 +445,7 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 				return found !== undefined;
 			});
 
-			if(childrenFiltered.length <= 0)
+			if (childrenFiltered.length <= 0)
 			{
 				return [{ uri: "No tests found...", type: vscode.FileType.Unknown }];
 			}

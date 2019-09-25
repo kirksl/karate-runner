@@ -5,7 +5,7 @@ import * as vscode from 'vscode';
 
 interface ProjectDetail
 {
-	projectRoot: string;
+  projectRoot: string;
   runFile: string;
 }
 
@@ -26,12 +26,12 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): ProjectDetail
   let projectRootPath = "";
   let runFilePath = "";
 
-  if(type === vscode.FileType.File)
+  if (type === vscode.FileType.File)
   {
     filePathArray.pop();
   }
 
-  for(let ndx = filePathArray.length; ndx > 0; ndx--)
+  for (let ndx = filePathArray.length; ndx > 0; ndx--)
   {
     let mavenBuildFile = "pom.xml";
     let gradleBuildFile = "build.gradle";
@@ -39,21 +39,21 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): ProjectDetail
 
     let runFileTestPath = filePathArray.join(path.sep);
 
-    if(fs.existsSync(runFileTestPath + path.sep + karateJarFile))
+    if (fs.existsSync(runFileTestPath + path.sep + karateJarFile))
     {
       projectRootPath = runFileTestPath;
       runFilePath = runFileTestPath + path.sep + karateJarFile;
       break;
     }
 
-    if(fs.existsSync(runFileTestPath + path.sep + mavenBuildFile))
+    if (fs.existsSync(runFileTestPath + path.sep + mavenBuildFile))
     {
       projectRootPath = runFileTestPath;
       runFilePath = runFileTestPath + path.sep + mavenBuildFile;
       break;
     }
 
-    if(fs.existsSync(runFileTestPath + path.sep + gradleBuildFile))
+    if (fs.existsSync(runFileTestPath + path.sep + gradleBuildFile))
     {
       projectRootPath = runFileTestPath;
       runFilePath = runFileTestPath + path.sep + gradleBuildFile;
@@ -70,18 +70,18 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 {
   let tedArray: TestExecutionDetail[] = [];
 
-  if(type === vscode.FileType.File)
+  if (type === vscode.FileType.File)
   {
     let featureTitle = "Run Karate Tests";
     let scenarioTitle = "Run Karate Test";
-  
+
     let document = await vscode.workspace.openTextDocument(uri);
-    
+
     let lineTestRegExp = new RegExp("^\\s*(Feature|Scenario|Scenario Outline):.*$");
     let lineTagRegExp = new RegExp("^\\s*@.+$");
     for (let line = 0; line < document.lineCount; line++)
     {
-      let ted: TestExecutionDetail = 
+      let ted: TestExecutionDetail =
       {
         testTag: "",
         testTitle: "",
@@ -91,22 +91,22 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
         codelensTitle: "",
         codelensLine: 0
       };
-      
+
       ted.karateOptions = uri.fsPath;
       ted.karateJarOptions = uri.fsPath;
-  
+
       let lineText = document.lineAt(line).text;
       let lineTestMatch = lineText.match(lineTestRegExp);
-      if(lineTestMatch !== null && lineTestMatch.index !== undefined)
+      if (lineTestMatch !== null && lineTestMatch.index !== undefined)
       {
         ted.testTitle = lineText.trim();
         ted.codelensLine = line;
-  
+
         if (line > 0)
         {
           let lineLastText = document.lineAt(line - 1).text;
           let lineTagMatch = lineLastText.match(lineTagRegExp);
-          if(lineTagMatch !== null && lineTagMatch.index !== undefined)
+          if (lineTagMatch !== null && lineTagMatch.index !== undefined)
           {
             ted.testTag = lineLastText.trim();
             ted.codelensLine--;
@@ -118,7 +118,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
         }
         let lineScenarioRegExp = new RegExp("^\\s*(Scenario|Scenario Outline):(.*)$");
         let lineScenarioMatch = lineText.match(lineScenarioRegExp);
-        if(lineScenarioMatch !== null && lineScenarioMatch.index !== undefined)
+        if (lineScenarioMatch !== null && lineScenarioMatch.index !== undefined)
         {
           ted.testLine = (line + 1);
           ted.codelensTitle = scenarioTitle;
@@ -130,7 +130,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
           ted.testLine = 0;
           ted.codelensTitle = featureTitle;
         }
-  
+
         tedArray.push(ted);
       }
     }
@@ -146,7 +146,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
     });
 
     let karateTestFoldersFiltered: Array<string> = [];
-    karateTestFilesFiltered.forEach((karateTestFile) => 
+    karateTestFilesFiltered.forEach((karateTestFile) =>
     {
       karateTestFoldersFiltered.push(karateTestFile.fsPath.substring(0, karateTestFile.fsPath.lastIndexOf(path.sep)));
     });
@@ -176,11 +176,11 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
         let commonPath = (input, sep = path.sep) => rotate(splitStrings(input, sep)).filter(allElementsEqual).map(elAt(0)).join(sep);
 
         classPathNormalized = commonPath(karateTestFoldersFiltered);
-        
+
       }
     }
 
-    let ted: TestExecutionDetail = 
+    let ted: TestExecutionDetail =
     {
       testTag: "",
       testTitle: "",

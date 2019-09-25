@@ -1,78 +1,29 @@
 import providerCodeLens from "./providerCodeLens";
-import { getKarateDebugFile, runKarateTest, runAllKarateTests, openBuildReport, openFileInEditor } from "./commands";
+import providerFoldingRange from "./providerFoldingRange";
+import { smartPaste, getKarateDebugFile, runKarateTest, runAllKarateTests, openBuildReport, openFileInEditor } from "./commands";
 import { getProjectDetail, ProjectDetail } from "./helper";
 import providerBuildReports from "./providerBuildReports";
 import providerKarateTests from "./providerKarateTests";
 import fs = require("fs");
 import * as vscode from 'vscode';
-import parse = require('parse-curl');
 
 let buildReportsTreeView = null;
 let karateTestsTreeView = null;
 let buildReportsWatcher = null;
 let karateTestsWatcher = null;
 
-const curlIgnores = ['accept-', 'upgrade-', 'user-', 'connection', 'referer', 'sec-', 'origin', 'host', 'content-length'];
-
-let curlIgnoreHeader = (header: string) => {
-  for (let ignore of curlIgnores) {
-    if (header.toLowerCase().startsWith(ignore)) {
-      return true;
-    }
-  }
-  return false;  
-}
-
-let convertCurl = (raw: string) => {
-  let steps: Array<string> = [];
-  raw = raw.replace('--data-binary', '--data');
-  const curl: object = parse(raw);
-  // console.log(curl);
-  steps.push('* url \'' + curl['url'] + '\'');
-  const headers: object = curl['header'] || {};
-  for (let key of Object.keys(headers)) {
-    if (curlIgnoreHeader(key)) {
-      continue;
-    }
-    let val: string = headers[key];
-    steps.push('* header ' + key + ' = \'' + val + '\'');
-  }
-  let method: string = curl['method'];
-  let body = curl['body'];
-  if (!body && (method === 'POST' || method === 'PUT' || method === 'PATCH')) {
-    body = '\'\'';
-  }
-  if (body) {
-    steps.push('* request ' + body);
-  }
-  steps.push('* method ' + method.toLowerCase());
-  return steps.join('\n');
-}
-
-let smartPaste = () => {
-  let editor = vscode.window.activeTextEditor;
-  let start = editor.selection.start;
-  vscode.commands.executeCommand('editor.action.clipboardPasteAction').then(() => {
-    let end = editor.selection.end;
-    let selection = new vscode.Selection(start.line, start.character, end.line, end.character);
-    let selectedText = editor.document.getText(selection).trim();
-    if (selectedText.startsWith('curl')) {
-      editor.edit((editBuilder: vscode.TextEditorEdit) => {
-        editBuilder.replace(selection, convertCurl(selectedText) + '\n');
-        editor.revealRange(new vscode.Range(start, start));
-      });
-    }
-  })
-}
 
 export function activate(context: vscode.ExtensionContext)
 {
   let buildReportsProvider = new providerBuildReports();
   let karateTestsProvider = new providerKarateTests();
   let codeLensProvider = new providerCodeLens();
+  let foldingRangeProvider = new providerFoldingRange();
   let codeLensTarget = { language: "feature", scheme: "file" };
+  let foldingRangeTarget = { language: "feature", scheme: "file" };
 
-  let getDebugFile = vscode.commands.registerCommand("karateRunner.getDebugFile", getKarateDebugFile);
+  let smartPasteCommand = vscode.commands.registerCommand('karateRunner.paste', smartPaste);
+  let getDebugFileCommand = vscode.commands.registerCommand("karateRunner.getDebugFile", getKarateDebugFile);
   let runTestCommand = vscode.commands.registerCommand("karateRunner.runKarateTest", runKarateTest);
   let runAllCommand = vscode.commands.registerCommand("karateRunner.runAllKarateTests", runAllKarateTests);
   let openReportCommand = vscode.commands.registerCommand("karateRunner.openBuildReport", openBuildReport);
@@ -81,6 +32,7 @@ export function activate(context: vscode.ExtensionContext)
   let openFileCommand = vscode.commands.registerCommand("karateRunner.openFile", openFileInEditor);
 
   let registerCodeLensProvider = vscode.languages.registerCodeLensProvider(codeLensTarget, codeLensProvider);
+  let registerFoldingRangeProvider= vscode.languages.registerFoldingRangeProvider(foldingRangeTarget, foldingRangeProvider);
   
   buildReportsTreeView = vscode.window.createTreeView('karate-reports', { showCollapseAll: true, treeDataProvider: buildReportsProvider });
   karateTestsTreeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: karateTestsProvider });
@@ -102,12 +54,12 @@ export function activate(context: vscode.ExtensionContext)
     let buildReportsDisplayType = e.affectsConfiguration("karateRunner.buildReports.activityBarDisplayType");
     let buildReportsToTarget = e.affectsConfiguration("karateRunner.buildReports.toTarget");
 
-    if(buildReportsDisplayType)
+    if (buildReportsDisplayType)
     {
       buildReportsProvider.refresh();
     }
 
-    if(buildReportsToTarget)
+    if (buildReportsToTarget)
     {    
       try
       {
@@ -128,12 +80,12 @@ export function activate(context: vscode.ExtensionContext)
     let karateTestsDisplayType = e.affectsConfiguration("karateRunner.tests.activityBarDisplayType");
     let karateTestsToTarget = e.affectsConfiguration("karateRunner.tests.toTarget");
 
-    if(karateTestsDisplayType)
+    if (karateTestsDisplayType)
     {
       karateTestsProvider.refresh();
     }
 
-    if(karateTestsToTarget)
+    if (karateTestsToTarget)
     {    
       try
       {
@@ -152,7 +104,8 @@ export function activate(context: vscode.ExtensionContext)
     }
   });
 
-  context.subscriptions.push(getDebugFile);
+  context.subscriptions.push(smartPasteCommand);
+  context.subscriptions.push(getDebugFileCommand);
   context.subscriptions.push(runTestCommand);
   context.subscriptions.push(runAllCommand);
   context.subscriptions.push(openReportCommand);
@@ -160,16 +113,18 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(refreshTestsTreeCommand);
   context.subscriptions.push(openFileCommand);
   context.subscriptions.push(registerCodeLensProvider);
+  context.subscriptions.push(registerFoldingRangeProvider);
 
-  context.subscriptions.push(vscode.commands.registerCommand('karateRunner.paste', smartPaste));
 
-  context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('karate', {
-    createDebugAdapterDescriptor: (session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined) => {
+  context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('karate', 
+  {
+    createDebugAdapterDescriptor: (session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined) => 
+    {
       let projectRootPath = "";
 
       let featureFile = String(session.configuration.feature);
       featureFile = featureFile.replace(/^['"]|['"]$/g, '');
-      if(featureFile.endsWith(".feature"))
+      if (featureFile.endsWith(".feature"))
       {
         let projectDetail: ProjectDetail = getProjectDetail(vscode.Uri.file(featureFile), vscode.FileType.File);
         projectRootPath = projectDetail.projectRoot;
@@ -187,7 +142,7 @@ export function activate(context: vscode.ExtensionContext)
       {
         let timeout = setInterval(() => 
         {
-          if(debugPortFile !== null)
+          if (debugPortFile !== null)
           {
             clearInterval(timeout);
             let port = fs.readFileSync(debugPortFile.fsPath, { encoding: 'utf8' });

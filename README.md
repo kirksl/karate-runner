@@ -43,12 +43,12 @@ Please make sure you are using `Karate Version 0.9.5` or greater in your Karate 
     ```
 
 #### Debug Project
-- Set breakpoints within feature file(s).
-- Keep feature file(s) opened in editor. (when multiple projects loaded)
+- Set breakpoint(s) within feature file(s).
+- Keep feature file(s) opened in editor. (Recommended)
 - Start debugging.
 
 ## Release Notes
-0.4.2 - Remove reliance on feature files having to be `in focus` within IDE to start debugging.  See `Debug Setup` section for details.  Note new launch.json debug configurations will need to be setup.
+0.5.0 - Remove reliance on feature files having to be `in focus` within IDE to start debugging.  See `Debug Setup` section for details.  **Note new debug configurations will need to be setup in launch.json.**  Add `Smart Paste` to detect when pasting into feature files via keyboard shortcut(eg Cmd+V).  Add `curl` detection to `Smart Paste` to transform curl commands into Karate syntax.  Add option to `Fold` or minimize each `Scenario:` or `Scenario Outline:`.
 
 0.4.1 - Add option to specify switches when debugging within `feature` property of `launch.json`.
 
