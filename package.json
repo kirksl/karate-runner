@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.5.1",
+  "version": "0.5.2",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -62,15 +62,15 @@
         "title": "Get File To Debug"
       },
       {
-        "command": "karateRunner.runKarateTest",
+        "command": "karateRunner.tests.run",
         "title": "Run Karate Test"
       },
       {
-        "command": "karateRunner.openBuildReport",
+        "command": "karateRunner.buildReports.open",
         "title": "Open Build Report"
       },
       {
-        "command": "karateRunner.refreshBuildReportsTree",
+        "command": "karateRunner.buildReports.refreshTree",
         "title": "Refresh",
         "icon": {
           "light": "resources/light/refresh.svg",
@@ -78,7 +78,7 @@
         }
       },
       {
-        "command": "karateRunner.refreshTestsTree",
+        "command": "karateRunner.tests.refreshTree",
         "title": "Refresh",
         "icon": {
           "light": "resources/light/refresh.svg",
@@ -86,7 +86,7 @@
         }
       },
       {
-        "command": "karateRunner.openFile",
+        "command": "karateRunner.tests.open",
         "title": "Open In Editor",
         "icon": {
           "light": "resources/light/open-file.svg",
@@ -94,35 +94,87 @@
         }
       },
       {
-        "command": "karateRunner.runAllKarateTests",
+        "command": "karateRunner.tests.runAll",
         "title": "Run All Tests",
         "icon": {
           "light": "resources/light/run-all.svg",
           "dark": "resources/dark/run-all.svg"
+        }
+      },
+      {
+        "command": "karateRunner.buildReports.displayShallow",
+        "title": "Display Shallow",
+        "icon": {
+          "light": "resources/light/display-deep.svg",
+          "dark": "resources/dark/display-deep.svg"
+        }
+      },
+      {
+        "command": "karateRunner.buildReports.displayDeep",
+        "title": "Display Deep",
+        "icon": {
+          "light": "resources/light/display-shallow.svg",
+          "dark": "resources/dark/display-shallow.svg"
+        }
+      },
+      {
+        "command": "karateRunner.tests.displayShallow",
+        "title": "Display Shallow",
+        "icon": {
+          "light": "resources/light/display-deep.svg",
+          "dark": "resources/dark/display-deep.svg"
+        }
+      },
+      {
+        "command": "karateRunner.tests.displayDeep",
+        "title": "Display Deep",
+        "icon": {
+          "light": "resources/light/display-shallow.svg",
+          "dark": "resources/dark/display-shallow.svg"
         }
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "karateRunner.refreshBuildReportsTree",
+          "command": "karateRunner.buildReports.refreshTree",
           "when": "view == karate-reports",
-          "group": "navigation"
+          "group": "navigation@1"
         },
         {
-          "command": "karateRunner.refreshTestsTree",
+          "command": "karateRunner.tests.refreshTree",
           "when": "view == karate-tests",
-          "group": "navigation"
+          "group": "navigation@1"
+        },
+        {
+          "command": "karateRunner.buildReports.displayShallow",
+          "when": "view == karate-reports && config.karateRunner.buildReports.activityBarDisplayType == Deep",
+          "group": "navigation@2"
+        },
+        {
+          "command": "karateRunner.buildReports.displayDeep",
+          "when": "view == karate-reports && config.karateRunner.buildReports.activityBarDisplayType == Shallow",
+          "group": "navigation@2"
+        },
+        {
+          "command": "karateRunner.tests.displayShallow",
+          "when": "view == karate-tests && config.karateRunner.tests.activityBarDisplayType == Deep",
+          "group": "navigation@2"
+        },
+        {
+          "command": "karateRunner.tests.displayDeep",
+          "when": "view == karate-tests && config.karateRunner.tests.activityBarDisplayType == Shallow",
+          "group": "navigation@2"
         }
       ],
       "view/item/context": [
         {
-          "command": "karateRunner.openFile",
+          "command": "karateRunner.tests.open",
           "when": "view == karate-tests && viewItem == testFile",
           "group": "inline"
         },
         {
-          "command": "karateRunner.runAllKarateTests",
+          "command": "karateRunner.tests.runAll",
           "when": "view == karate-tests && viewItem == testDirectory",
           "group": "inline"
         }
@@ -176,6 +228,12 @@
             "Deep"
           ],
           "description": "Display reports as a flat list (Shallow) or natural directory structure (Deep) within Activity Bar.",
+          "scope": "resource"
+        },
+        "karateRunner.debugger.serverPortTimeout": {
+          "type": "number",
+          "default": 60,
+          "description": "Default time (seconds) to wait for debug server to start.",
           "scope": "resource"
         },
         "karateRunner.tests.toTarget": {
@@ -250,7 +308,7 @@
               "request": "launch",
               "feature": "^\"\\${command:karateRunner.getDebugFile}\"",
               "karateOptions": "",
-              "karateCli": "mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args='-d' -Dexec.classpathScope=test"
+              "karateCli": "mvn test-compile -f pom.xml exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args='-d' -Dexec.classpathScope=test"
             }
           },
           {
@@ -262,7 +320,7 @@
               "request": "launch",
               "feature": "^\"\\${command:karateRunner.getDebugFile}\"",
               "karateOptions": "",
-              "karateCli": "gradle clean compileTestJava -b build.gradle karateExecute -DmainClass=com.intuit.karate.cli.Main --args='-d'"
+              "karateCli": "gradle compileTestJava -b build.gradle karateExecute -DmainClass=com.intuit.karate.cli.Main --args='-d'"
             }
           }
         ]

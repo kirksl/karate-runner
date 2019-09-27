@@ -48,6 +48,8 @@ Please make sure you are using `Karate Version 0.9.5` or greater in your Karate 
 - Start debugging.
 
 ## Release Notes
+0.5.2 - Add `Display Shallow` and `Display Deep` actions to Build Reports and Tests views within Activity Bar.  Remove `clean` build task for Maven and Gradle from default debug configurations.  Add option to set `Debugger: Server Port Timeout` in settings and view timeout in UI while debugger starts.
+
 0.5.1 - Icon refresh to align with latest VSCode.
 
 0.5.0 - Remove reliance on feature files having to be `in focus` within IDE to start debugging.  See `Debug Setup` section for details.  **Note new debug configurations will need to be setup in launch.json.**  Add `Smart Paste` to detect when pasting into feature files via keyboard shortcut(eg Cmd+V).  Add `curl` detection to `Smart Paste` to transform curl commands into Karate syntax.  Add option to `Fold` or minimize each `Scenario:` or `Scenario Outline:`.

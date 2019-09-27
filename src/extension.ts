@@ -1,11 +1,13 @@
 import providerCodeLens from "./providerCodeLens";
 import providerFoldingRange from "./providerFoldingRange";
-import { smartPaste, getKarateDebugFile, runKarateTest, runAllKarateTests, openBuildReport, openFileInEditor } from "./commands";
+import { smartPaste, getKarateDebugFile, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor } from "./commands";
 import { getProjectDetail, ProjectDetail } from "./helper";
 import providerBuildReports from "./providerBuildReports";
 import providerKarateTests from "./providerKarateTests";
 import fs = require("fs");
 import * as vscode from 'vscode';
+import { settings } from "cluster";
+import { rejects } from "assert";
 
 let buildReportsTreeView = null;
 let karateTestsTreeView = null;
@@ -24,16 +26,20 @@ export function activate(context: vscode.ExtensionContext)
 
   let smartPasteCommand = vscode.commands.registerCommand('karateRunner.paste', smartPaste);
   let getDebugFileCommand = vscode.commands.registerCommand("karateRunner.getDebugFile", getKarateDebugFile);
-  let runTestCommand = vscode.commands.registerCommand("karateRunner.runKarateTest", runKarateTest);
-  let runAllCommand = vscode.commands.registerCommand("karateRunner.runAllKarateTests", runAllKarateTests);
-  let openReportCommand = vscode.commands.registerCommand("karateRunner.openBuildReport", openBuildReport);
-  let refreshReportsTreeCommand = vscode.commands.registerCommand("karateRunner.refreshBuildReportsTree", () => buildReportsProvider.refresh());
-  let refreshTestsTreeCommand = vscode.commands.registerCommand("karateRunner.refreshTestsTree", () => karateTestsProvider.refresh());
-  let openFileCommand = vscode.commands.registerCommand("karateRunner.openFile", openFileInEditor);
+  let runTestCommand = vscode.commands.registerCommand("karateRunner.tests.run", runKarateTest);
+  let runAllCommand = vscode.commands.registerCommand("karateRunner.tests.runAll", runAllKarateTests);
+  let displayShallowReportsTreeCommand = vscode.commands.registerCommand("karateRunner.buildReports.displayShallow", () => displayReportsTree("Shallow"));
+  let displayDeepReportsTreeCommand = vscode.commands.registerCommand("karateRunner.buildReports.displayDeep", () => displayReportsTree("Deep"));
+  let displayShallowTestsTreeCommand = vscode.commands.registerCommand("karateRunner.tests.displayShallow", () => displayTestsTree("Shallow"));
+  let displayDeepTestsTreeCommand = vscode.commands.registerCommand("karateRunner.tests.displayDeep", () => displayTestsTree("Deep"));
+  let openReportCommand = vscode.commands.registerCommand("karateRunner.buildReports.open", openBuildReport);
+  let refreshReportsTreeCommand = vscode.commands.registerCommand("karateRunner.buildReports.refreshTree", () => buildReportsProvider.refresh());
+  let refreshTestsTreeCommand = vscode.commands.registerCommand("karateRunner.tests.refreshTree", () => karateTestsProvider.refresh());
+  let openFileCommand = vscode.commands.registerCommand("karateRunner.tests.open", openFileInEditor);
 
   let registerCodeLensProvider = vscode.languages.registerCodeLensProvider(codeLensTarget, codeLensProvider);
-  let registerFoldingRangeProvider= vscode.languages.registerFoldingRangeProvider(foldingRangeTarget, foldingRangeProvider);
-  
+  let registerFoldingRangeProvider = vscode.languages.registerFoldingRangeProvider(foldingRangeTarget, foldingRangeProvider);
+
   buildReportsTreeView = vscode.window.createTreeView('karate-reports', { showCollapseAll: true, treeDataProvider: buildReportsProvider });
   karateTestsTreeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: karateTestsProvider });
 
@@ -60,7 +66,7 @@ export function activate(context: vscode.ExtensionContext)
     }
 
     if (buildReportsToTarget)
-    {    
+    {
       try
       {
         buildReportsWatcher.dispose();
@@ -86,7 +92,7 @@ export function activate(context: vscode.ExtensionContext)
     }
 
     if (karateTestsToTarget)
-    {    
+    {
       try
       {
         karateTestsWatcher.dispose();
@@ -108,6 +114,10 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(getDebugFileCommand);
   context.subscriptions.push(runTestCommand);
   context.subscriptions.push(runAllCommand);
+  context.subscriptions.push(displayShallowReportsTreeCommand);
+  context.subscriptions.push(displayDeepReportsTreeCommand);
+  context.subscriptions.push(displayShallowTestsTreeCommand);
+  context.subscriptions.push(displayDeepTestsTreeCommand);
   context.subscriptions.push(openReportCommand);
   context.subscriptions.push(refreshReportsTreeCommand);
   context.subscriptions.push(refreshTestsTreeCommand);
@@ -116,11 +126,12 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(registerFoldingRangeProvider);
 
 
-  context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('karate', 
+  context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('karate',
   {
-    createDebugAdapterDescriptor: (session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined) => 
+    createDebugAdapterDescriptor: (session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined) =>
     {
       let projectRootPath = "";
+      let settingsTimeout = Number(vscode.workspace.getConfiguration('karateRunner.debugger').get('serverPortTimeout'));
 
       let featureFile = String(session.configuration.feature);
       featureFile = featureFile.replace(/^['"]|['"]$/g, '');
@@ -138,38 +149,55 @@ export function activate(context: vscode.ExtensionContext)
       let watcher = vscode.workspace.createFileSystemWatcher(relativePattern);
       let debugPortFile = null;
 
-      let getDebugPort = new Promise<number>((resolve) => 
+      let getDebugPort = new Promise<number>((resolve) =>
       {
-        let timeout = setInterval(() => 
+        vscode.window.withProgress(
         {
-          if (debugPortFile !== null)
+          location: vscode.ProgressLocation.Notification,
+          title: "Karate Runner: Waiting for debug server to start...",
+          cancellable: false
+        },
+        async (progress, token) =>
+        {
+          let incrementer = 100 / settingsTimeout;
+
+          progress.report({ increment: 0 });
+
+          await new Promise((resolve) =>
           {
-            clearInterval(timeout);
-            let port = fs.readFileSync(debugPortFile.fsPath, { encoding: 'utf8' });
-            console.log(`debug server ready on port: ${port}`);
-            resolve(parseInt(port));
-          }
-          else
-          {
-            console.log("waiting for debug server port");
-          }
-        }, 1000);
+            let timeout = setInterval(() =>
+            {
+              if (debugPortFile !== null)
+              {
+                clearInterval(timeout);
+                let port = fs.readFileSync(debugPortFile.fsPath, { encoding: 'utf8' });
+                console.log(`debug server ready on port: ${port}`);
+  
+                resolve(parseInt(port));
+              }
+              else
+              {
+                progress.report({ increment: incrementer });
+              }
+            }, 1000);
+          }).then((port) => { resolve(Number(port)); });
+        });
       });
 
-      let timeoutDebugPort = new Promise<number>((resolve, reject) => 
+      let timeoutDebugPort = new Promise<number>((resolve, reject) =>
       {
         setTimeout(() =>
         {
           reject(new Error("Aborting debugger.  Timed out waiting for debug server port."))
-        }, 60000);
+        }, (settingsTimeout * 1000));
       });
 
-      watcher.onDidCreate((e) => 
+      watcher.onDidCreate((e) =>
       {
         watcher.dispose();
         debugPortFile = e;
       });
-    
+
       watcher.onDidChange((e) =>
       {
         watcher.dispose();
@@ -193,7 +221,6 @@ export function activate(context: vscode.ExtensionContext)
       .then(port => new vscode.DebugAdapterServer(port));
     }
   }));
-
 }
 
 export function deactivate()

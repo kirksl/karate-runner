@@ -286,6 +286,16 @@ async function runKarateTest(args)
   vscode.tasks.executeTask(task);
 }
 
+function displayReportsTree(displayType)
+{
+  vscode.workspace.getConfiguration().update('karateRunner.buildReports.activityBarDisplayType', displayType);
+}
+
+function displayTestsTree(displayType)
+{
+  vscode.workspace.getConfiguration().update('karateRunner.tests.activityBarDisplayType', displayType);
+}
+
 function openBuildReport(reportUri)
 {
   vscode.env.openExternal(reportUri);
@@ -297,4 +307,4 @@ function openFileInEditor(args)
   vscode.window.showTextDocument(fileUri);
 }
 
-export { smartPaste, getKarateDebugFile, runKarateTest, runAllKarateTests, openBuildReport, openFileInEditor };
+export { smartPaste, getKarateDebugFile, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor };

@@ -189,19 +189,19 @@ interface Entry
 
 export class ProviderBuildReports implements vscode.TreeDataProvider<Entry>, vscode.FileSystemProvider
 {
-    private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;   
-    private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
-    readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
+	private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
+	private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
+	readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
 
 	constructor()
 	{
 		this._onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
-    }
-    
+	}
+
 	public refresh(): any
 	{
-        this._onDidChangeTreeData.fire();
-    }
+		this._onDidChangeTreeData.fire();
+	}
 
 	get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]>
 	{
@@ -339,14 +339,14 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<Entry>, vsc
 		{
 			let displayType = String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('activityBarDisplayType'));
 
-			if(displayType === "Shallow")
+			if (displayType === "Shallow")
 			{
 				let buildReportFilesFiltered = buildReportFiles.filter((reportFile) =>
 				{
 					return reportFile.toString().startsWith(element.uri.toString());
 				});
-	
-				return buildReportFilesFiltered.map((reportFile) => 
+
+				return buildReportFilesFiltered.map((reportFile) =>
 					(
 						{ uri: reportFile, type: vscode.FileType.File }
 					)
@@ -359,16 +359,16 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<Entry>, vsc
 				let childrenFiltered = children.filter((child) =>
 				{
 					let childUri = vscode.Uri.file(path.join(element.uri.fsPath, child[0]));
-					
+
 					let found = buildReportFiles.find((file) =>
 					{
 						return file.toString().startsWith(childUri.toString());
 					});
-					
+
 					return found !== undefined;
 				});
-	
-				return childrenFiltered.map(([name, type]) => 
+
+				return childrenFiltered.map(([name, type]) =>
 					(
 						{ uri: vscode.Uri.file(path.join(element.uri.fsPath, name)), type: type }
 					)
@@ -384,16 +384,15 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<Entry>, vsc
 			let childrenFiltered = children.filter((child) =>
 			{
 				let childUri = vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, child[0]));
-				
 				let found = buildReportFiles.find((file) =>
 				{
 					return file.toString().startsWith(childUri.toString());
 				});
-				
+
 				return found !== undefined;
 			});
 
-			if(childrenFiltered.length <= 0)
+			if (childrenFiltered.length <= 0)
 			{
 				return [{ uri: "No reports found...", type: vscode.FileType.Unknown }];
 			}
@@ -404,11 +403,11 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<Entry>, vsc
 				{
 					return a[0].localeCompare(b[0]);
 				}
-				
+
 				return a[1] === vscode.FileType.Directory ? -1 : 1;
 			});
 
-			return childrenFiltered.map(([name, type]) => 
+			return childrenFiltered.map(([name, type]) =>
 				(
 					{ uri: vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, name)), type: type }
 				)
@@ -428,7 +427,7 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<Entry>, vsc
 
 		if (element.type === vscode.FileType.File)
 		{
-			treeItem.command = { command: 'karateRunner.openBuildReport', title: "Open Build Report", arguments: [element.uri] };
+			treeItem.command = { command: 'karateRunner.buildReports.open', title: "Open Build Report", arguments: [element.uri] };
 			treeItem.contextValue = 'file';
 		}
 

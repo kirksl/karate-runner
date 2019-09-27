@@ -18,16 +18,16 @@ class ProviderCodeLens implements vscode.CodeLensProvider
       commandArgs.push(ted.karateJarOptions);
       commandArgs.push(document.uri);
       commandArgs.push(vscode.FileType.File);
-      let codeLensCommand: vscode.Command = 
+      let codeLensCommand: vscode.Command =
       {
         arguments: [commandArgs],
-        command: "karateRunner.runKarateTest",
+        command: "karateRunner.tests.run",
         title: ted.codelensTitle
       };
-    
+
       codeLensArray.push(new vscode.CodeLens(codeLensLocation, codeLensCommand));
     });
-    
+
     return codeLensArray;
   }
 }
