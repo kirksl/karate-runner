@@ -48,6 +48,8 @@ Please make sure you are using `Karate Version 0.9.5` or greater in your Karate 
 - Start debugging.
 
 ## Release Notes
+0.5.3 - Add option to cancel debug session while it's attempting to start.
+
 0.5.2 - Add `Display Shallow` and `Display Deep` actions to Build Reports and Tests views within Activity Bar.  Remove `clean` build task for Maven and Gradle from default debug configurations.  Add option to set `Debugger: Server Port Timeout` in settings and view timeout in UI while debugger starts.
 
 0.5.1 - Icon refresh to align with latest VSCode.
