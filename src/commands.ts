@@ -154,38 +154,13 @@ async function runKarateTest(args)
   let runFilePath = projectDetail.runFile;
 
 
-  if (runFilePath == "")
+  if (runFilePath === "")
   {
     return;
   }
 
   if (!runFilePath.toLowerCase().endsWith(standaloneBuildFile))
   {
-    if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('promptToSpecify')))
-    {
-      karateRunner = await vscode.window.showInputBox
-        (
-          {
-            prompt: "Karate Runner",
-            value: String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'))
-          }
-        );
-
-      if (karateRunner !== undefined && karateRunner !== "")
-      {
-        await vscode.workspace.getConfiguration().update('karateRunner.karateRunner.default', karateRunner)
-      }
-    }
-    else
-    {
-      karateRunner = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'));
-    }
-
-    if (karateRunner === undefined || karateRunner === "")
-    {
-      return;
-    }
-
     if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildDirectory').get('cleanBeforeEachRun')))
     {
       runPhases = "clean test";
@@ -195,22 +170,78 @@ async function runKarateTest(args)
       runPhases = "test";
     }
 
-    if (runFilePath.toLowerCase().endsWith(mavenBuildFile))
+    if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateCli').get('overrideKarateRunner')))
     {
-      runCommandPrefix = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch}`;
+      let karateCliArgs = String(vscode.workspace.getConfiguration('karateRunner.karateCli').get('commandLineArgs'));
+      if(karateCliArgs !== undefined && karateCliArgs !== "")
+      {
+        karateOptions = `${karateCliArgs} ${karateOptions}`
+      }
+    
+      if(runFilePath.toLowerCase().endsWith(mavenBuildFile))
+      {
+        // mvn clean test -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='${karateOptions}' -Dexec.classpathScope='test'
+        runCommand = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch} "${runFilePath}"`;
+        runCommand += ` exec:java -Dexec.mainClass="com.intuit.karate.cli.Main" -Dexec.args="${karateOptions}"`;
+        runCommand += ` -Dexec.classpathScope="test"`;
+      }
+    
+      if(runFilePath.toLowerCase().endsWith(gradleBuildFile))
+      {
+        // gradle clean test -b build.gradle karateExecute -DmainClass='com.intuit.karate.cli.Main' --args='-d'
+        runCommand = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch} "${runFilePath}"`;
+        runCommand += ` karateExecute -DmainClass="com.intuit.karate.cli.Main" --args="${karateOptions}"`;
+      }
+    
+      if(runCommand === null)
+      {
+        return;
+      }
     }
-
-    if (runFilePath.toLowerCase().endsWith(gradleBuildFile))
+    else
     {
-      runCommandPrefix = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch}`;
+      if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('promptToSpecify')))
+      {
+        karateRunner = await vscode.window.showInputBox
+          (
+            {
+              prompt: "Karate Runner",
+              value: String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'))
+            }
+          );
+  
+        if (karateRunner !== undefined && karateRunner !== "")
+        {
+          await vscode.workspace.getConfiguration().update('karateRunner.karateRunner.default', karateRunner)
+        }
+      }
+      else
+      {
+        karateRunner = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'));
+      }
+  
+      if (karateRunner === undefined || karateRunner === "")
+      {
+        return;
+      }
+  
+      if (runFilePath.toLowerCase().endsWith(mavenBuildFile))
+      {
+        runCommandPrefix = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch}`;
+      }
+  
+      if (runFilePath.toLowerCase().endsWith(gradleBuildFile))
+      {
+        runCommandPrefix = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch}`;
+      }
+  
+      if (runCommandPrefix === null)
+      {
+        return;
+      }
+  
+      runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} -Dkarate.options="${karateOptions}"`;
     }
-
-    if (runCommandPrefix == null)
-    {
-      return;
-    }
-
-    runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} -Dkarate.options="${karateOptions}"`;
   }
   else
   {

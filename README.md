@@ -47,7 +47,34 @@ Please make sure you are using `Karate Version 0.9.5` or greater in your Karate 
 - Keep feature file(s) opened in editor. (Recommended)
 - Start debugging.
 
+## Karate Cli Setup
+Please make sure you are using `Karate Version 0.9.5` or greater in your Karate projects.  (Required to enable this feature)
+
+[Karate Cli](https://github.com/intuit/karate/wiki/Debug-Server#karate-cli) is a slated replacement to the `Karate Runner` feature within Karate.  A Karate Runner(same name as this extension) is a Java file that specifies Karate tests to run.  By using `Karate Cli` Java files are no longer used to run tests.  Finally Karate Cli is a work in progress and does not currently generate things like the Cucumber Report and will build only to a /target directory.
+
+#### Setup Gradle (If applicable)
+- Open build.gradle for target project.
+- Add the following task to build.gradle.
+    ```java
+    task karateExecute(type: JavaExec) {
+        classpath = sourceSets.test.runtimeClasspath
+        main = System.properties.getProperty('mainClass')
+    }
+    ```
+
+#### Enable Karate Cli
+- Open Extension Settings in VSCode.
+- Add a check mark to `Karate Runner > Karate Cli: Override Karate Runner`.
+
+#### Configure Karate Cli
+- Open Extension Settings in VSCode.
+- Set `Karate Runner > Karate Cli: Command Line Args` as defined at [Karate Options](https://github.com/intuit/karate/wiki/Debug-Server#karate-options).
+- This extension will handle all Maven and Gradle build commands, setting the command line with the feature file being tested and suffixing the feature file with a ':number' when running individual Scenarios.
+- Remove `Karate Runner` Java files from your project.  If not removed all tests in your project will run regardless of which test(s) you choose to run.
+
 ## Release Notes
+0.5.5 - Add option to override default Karate Runner with Karate Cli.  Karate Runner refers to the Java files used to run Karate tests.  See `Karate Cli Setup` section above and link to `Karate Cli` on Karate website for greater details.
+
 0.5.3 - Add option to cancel debug session while it's attempting to start.
 
 0.5.2 - Add `Display Shallow` and `Display Deep` actions to Build Reports and Tests views within Activity Bar.  Remove `clean` build task for Maven and Gradle from default debug configurations.  Add option to set `Debugger: Server Port Timeout` in settings and view timeout in UI while debugger starts.

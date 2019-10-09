@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.5.3",
+  "version": "0.5.5",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -188,6 +188,18 @@
           "type": "string",
           "default": "java -cp karate.jar com.intuit.karate.Main",
           "description": "Karate.jar command line.  Karate Runner will handle setting the command line with the feature file being tested and suffixing the feature file with a ':number' when running individual Scenarios.  Only applies when using Karate.jar.",
+          "scope": "resource"
+        },
+        "karateRunner.karateCli.overrideKarateRunner": {
+          "type": "boolean",
+          "default": false,
+          "description": "Override Karate Runner utilizing the new Karate Cli.  See 'Karate Cli' section within Extension Details in the Marketplace for further information.  Only applies when using Maven or Gradle.",
+          "scope": "resource"
+        },
+        "karateRunner.karateCli.commandLineArgs": {
+          "type": "string",
+          "default": "",
+          "description": "Karate Cli command line.  Karate Runner will handle build commands, setting the command line with the feature file being tested and suffixing the feature file with a ':number' when running individual Scenarios.  Only applies when using Maven or Gradle.",
           "scope": "resource"
         },
         "karateRunner.karateRunner.default": {

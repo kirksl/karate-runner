@@ -56,6 +56,7 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
                   if (debugCanceledByUser)
                   {
                     clearInterval(interval);
+                    clearTimeout(timeout);
                     task.terminate();
                     reject(new Error("Aborting debugger.  Canceled by user."));
                   }
@@ -63,6 +64,7 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
                   if (debugPortFile !== null)
                   {
                     clearInterval(interval);
+                    clearTimeout(timeout);
                     let port = fs.readFileSync(debugPortFile.fsPath, { encoding: 'utf8' });
                     console.log(`debug server ready on port: ${port}`);
     
@@ -74,7 +76,7 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
                   }
                 }, 1000);
 
-                setTimeout(() =>
+                let timeout = setTimeout(() =>
                 {
                   clearInterval(interval);
                   task.terminate();
@@ -113,7 +115,7 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
         );
   
         return vscode.tasks.executeTask(task)
-        .then((task) => getDebugPort(task))
+        .then(task => getDebugPort(task))
         .then(port => new vscode.DebugAdapterServer(port));
     }
 }
