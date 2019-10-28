@@ -1,0 +1,291 @@
+$schema: "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json"
+name: Karate
+scopeName: source.karate
+patterns:
+  - include: "#section"
+  - include: "#statement"
+  - include: "#data"
+  - include: "#tripplequote-expression"      
+  - include: "#comment"
+  - include: "#tag"
+  - include: "#text"
+repository:
+  section:
+    patterns:
+      - match: '^\s*(Feature|Background|Examples|Scenario|Scenario Outline)(:)(.*)'
+        captures:
+          "1":
+            name: keyword.language.section.karate
+          "2":
+            name: constant.character.section.colon.karate
+          "3":
+            name: string.unquoted.text.karate
+  comment:
+    patterns:
+      - name: comment.line.karate
+        match: '^\s*#.*'
+  tag:
+    patterns:
+      - name: entity.name.type.tag.karate
+        match: ^\s*(@\S*)(.*)
+        captures:
+          "2":
+            name: invalid.illegal.tag.karate
+  text:
+    patterns:
+      - name: string.unquoted.text.karate
+        match: ^\s*\S+.*
+
+  statement:
+    patterns:
+      - match: ^\s*(\*|Given|When|Then|And|But)\s+(.*)
+        captures:
+          "1":
+            name: keyword.control.statement.karate
+          "2":
+            name: meta.control.statement.karate
+            patterns:
+              - include: "#configure"
+              - include: "#http-method"
+              - include: "#http-status"
+              - include: "#evaluation"
+              - include: "#set"
+              - include: "#replace"
+              - include: "#remove"
+              - include: "#assert"
+              - include: "#match"
+              - include: "#functional-assignments"
+              - include: "#first-class-functions"
+              - include: "#types"
+  data:
+    patterns: 
+      - match: ^\s*(\|)(.*)
+        captures:
+          "1":
+            name: constant.character.pipe.karate
+          "2":
+            patterns:
+              - match: \|
+                name: constant.character.pipe.karate
+              - include: source.json.karate
+              - include: text.xml
+              - include: source.js
+  configure:
+    patterns:
+      - match: \b(configure)\b\s*(headers|cookies|logPrettyRequest|logPrettyResponse|printEnabled|report|afterScenario|afterFeature|ssl|followRedirects|connectTimeout|readTimeout|proxy|charset|retry|outlineVariablesAuto|lowerCaseResponseHeaders|httpClientClass|httpClientInstance|userDefined|responseHeaders|cors)?\s*(\w*)?(.*)
+        captures:
+          "1":
+            name: support.function.configure.karate
+          "2":
+            name: keyword.other.configuration.parameter.karate
+          "3":
+            name: support.variable.unknown.configuration.parameter.karate
+          "4":
+            name: meta.embedded.configuration.karate
+            patterns:
+              - include: '#expression'
+
+  http-method:
+    patterns:
+      - match: \b(method)\b(?i)(\b(?:get|head|post|put|delete|connect|options|trace|patch)\b)?(.*)?
+        captures:
+          "1":
+            name: support.function.http-method.karate
+          "2":
+            name: support.constant.http-method.karate
+          "3":
+            name: support.variable.other.http-method.karate
+  http-status: 
+      patterns:
+        - match: \b(status)\b\s*(\d{3}\b)?(.*)?
+          captures:
+            "1":
+              name: support.function.http-status.karate
+            "2":
+              name: constant.numeric.http-status.karate          
+            "3":
+              name: invalid.illegal.http-status.karate         
+  first-class-functions: 
+      patterns:
+        - match: \b(request|params|retry\s+until|soap\s+action|path|url|multipart\s+files|multipart\s+fields|form\s+fields|multipart\s+entity|cookies|headers|print)\b(.*)?
+          captures:
+            "1":
+              name: support.function.first-class.karate
+            "2":
+              name: meta.statement.first-class.karate
+              patterns:
+                - include: "#expression"
+  evaluation: 
+    patterns:
+      - match: \b(eval)\b(.*)?
+        captures:
+          "1":
+            name:  keyword.other.eval.karate
+          "2":
+            name: meta.statement.eval.karate
+            patterns:
+              - include: source.js
+  set: 
+    patterns:
+      - match: \b(set)\b(.*)?
+        captures:
+          "1":
+            name:  keyword.other.set.karate
+          "2":
+            name: meta.statement.set.karate
+            patterns:
+              - include: source.js
+  replace: 
+    patterns:
+      - match: \b(replace)\b(.*)?
+        captures:
+          "1":
+            name:  keyword.other.replace.karate
+          "2":
+            name: meta.statement.replace.karate
+            patterns:
+              - include: source.js
+  remove: 
+    patterns:
+      - match: \b(remove)\b(.*)?
+        captures:
+          "1":
+            name:  keyword.other.remove.karate
+          "2":
+            name: meta.statement.remove.karate
+            patterns:
+              - include: source.js
+  functional-assignments:
+    patterns:
+      - match: \b(param|header|cookie|form\s+field|multipart\s+field|multipart\s+file|form\s+field)\b
+        name: support.function.assignment.karate
+      - include: "#assignment"
+  assert: 
+    patterns:
+      - match: \b(assert)\b(.*)?
+        captures:
+          "1":
+            name: keyword.other.assert.karate
+          "2":
+            name: meta.statement.assert.karate
+            patterns:
+              - include: source.js
+  match: 
+    patterns:
+      - match: \b(match(?:\s+each)?)\b(.*)\s+(==|!=|contains\s+only|contains\s+any|!contains|contains)\s+(.*)
+        captures:
+          "1":
+            name: support.function.match.karate
+          "2":
+            name: meta.statement.action.match.karate
+            patterns: 
+              - include: "#expression"
+          "3":
+            name: keyword.operator.comparison.match.karate
+          "4":
+            name: meta.statement.action.match.karate
+            patterns: 
+              - include: "#expression"
+  types: 
+    patterns:
+      - include: "#type-table"
+      - include: "#type-text"
+      - include: "#type-generic"
+  type-table: 
+    patterns:
+      - match: \b(table)\b\s*([_$[:alpha:]][_$[:alnum:]]*)\s*$
+        captures:
+          "1":
+            name: keyword.other.type.table.karate
+          "2":
+            name: support.variable.other.karate
+  type-text:
+    patterns:
+      - match: \b(text)\b\s*(.*)$
+        captures:
+          "1":
+            name: keyword.other.type.text.karate
+          "2":
+            name: meta.assignment.karate
+            patterns:
+            - include: "#assignment"
+  type-generic:
+    patterns:
+      - match: \b(def|yaml|csv|string|json|xml|xmlstring|bytes|copy|)\b\s*(.*)$
+        captures:
+          "1":
+            name: keyword.other.type.karate
+          "2":
+            name: meta.assignment.karate
+            patterns:
+            - include: "#assignment"
+
+  assignment:
+    patterns:
+      - match: ([_$[:alpha:]][_$[:alnum:]]*)\s*(=)\s*(.*)
+        captures:
+          "1" :
+            name: support.variable.other.karate
+          "2" : 
+            name: keyword.operator.equal.karate
+          "3":
+            name: meta.variable.other.karate
+            patterns:
+              - include: "#expression"
+  expression:
+    patterns: 
+      - include: "#strings"
+      - include: "#call"
+      - include: source.json.karate
+      - include: text.xml
+      - include: source.js
+  call:
+    patterns:
+      - match: \b(call(?:once)?)\b\s+(.*)?
+        captures:
+          "1":
+            name: keyword.other.call.karate
+          "2":
+            name: meta.statement.call.karate
+            patterns:
+              - include: source.js
+
+  strings:
+    patterns:
+      - include: "#singlequote-string"
+      - include: "#doublequote-string"
+  singlequote-string:
+    patterns:
+      - match: (')(\\.|[^'])*(')
+        name: string.quoted.single.karate
+  doublequote-string:
+    patterns:
+      - match: (")(\\.|[^"])*(")
+        name: string.quoted.double.karate
+        # json, xml and js expression can be put into a tripple quote multi line string
+  tripplequote-expression:
+    begin: (^|\G)\s*["]{3}\s*$
+    end: (^|\G)\s*["]{3}\s*$
+    contentName: meta.embedded.block
+    beginCaptures: 
+      "0" :
+          name: string.quoted.triple.karate
+    endCaptures:
+      "0": 
+          name: string.quoted.triple.karate
+    patterns:
+      - begin: ^(\s*)(?=[{\[])
+        while: ^(?!\s*["]{3}\s*)
+        contentName: meta.embedded.block.json
+        patterns: 
+          - include: 'source.json.karate'
+      - begin: ^(\s*)(?=[<])
+        while: ^(?!\s*["]{3}\s*)
+        contentName: meta.embedded.block.xml
+        patterns: 
+          - include: 'text.xml'
+      - begin: ^(\s*)(?=[\S&&[^{<\[]])
+        while: ^(?!\s*["]{3}\s*)
+        contentName: meta.embedded.block.javascript
+        patterns: 
+          - include: 'source.js'
