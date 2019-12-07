@@ -29,10 +29,6 @@
         {
           "match": ",",
           "name": "punctuation.separator.array.karate"
-        },
-        {
-          "match": "[^\\s\\]]",
-          "name": "invalid.illegal.expected-array-separator.karate"
         }
       ]
     },
@@ -117,16 +113,8 @@
             {
               "comment": "the JSON object value",
               "include": "#value"
-            },
-            {
-              "match": "[^\\s,]",
-              "name": "invalid.illegal.expected-dictionary-separator.karate"
             }
           ]
-        },
-        {
-          "match": "[^\\s\\}]",
-          "name": "invalid.illegal.expected-dictionary-separator.karate"
         }
       ]
     },
