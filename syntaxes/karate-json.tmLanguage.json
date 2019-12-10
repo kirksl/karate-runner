@@ -1,0 +1,288 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "KarateJson",
+  "scopeName": "source.json.karate",
+  "patterns": [
+    {
+      "include": "#value"
+    }
+  ],
+  "repository": {
+    "array": {
+      "begin": "\\[",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.array.begin.karate"
+        }
+      },
+      "end": "\\]",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.array.end.karate"
+        }
+      },
+      "name": "meta.structure.array.karate",
+      "patterns": [
+        {
+          "include": "#value"
+        },
+        {
+          "match": ",",
+          "name": "punctuation.separator.array.karate"
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "begin": "/\\*\\*(?!/)",
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.karate"
+            }
+          },
+          "end": "\\*/",
+          "name": "comment.block.documentation.karate"
+        },
+        {
+          "begin": "/\\*",
+          "captures": {
+            "0": {
+              "name": "punctuation.definition.comment.karate"
+            }
+          },
+          "end": "\\*/",
+          "name": "comment.block.karate"
+        },
+        {
+          "captures": {
+            "1": {
+              "name": "punctuation.definition.comment.karate"
+            }
+          },
+          "match": "(//).*$\\n?",
+          "name": "comment.line.double-slash.js"
+        }
+      ]
+    },
+    "constant": {
+      "match": "\\b(?:true|false|null)\\b",
+      "name": "constant.language.karate"
+    },
+    "number": {
+      "match": "(?x)        # turn on extended mode\n  -?        # an optional minus\n  (?:\n    0       # a zero\n    |       # ...or...\n    [1-9]   # a 1-9 character\n    \\d*     # followed by zero or more digits\n  )\n  (?:\n    (?:\n      \\.    # a period\n      \\d+   # followed by one or more digits\n    )?\n    (?:\n      [eE]  # an e character\n      [+-]? # followed by an option +/-\n      \\d+   # followed by one or more digits\n    )?      # make exponent optional\n  )?        # make decimal portion optional",
+      "name": "constant.numeric.karate"
+    },
+    "object": {
+      "begin": "\\{",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.dictionary.begin.karate"
+        }
+      },
+      "end": "\\}",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.dictionary.end.karate"
+        }
+      },
+      "name": "meta.structure.dictionary.karate",
+      "patterns": [
+        {
+          "comment": "the JSON object key",
+          "include": "#objectkey"
+        },
+        {
+          "include": "#comments"
+        },
+        {
+          "begin": ":",
+          "beginCaptures": {
+            "0": {
+              "name": "punctuation.separator.dictionary.key-value.karate"
+            }
+          },
+          "end": "(,)|(?=\\})",
+          "endCaptures": {
+            "1": {
+              "name": "punctuation.separator.dictionary.pair.karate"
+            }
+          },
+          "name": "meta.structure.dictionary.value.karate",
+          "patterns": [
+            {
+              "comment": "the JSON object value",
+              "include": "#value"
+            }
+          ]
+        }
+      ]
+    },
+    "string": {
+      "patterns": [
+        {
+          "include": "#double-quote-string"
+        },
+        {
+          "include": "#single-quote-string"
+        }
+      ]
+    },
+    "single-quote-string": {
+      "begin": "\\'",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.karate"
+        }
+      },
+      "end": "\\'",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.karate"
+        }
+      },
+      "name": "string.quoted.single.karate",
+      "patterns": [
+        {
+          "include": "#expression"
+        },
+        {
+          "include": "#stringcontent"
+        }
+      ]
+    },
+    "double-quote-string": {
+      "begin": "\"",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.begin.karate"
+        }
+      },
+      "end": "\"",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.definition.string.end.karate"
+        }
+      },
+      "name": "string.quoted.double.karate",
+      "patterns": [
+        {
+          "include": "#expression"
+        },
+        {
+          "include": "#stringcontent"
+        }
+      ]
+    },
+    "objectkey": {
+      "patterns": [
+        {
+          "match": "\\b(\\w+)\\s*(?=:)",
+          "name": "string.json support.type.property-name.karate"
+        },
+        {
+          "include": "#double-quote-objectkey"
+        },
+        {
+          "include": "#single-quote-objectkey"
+        }
+      ]
+    },
+    "single-quote-objectkey": {
+      "begin": "\\'",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.support.type.property-name.begin.karate"
+        }
+      },
+      "end": "\\'",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.support.type.property-name.end.karate"
+        }
+      },
+      "name": "string.json support.type.property-name.karate",
+      "patterns": [
+        {
+          "include": "#stringcontent"
+        }
+      ]
+    },
+    "double-quote-objectkey": {
+      "begin": "\"",
+      "beginCaptures": {
+        "0": {
+          "name": "punctuation.support.type.property-name.begin.karate"
+        }
+      },
+      "end": "\"",
+      "endCaptures": {
+        "0": {
+          "name": "punctuation.support.type.property-name.end.karate"
+        }
+      },
+      "name": "string.json support.type.property-name.karate",
+      "patterns": [
+        {
+          "include": "#stringcontent"
+        }
+      ]
+    },
+    "expression": {
+      "begin": "#\\(",
+      "end": "\\)",
+      "beginCaptures": {
+        "0": {
+          "name": "string.interpolated punctuation.definition.expression.begin.karate"
+        }
+      },
+      "endCaptures": {
+        "0": {
+          "name": "string.interpolated punctuation.definition.expression.end.karate"
+        }
+      },
+      "patterns": [
+        {
+          "include": "source.js"
+        }
+      ]
+    },
+    "value": {
+      "patterns": [
+        {
+          "include": "#constant"
+        },
+        {
+          "include": "#number"
+        },
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#array"
+        },
+        {
+          "include": "#object"
+        },
+        {
+          "include": "#comments"
+        },
+        {
+          "include": "#expression"
+        }
+      ]
+    },
+    "stringcontent": {
+      "patterns": [
+        {
+          "match": "(?x)                # turn on extended mode\n  \\\\                # a literal backslash\n  (?:               # ...followed by...\n    [\"\\\\/bfnrt]     # one of these characters\n    |               # ...or...\n    u               # a u\n    [0-9a-fA-F]{4}) # and four hex digits",
+          "name": "constant.character.escape.karate"
+        },
+        {
+          "match": "\\\\.",
+          "name": "invalid.illegal.unrecognized-string-escape.karate"
+        }
+      ]
+    }
+  }
+}

@@ -269,6 +269,9 @@
     "breakpoints": [
       {
         "language": "feature"
+      },
+      {
+        "language": "karate"
       }
     ],
     "debuggers": [
@@ -346,6 +349,49 @@
         "mac": "Cmd+V",
         "when": "editorTextFocus"
       }
+    ],
+    "languages": [
+      {
+        "id": "karate",
+        "aliases": [
+          "Karate",
+          "karate"
+        ],
+        "extensions": [
+          ".feature"
+        ],
+        "configuration": "./karate-language-configuration.json"
+      },
+      {
+        "id": "karate-json",
+        "configuration": "./karate-js-language-configuration.json"
+      },
+      {
+        "id": "karate-js",
+        "configuration": "./karate-js-language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "karate",
+        "scopeName": "source.karate",
+        "path": "./syntaxes/karate.tmLanguage.json",
+        "embeddedLanguages": {
+          "meta.embedded.block.javascript": "javascript",
+          "meta.embedded.block.json": "karate-json",
+          "meta.embedded.block.xml": "xml"
+        }
+      },
+      {
+        "language": "karate-json",
+        "scopeName": "source.json.karate",
+        "path": "./syntaxes/karate-json.tmLanguage.json"
+      },
+      {
+        "language": "karate-js",
+        "scopeName": "source.js.karate",
+        "path": "./syntaxes/karate-js.tmLanguage.json"
+      }
     ]
   },
   "scripts": {
@@ -364,7 +410,8 @@
     "mocha": "^6.2.0",
     "tslint": "^5.18.0",
     "typescript": "3.5.3",
-    "vscode-test": "^1.1.0"
+    "vscode-test": "^1.1.0",
+    "js-yaml": "^3.13.1"
   },
   "dependencies": {
     "fs-extra": "^8.1.0",
