@@ -2,7 +2,7 @@ import providerBuildReports from "./providerBuildReports";
 import providerKarateTests from "./providerKarateTests";
 import providerDebugAdapter from "./providerDebugAdapter";
 import providerCodeLens from "./providerCodeLens";
-import providerFoldingRange from "./providerFoldingRange";
+//import providerFoldingRange from "./providerFoldingRange";
 import { smartPaste, getKarateDebugFile, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor } from "./commands";
 import * as vscode from 'vscode';
 
@@ -18,11 +18,9 @@ export function activate(context: vscode.ExtensionContext)
   let karateTestsProvider = new providerKarateTests();
   let debugAdapterProvider = new providerDebugAdapter();
   let codeLensProvider = new providerCodeLens();
-  let foldingRangeProvider = new providerFoldingRange();
-  let codeLensTarget = { language: "feature", scheme: "file" };
-  let foldingRangeTarget = { language: "feature", scheme: "file" };
-  let codeLensKarateTarget = { language: "karate", scheme: "file" };
-  let foldingRangeKarateTarget = { language: "karate", scheme: "file" };
+  //let foldingRangeProvider = new providerFoldingRange();
+  let codeLensTarget = { language: "karate", scheme: "file" };
+  let foldingRangeTarget = { language: "karate", scheme: "file" };
 
   let smartPasteCommand = vscode.commands.registerCommand('karateRunner.paste', smartPaste);
   let getDebugFileCommand = vscode.commands.registerCommand("karateRunner.getDebugFile", getKarateDebugFile);
@@ -39,9 +37,7 @@ export function activate(context: vscode.ExtensionContext)
 
   let registerDebugAdapterProvider = vscode.debug.registerDebugAdapterDescriptorFactory('karate', debugAdapterProvider);
   let registerCodeLensProvider = vscode.languages.registerCodeLensProvider(codeLensTarget, codeLensProvider);
-  let registerFoldingRangeProvider = vscode.languages.registerFoldingRangeProvider(foldingRangeTarget, foldingRangeProvider);
-  let registerCodeLensKarateProvider = vscode.languages.registerCodeLensProvider(codeLensKarateTarget, codeLensProvider);
-  let registerFoldingRangeKarateProvider = vscode.languages.registerFoldingRangeProvider(foldingRangeKarateTarget, foldingRangeProvider);
+  //let registerFoldingRangeProvider = vscode.languages.registerFoldingRangeProvider(foldingRangeTarget, foldingRangeProvider);
 
   buildReportsTreeView = vscode.window.createTreeView('karate-reports', { showCollapseAll: true, treeDataProvider: buildReportsProvider });
   karateTestsTreeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: karateTestsProvider });
@@ -127,9 +123,7 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(openFileCommand);
   context.subscriptions.push(registerDebugAdapterProvider);
   context.subscriptions.push(registerCodeLensProvider);
-  context.subscriptions.push(registerFoldingRangeProvider);
-  context.subscriptions.push(registerCodeLensKarateProvider);
-  context.subscriptions.push(registerFoldingRangeKarateProvider);
+  //context.subscriptions.push(registerFoldingRangeProvider);
 }
 
 export function deactivate()
