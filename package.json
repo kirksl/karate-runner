@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.6.1",
+  "version": "0.6.6",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -246,6 +246,12 @@
           "type": "number",
           "default": 60,
           "description": "Default time (seconds) to wait for debug server to start.",
+          "scope": "resource"
+        },
+        "karateRunner.executionHistory.limit": {
+          "type": "number",
+          "default": 50,
+          "description": "Maximum number of executions to store and re-execute from Karate status bar.",
           "scope": "resource"
         },
         "karateRunner.tests.toTarget": {

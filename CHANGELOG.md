@@ -1,8 +1,11 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.6.6
+Add execution results to status bar.  Make status bar clickable to show historical results executed from Codelens or Activity Bar.  Make historical results clickable to re-execute command tied to results.  `Note this feature is dependent on Karate providing a results file called results-json.txt typically found under /<build directory>/surefire-reports`.
+
 ## 0.6.1
-Add `Karate Language` via TextMate and integrate into syntax higlighting, debug, codelens and code folding.
+Add `Karate Language` via TextMate and integrate into syntax highlighting, debug, codelens and code folding.
 
 ## 0.5.5
 Add option to override default Karate Runner with Karate Cli.  Karate Runner refers to the Java files used to run Karate tests.  See `Karate Cli Setup` section above and link to `Karate Cli` on Karate website for greater details.
