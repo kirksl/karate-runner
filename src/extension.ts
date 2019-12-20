@@ -1,8 +1,11 @@
-import providerBuildReports from "./providerBuildReports";
-import providerKarateTests from "./providerKarateTests";
-import providerDebugAdapter from "./providerDebugAdapter";
-import providerCodeLens from "./providerCodeLens";
-//import providerFoldingRange from "./providerFoldingRange";
+import ProviderBuildReports from "./providerBuildReports";
+import ProviderKarateTests from "./providerKarateTests";
+import ProviderDebugAdapter from "./providerDebugAdapter";
+import ProviderResults from "./providerResults";
+import ProviderExecutions from "./providerExecutions";
+import ProviderStatusBar from "./providerStatusBar";
+import ProviderCodeLens from "./providerCodeLens";
+//import ProviderFoldingRange from "./providerFoldingRange";
 import { smartPaste, getKarateDebugFile, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor } from "./commands";
 import * as vscode from 'vscode';
 
@@ -14,13 +17,17 @@ let karateTestsWatcher = null;
 
 export function activate(context: vscode.ExtensionContext)
 {
-  let buildReportsProvider = new providerBuildReports();
-  let karateTestsProvider = new providerKarateTests();
-  let debugAdapterProvider = new providerDebugAdapter();
-  let codeLensProvider = new providerCodeLens();
-  //let foldingRangeProvider = new providerFoldingRange();
+  let buildReportsProvider = new ProviderBuildReports();
+  let karateTestsProvider = new ProviderKarateTests();
+  let debugAdapterProvider = new ProviderDebugAdapter();
+  let resultsProvider = new ProviderResults();
+  let executionsProvider = new ProviderExecutions();
+  let statusBarProvider = new ProviderStatusBar(context);
+  let codeLensProvider = new ProviderCodeLens();
+  //let foldingRangeProvider = new ProviderFoldingRange();
+  
   let codeLensTarget = { language: "karate", scheme: "file" };
-  let foldingRangeTarget = { language: "karate", scheme: "file" };
+  //let foldingRangeTarget = { language: "karate", scheme: "file" };
 
   let smartPasteCommand = vscode.commands.registerCommand('karateRunner.paste', smartPaste);
   let getDebugFileCommand = vscode.commands.registerCommand("karateRunner.getDebugFile", getKarateDebugFile);
@@ -123,6 +130,7 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(openFileCommand);
   context.subscriptions.push(registerDebugAdapterProvider);
   context.subscriptions.push(registerCodeLensProvider);
+  context.subscriptions.push(resultsProvider);
   //context.subscriptions.push(registerFoldingRangeProvider);
 }
 

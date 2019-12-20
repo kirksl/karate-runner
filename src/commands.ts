@@ -1,4 +1,6 @@
 import { getProjectDetail, getTestExecutionDetail, ProjectDetail, TestExecutionDetail } from "./helper";
+import ProviderStatusBar from "./providerStatusBar";
+import ProviderExecutions from "./providerExecutions";
 import parse = require('parse-curl');
 import * as vscode from 'vscode';
 
@@ -288,7 +290,7 @@ async function runKarateTest(args)
     );
 
   /*
-  tasks.onDidStartTask((e) => 
+  vscode.tasks.onDidStartTask((e) => 
   {
     if (e.execution.task.name == 'Karate Runner')
     {
@@ -302,6 +304,9 @@ async function runKarateTest(args)
     {
       watcher.dispose();
 
+      ProviderExecutions.addExecutionToHistory();
+      ProviderExecutions.executionArgs = null;
+
       if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildReports').get('openAfterEachRun')))
       {
         reportUrisFound.forEach((reportUri) =>
@@ -313,6 +318,9 @@ async function runKarateTest(args)
 
     reportUrisFound = [];
   });
+
+  ProviderStatusBar.reset();
+  ProviderExecutions.executionArgs = args;
 
   vscode.tasks.executeTask(task);
 }
