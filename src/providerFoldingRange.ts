@@ -1,11 +1,11 @@
-import { getTestExecutionDetail, TestExecutionDetail } from "./helper";
+import { getTestExecutionDetail, ITestExecutionDetail } from "./helper";
 import * as vscode from 'vscode';
 
 class ProviderFoldingRange implements vscode.FoldingRangeProvider
 {
     async provideFoldingRanges(document: vscode.TextDocument, context: vscode.FoldingContext, token: vscode.CancellationToken): Promise <vscode.FoldingRange[]>
     {
-        let tedArray: TestExecutionDetail[] = await getTestExecutionDetail(document.uri, vscode.FileType.File);
+        let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(document.uri, vscode.FileType.File);
 
         let scenarioLines = [];
         let foldingRanges: vscode.FoldingRange[] = [];

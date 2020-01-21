@@ -1,4 +1,4 @@
-import { getProjectDetail, ProjectDetail } from "./helper";
+import { getProjectDetail, IProjectDetail } from "./helper";
 import fs = require("fs");
 import * as vscode from 'vscode';
 
@@ -15,7 +15,7 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
         featureFile = featureFile.replace(/^['"]|['"]$/g, '');
         if (featureFile.endsWith(".feature"))
         {
-          let projectDetail: ProjectDetail = getProjectDetail(vscode.Uri.file(featureFile), vscode.FileType.File);
+          let projectDetail: IProjectDetail = getProjectDetail(vscode.Uri.file(featureFile), vscode.FileType.File);
           projectRootPath = projectDetail.projectRoot;
         }
         else

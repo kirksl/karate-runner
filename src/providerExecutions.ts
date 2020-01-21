@@ -3,7 +3,7 @@ import { runKarateTest } from "./commands";
 import * as vscode from 'vscode';
 
 
-interface ExecutionItem
+interface IExecutionItem
 {
   executionArgs: any;
   quickPickItem: vscode.QuickPickItem;
@@ -11,7 +11,7 @@ interface ExecutionItem
 
 class ProviderExecutions
 {
-    private static executionHistory: ExecutionItem[] = [];
+    private static executionHistory: IExecutionItem[] = [];
     public static executionArgs: any = null;
     private static jsonResultsData: any = null;
 
@@ -36,7 +36,7 @@ class ProviderExecutions
       let executionDate: string = `${json.lastModified}`;
       let executionStats: string = `Features: ${json.features} | Scenarios: ${json.scenarios} | Passed: ${json.passed} | Failed: ${json.failed} | Elapsed: ${(json.elapsedTime/1000).toFixed(2)}`;
       let executionIcon: string = (json.failed > 0) ? `$(bug) [F]` : `$(check) [P]`;
-      let executionItem: ExecutionItem = 
+      let executionItem: IExecutionItem = 
         {
           executionArgs: ProviderExecutions.executionArgs,
           quickPickItem:

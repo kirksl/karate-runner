@@ -1,4 +1,4 @@
-import { getProjectDetail, getTestExecutionDetail, ProjectDetail, TestExecutionDetail } from "./helper";
+import { getProjectDetail, getTestExecutionDetail, IProjectDetail, ITestExecutionDetail } from "./helper";
 import ProviderStatusBar from "./providerStatusBar";
 import ProviderExecutions from "./providerExecutions";
 import parse = require('parse-curl');
@@ -120,7 +120,7 @@ async function getKarateDebugFile()
 
 async function runAllKarateTests(args)
 {
-  let tedArray: TestExecutionDetail[] = await getTestExecutionDetail(args.uri, args.type);
+  let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(args.uri, args.type);
 
   let commandArgs = new Array();
   commandArgs.push(tedArray[0].karateOptions);
@@ -151,7 +151,7 @@ async function runKarateTest(args)
   let runCommandPrefix = null;
   let runCommand = null;
 
-  let projectDetail: ProjectDetail = getProjectDetail(targetTestUri, targetTestUriType);
+  let projectDetail: IProjectDetail = getProjectDetail(targetTestUri, targetTestUriType);
   let projectRootPath = projectDetail.projectRoot;
   let runFilePath = projectDetail.runFile;
 

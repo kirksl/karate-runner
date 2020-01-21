@@ -1,13 +1,13 @@
 {
   "name": "karate-runner",
   "displayName": "Karate Runner",
-  "description": "Run/Debug Karate Tests and open Build Reports from Codelens and Activity Bar.",
+  "description": "Open/Run/Debug Karate Tests and Build Reports by leveraging Codelens, Activity Bar, Debug and much more.",
   "icon": "resources/karate.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.6.6",
+  "version": "0.7.0",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"

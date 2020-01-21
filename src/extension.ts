@@ -5,6 +5,7 @@ import ProviderResults from "./providerResults";
 import ProviderExecutions from "./providerExecutions";
 import ProviderStatusBar from "./providerStatusBar";
 import ProviderCodeLens from "./providerCodeLens";
+import ProviderDefinition from "./providerDefinition";
 //import ProviderFoldingRange from "./providerFoldingRange";
 import { smartPaste, getKarateDebugFile, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor } from "./commands";
 import * as vscode from 'vscode';
@@ -24,9 +25,11 @@ export function activate(context: vscode.ExtensionContext)
   let executionsProvider = new ProviderExecutions();
   let statusBarProvider = new ProviderStatusBar(context);
   let codeLensProvider = new ProviderCodeLens();
+  let definitionProvider = new ProviderDefinition();
   //let foldingRangeProvider = new ProviderFoldingRange();
   
   let codeLensTarget = { language: "karate", scheme: "file" };
+  let definitionTarget = { language: "karate", scheme: "file" };
   //let foldingRangeTarget = { language: "karate", scheme: "file" };
 
   let smartPasteCommand = vscode.commands.registerCommand('karateRunner.paste', smartPaste);
@@ -44,6 +47,7 @@ export function activate(context: vscode.ExtensionContext)
 
   let registerDebugAdapterProvider = vscode.debug.registerDebugAdapterDescriptorFactory('karate', debugAdapterProvider);
   let registerCodeLensProvider = vscode.languages.registerCodeLensProvider(codeLensTarget, codeLensProvider);
+  let registerDefinitionProvider = vscode.languages.registerDefinitionProvider(definitionTarget, definitionProvider);
   //let registerFoldingRangeProvider = vscode.languages.registerFoldingRangeProvider(foldingRangeTarget, foldingRangeProvider);
 
   buildReportsTreeView = vscode.window.createTreeView('karate-reports', { showCollapseAll: true, treeDataProvider: buildReportsProvider });
@@ -130,6 +134,7 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(openFileCommand);
   context.subscriptions.push(registerDebugAdapterProvider);
   context.subscriptions.push(registerCodeLensProvider);
+  context.subscriptions.push(registerDefinitionProvider);
   context.subscriptions.push(resultsProvider);
   //context.subscriptions.push(registerFoldingRangeProvider);
 }

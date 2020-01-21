@@ -1,4 +1,4 @@
-import { getTestExecutionDetail, TestExecutionDetail } from "./helper";
+import { getTestExecutionDetail, ITestExecutionDetail } from "./helper";
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -182,14 +182,14 @@ export class FileStat implements vscode.FileStat
 	}
 }
 
-interface Entry
+interface IEntry
 {
 	uri: any;
 	type: vscode.FileType;
 	command?: vscode.Command;
 }
 
-export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vscode.FileSystemProvider
+export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, vscode.FileSystemProvider
 {
 	private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
 	private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
@@ -332,7 +332,7 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 		return _.rename(oldUri.fsPath, newUri.fsPath);
 	}
 
-	async getChildren(element?: Entry): Promise<Entry[]>
+	async getChildren(element?: IEntry): Promise<IEntry[]>
 	{
 		let glob = String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTarget'));
 		let karateTestFiles = await vscode.workspace.findFiles(glob).then((value) => { return value; });
@@ -341,8 +341,8 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 		{
 			if (element.type === vscode.FileType.File)
 			{
-				let karateTests: Entry[] = [];
-				let tedArray: TestExecutionDetail[] = await getTestExecutionDetail(element.uri, vscode.FileType.File);
+				let karateTests: IEntry[] = [];
+				let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(element.uri, vscode.FileType.File);
 
 				tedArray.forEach((ted) =>
 				{
@@ -470,7 +470,7 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<Entry>, vsco
 		return [{ uri: "No tests found...", type: vscode.FileType.Unknown }];
 	}
 
-	getTreeItem(element: Entry): vscode.TreeItem
+	getTreeItem(element: IEntry): vscode.TreeItem
 	{
 		let collapsibleState: vscode.TreeItemCollapsibleState;
 		switch (element.type)
