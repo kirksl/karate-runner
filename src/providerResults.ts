@@ -1,4 +1,4 @@
-import { getProjectDetail, ProjectDetail } from "./helper";
+import { getProjectDetail, IProjectDetail } from "./helper";
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 
@@ -24,7 +24,7 @@ class ProviderResults implements IDisposable
 
   private static publish(e: vscode.Uri)
   {
-    let projectDetail: ProjectDetail = getProjectDetail(e, vscode.FileType.File);
+    let projectDetail: IProjectDetail = getProjectDetail(e, vscode.FileType.File);
     let projectRootPath: string = projectDetail.projectRoot;
 
     let data: string = fs.readFileSync(e.fsPath, "utf8");

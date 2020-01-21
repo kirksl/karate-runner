@@ -3,13 +3,13 @@ import fs = require("fs");
 import * as vscode from 'vscode';
 
 
-interface ProjectDetail
+interface IProjectDetail
 {
   projectRoot: string;
   runFile: string;
 }
 
-interface TestExecutionDetail
+interface ITestExecutionDetail
 {
   testTag: string;
   testTitle: string;
@@ -20,7 +20,7 @@ interface TestExecutionDetail
   codelensLine: number;
 }
 
-function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): ProjectDetail
+function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetail
 {
   let filePathArray = uri.fsPath.split(path.sep);
   let projectRootPath = "";
@@ -66,9 +66,9 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): ProjectDetail
   return { projectRoot: projectRootPath, runFile: runFilePath };
 }
 
-async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): Promise<TestExecutionDetail[]>
+async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): Promise<ITestExecutionDetail[]>
 {
-  let tedArray: TestExecutionDetail[] = [];
+  let tedArray: ITestExecutionDetail[] = [];
 
   if (type === vscode.FileType.File)
   {
@@ -81,7 +81,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
     let lineTagRegExp = new RegExp("^\\s*@.+$");
     for (let line = 0; line < document.lineCount; line++)
     {
-      let ted: TestExecutionDetail =
+      let ted: ITestExecutionDetail =
       {
         testTag: "",
         testTitle: "",
@@ -180,7 +180,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
       }
     }
 
-    let ted: TestExecutionDetail =
+    let ted: ITestExecutionDetail =
     {
       testTag: "",
       testTitle: "",
@@ -197,4 +197,38 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
   return tedArray;
 }
 
-export { getProjectDetail, getTestExecutionDetail, ProjectDetail, TestExecutionDetail };
+function getChildAbsolutePath(basePath: string, childPath: string): string
+{
+  try
+  {
+    let dirents = fs.readdirSync(basePath, { withFileTypes: true });
+    let result = null;
+
+    for (let ndx = 0; ndx < dirents.length; ndx++)
+    {
+      let newBasePath = path.join(basePath, dirents[ndx].name);
+
+      if (dirents[ndx].isDirectory())
+      {
+        result = getChildAbsolutePath(newBasePath, childPath);
+      }
+      else
+      {
+        if (newBasePath.toLowerCase().endsWith(childPath))
+        {
+          result = newBasePath;
+        }
+      }
+
+      if (result !== null) { break; }
+    }
+
+    return result;
+  }
+  catch (e)
+  {
+    return null;
+  }
+}
+
+export { getProjectDetail, getTestExecutionDetail, getChildAbsolutePath, IProjectDetail, ITestExecutionDetail };

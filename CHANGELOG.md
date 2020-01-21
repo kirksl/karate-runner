@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.7.0
+Add option to view files referenced within a feature file within an `Inline Peek Editor`.
+
 ## 0.6.6
 Add execution results to status bar.  Make status bar clickable to show historical results executed from Codelens or Activity Bar.  Make historical results clickable to re-execute command tied to results.  `Note this feature is dependent on Karate providing a results file called results-json.txt typically found under /<build directory>/surefire-reports`.
 
@@ -8,7 +11,7 @@ Add execution results to status bar.  Make status bar clickable to show historic
 Add `Karate Language` via TextMate and integrate into syntax highlighting, debug, codelens and code folding.
 
 ## 0.5.5
-Add option to override default Karate Runner with Karate Cli.  Karate Runner refers to the Java files used to run Karate tests.  See `Karate Cli Setup` section above and link to `Karate Cli` on Karate website for greater details.
+Add option to override default Karate Runner with Karate Cli.  Karate Runner refers to the Java files used to run Karate tests.  See `Setup > Karate Cli` section and link to `Karate Cli` on Karate website for greater details.
 
 ## 0.5.3
 Add option to cancel debug session while it's attempting to start.
@@ -26,7 +29,7 @@ Remove reliance on feature files having to be `in focus` within IDE to start deb
 Add option to specify switches when debugging within `feature` property of `launch.json`.
 
 ## 0.4.0
-Add option to debug feature files.  This feature requires `Karate Version 0.9.5`.  For Gradle users ensure you have setup a `karateExecute` task in `build.gradle` as defined above in the `Setup Gradle` steps.
+Add option to debug feature files.  This feature requires `Karate Version 0.9.5`.  For Gradle users ensure you have setup a `karateExecute` task in `build.gradle` as defined in the `Setup Gradle` steps.
 
 ## 0.3.3
 Remove `classpath:` from command when referencing fully qualified path to test(s).

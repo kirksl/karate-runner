@@ -181,13 +181,13 @@ export class FileStat implements vscode.FileStat
 	}
 }
 
-interface Entry
+interface IEntry
 {
 	uri: any;
 	type: vscode.FileType;
 }
 
-export class ProviderBuildReports implements vscode.TreeDataProvider<Entry>, vscode.FileSystemProvider
+export class ProviderBuildReports implements vscode.TreeDataProvider<IEntry>, vscode.FileSystemProvider
 {
 	private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
 	private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
@@ -330,7 +330,7 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<Entry>, vsc
 		return _.rename(oldUri.fsPath, newUri.fsPath);
 	}
 
-	async getChildren(element?: Entry): Promise<Entry[]>
+	async getChildren(element?: IEntry): Promise<IEntry[]>
 	{
 		let glob = String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget'));
 		let buildReportFiles = await vscode.workspace.findFiles(glob).then((value) => { return value; });
@@ -417,7 +417,7 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<Entry>, vsc
 		return [{ uri: "No reports found...", type: vscode.FileType.Unknown }];
 	}
 
-	getTreeItem(element: Entry): vscode.TreeItem
+	getTreeItem(element: IEntry): vscode.TreeItem
 	{
 		let treeItem = new vscode.TreeItem
 		(
