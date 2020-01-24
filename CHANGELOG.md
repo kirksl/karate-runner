@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.7.3
+Fix issue where new `Karate Cli` method of running tests always runs all Maven tests.
+
 ## 0.7.2
 Add option to change `Key Bindings` if desired.
 
