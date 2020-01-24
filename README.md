@@ -48,6 +48,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 - Linux: `Ctrl+Shift+A`
 - Mac: `Cmd+A`
 
+*Note key bindings can be changed if desired by going to Menu > Preferences > Keyboard Shortcuts*
 
 ## Setup
 

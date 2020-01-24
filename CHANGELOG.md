@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.7.2
+Add option to change `Key Bindings` if desired.
+
 ## 0.7.1
 Add `Key Bindings` to enable running Karate tests from the keyboard.
 

@@ -119,7 +119,7 @@ async function getKarateDebugFile()
   return "";
 }
 
-async function runAllKarateTests(args)
+async function runAllKarateTests(args = null)
 {
   if (args === null)
   {
@@ -139,7 +139,7 @@ async function runAllKarateTests(args)
   runKarateTest(commandArgs);
 }
 
-async function runKarateTest(args)
+async function runKarateTest(args = null)
 {
   if (args === null)
   {
