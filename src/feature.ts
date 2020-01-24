@@ -1,9 +1,10 @@
 import * as vscode from 'vscode';
 
 
-interface IHeader
+interface ISection
 {
-    text: string;
+    tag: string;
+    title: string;
     type: string;
     startLine: number;
     endLine: number;
@@ -25,7 +26,7 @@ interface ILineToken
   scope: number;
 }
 
-const HEADER_TYPE = 
+const SECTION_TYPE = 
 {
     FEATURE: 'feature:',
     BACKGROUND: 'background:',
@@ -39,7 +40,7 @@ const HEADER_TYPE =
 class Feature
 {
     public document: vscode.TextDocument = null;
-    public headers: IHeader[] = [];
+    public sections: ISection[] = [];
 
     constructor(document: vscode.TextDocument)
     {
@@ -241,6 +242,9 @@ class Feature
             else
             {
                 let deref = this.dereferenceToken(tokens[ndx]);
+
+                if (deref === null) { return null; }
+
                 let lTokens = this.getLineTokens(deref);
                 let position: vscode.Position = new vscode.Position(0, deref.text.length);
                 let pTokens = this.getPositionalTokens(lTokens, position);
@@ -289,75 +293,90 @@ class Feature
         return uriToken;
     }
 
-    public getHeaderType(line: string): string
+    public getSectionType(line: string): string
     {
-        if (this.isBackgroundHeader(line)) { return HEADER_TYPE.BACKGROUND }
-        if (this.isFeatureHeader(line)) { return HEADER_TYPE.FEATURE; }
-        if (this.isScenarioHeader(line)) { return HEADER_TYPE.SCENARIO; }
-        if (this.isScenarioOutlineHeader(line)) { return HEADER_TYPE.SCENARIO_OUTLINE; }
-        if (this.isExamplesHeader(line)) { return HEADER_TYPE.EXAMPLES; }
-        if (this.isTagHeader(line)) { return HEADER_TYPE.TAG; }
-        if (this.isCommentHeader(line)) { return HEADER_TYPE.COMMENT; }
+        if (this.isBackgroundSection(line)) { return SECTION_TYPE.BACKGROUND }
+        if (this.isFeatureSection(line)) { return SECTION_TYPE.FEATURE; }
+        if (this.isScenarioSection(line)) { return SECTION_TYPE.SCENARIO; }
+        if (this.isScenarioOutlineSection(line)) { return SECTION_TYPE.SCENARIO_OUTLINE; }
+        if (this.isExamplesSection(line)) { return SECTION_TYPE.EXAMPLES; }
+        if (this.isTagSection(line)) { return SECTION_TYPE.TAG; }
+        if (this.isCommentSection(line)) { return SECTION_TYPE.COMMENT; }
 
         return null;
     }
 
-    public getTestHeaders(useCache = true): IHeader[]
+    public getTestSections(useCache = true): ISection[]
     {
-        if (useCache && this.headers.length > 0)
+        if (useCache && this.sections.length > 0)
         {
-            return this.headers;
+            return this.sections;
         }
 
         for (let line = 0; line < this.document.lineCount; line++)
         {
             let lineText = this.getLine(line).text;
 
-            if (this.isTestHeader(lineText))
+            if (this.isTestSection(lineText))
             {
-                if (this.headers.length > 0)
+                let section: ISection = 
                 {
-                    this.headers[this.headers.length - 1].endLine = (line - 1);
-                }
-
-                let header: IHeader = 
-                {
-                    text: lineText,
-                    type: this.getHeaderType(lineText),
+                    tag: "",
+                    title: lineText,
+                    type: this.getSectionType(lineText),
                     startLine: line,
                     endLine: this.document.lineCount
                 };
 
-                this.headers.push(header);
+                if (line > 0)
+                {
+                    let lineLastText = this.getLine(line - 1).text;
+
+                    if (/^@.+/.test(lineLastText.trim()))
+                    {
+                        section.tag = lineLastText;
+                        section.startLine -= 1;
+                    }
+                }
+
+                if (this.sections.length > 0)
+                {
+                    this.sections[this.sections.length - 1].endLine = section.startLine - 1;
+                }
+
+                this.sections.push(section);
             }
         }
 
-        let abc = 1;
-        return this.headers;
+        return this.sections;
     }
 
     public dereferenceToken(token: ILineToken): vscode.TextLine
     {
-        let headers: IHeader[] = this.getTestHeaders().filter((h) => h.startLine < token.line);
-        let targetHeaders: IHeader[] = [];
-
-        if (headers.length > 0)
+        let sections: ISection[] = this.getTestSections().filter((section) => 
         {
-            headers[headers.length - 1].endLine = token.line;
-            targetHeaders.push(headers[headers.length - 1]);
+            return section.type !== SECTION_TYPE.FEATURE && section.startLine < token.line;
+        });
 
-            if (headers.length > 1)
+        let targetSections: ISection[] = [];
+
+        if (sections.length > 0)
+        {
+            sections[sections.length - 1].endLine = token.line;
+            targetSections.push(sections[sections.length - 1]);
+
+            if (sections.length > 1)
             {
-                if (this.isBackgroundHeader(this.getLine(headers[0].startLine).text))
+                if (this.isBackgroundSection(sections[0].title))
                 {
-                    targetHeaders.unshift(headers[0]);
+                    targetSections.unshift(sections[0]);
                 }
             }
     
             let regexp: RegExp = new RegExp(`\\s*\\*\\s+def\\s+${token.text}\\s+=(.+)`, 'i');
-            for (let ndx1 = targetHeaders.length - 1; ndx1 >= 0; ndx1--)
+            for (let ndx1 = targetSections.length - 1; ndx1 >= 0; ndx1--)
             {
-                for (let ndx2 = targetHeaders[ndx1].endLine; ndx2 > targetHeaders[ndx1].startLine; ndx2--)
+                for (let ndx2 = targetSections[ndx1].endLine; ndx2 > targetSections[ndx1].startLine; ndx2--)
                 {
                     let line: vscode.TextLine = this.getLine(ndx2);
                     let match: RegExpMatchArray = line.text.match(regexp);
@@ -373,80 +392,60 @@ class Feature
         return null;
     }
 
-    public isFeatureHeader(line: string): boolean
+    public isFeatureSection(line: string): boolean
     {
-        if (line.toLowerCase().trim().startsWith(HEADER_TYPE.FEATURE))
-        {
-            return true;
-        }
+        return line.toLowerCase().trim().startsWith(SECTION_TYPE.FEATURE);
     }
 
-    public isBackgroundHeader(line: string): boolean
+    public isBackgroundSection(line: string): boolean
     {
-        if (line.toLowerCase().trim().startsWith(HEADER_TYPE.BACKGROUND))
-        {
-            return true;
-        }
+        return line.toLowerCase().trim().startsWith(SECTION_TYPE.BACKGROUND);
     }
     
-    public isScenarioHeader(line: string): boolean
+    public isScenarioSection(line: string): boolean
     {
-        if (line.toLowerCase().trim().startsWith(HEADER_TYPE.SCENARIO))
-        {
-            return true;
-        }
+        return line.toLowerCase().trim().startsWith(SECTION_TYPE.SCENARIO);
     }
 
-    public isScenarioOutlineHeader(line: string): boolean
+    public isScenarioOutlineSection(line: string): boolean
     {
-        if (line.toLowerCase().trim().startsWith(HEADER_TYPE.SCENARIO_OUTLINE))
-        {
-            return true;
-        }
+        return line.toLowerCase().trim().startsWith(SECTION_TYPE.SCENARIO_OUTLINE);
     }
 
-    public isExamplesHeader(line: string): boolean
+    public isExamplesSection(line: string): boolean
     {
-        if (line.toLowerCase().trim().startsWith(HEADER_TYPE.EXAMPLES))
-        {
-            return true;
-        }
+        return line.toLowerCase().trim().startsWith(SECTION_TYPE.EXAMPLES);
     }
 
-    public isTagHeader(line: string): boolean
+    public isTagSection(line: string): boolean
     {
-        if (line.toLowerCase().trim().startsWith(HEADER_TYPE.TAG))
-        {
-            return true;
-        }
+        return line.toLowerCase().trim().startsWith(SECTION_TYPE.TAG);
     }
 
-    public isCommentHeader(line: string): boolean
+    public isCommentSection(line: string): boolean
     {
-        if (line.toLowerCase().trim().startsWith(HEADER_TYPE.COMMENT))
-        {
-            return true;
-        }
+        return line.toLowerCase().trim().startsWith(SECTION_TYPE.COMMENT);
     }
 
-    public isHeader(line: string): boolean
+    public isSection(line: string): boolean
     {
-        if (this.isBackgroundHeader(line)) { return true; }
-        if (this.isFeatureHeader(line)) { return true; }
-        if (this.isScenarioHeader(line)) { return true; }
-        if (this.isScenarioOutlineHeader(line)) { return true; }
-        if (this.isExamplesHeader(line)) { return true; }
-        if (this.isTagHeader(line)) { return true; }
-        if (this.isCommentHeader(line)) { return true; }
+        if (this.isBackgroundSection(line)) { return true; }
+        if (this.isFeatureSection(line)) { return true; }
+        if (this.isScenarioSection(line)) { return true; }
+        if (this.isScenarioOutlineSection(line)) { return true; }
+        if (this.isExamplesSection(line)) { return true; }
+        if (this.isTagSection(line)) { return true; }
+        if (this.isCommentSection(line)) { return true; }
 
         return false;
     }
 
-    public isTestHeader(line: string): boolean
+    public isTestSection(line: string): boolean
     {
-        if (this.isBackgroundHeader(line)) { return true; }
-        if (this.isScenarioHeader(line)) { return true; }
-        if (this.isScenarioOutlineHeader(line)) { return true; }
+        if (this.isFeatureSection(line)) { return true; }
+        if (this.isBackgroundSection(line)) { return true; }
+        if (this.isScenarioSection(line)) { return true; }
+        if (this.isScenarioOutlineSection(line)) { return true; }
 
         return false;
     }
@@ -483,4 +482,4 @@ class Feature
     }
 }
 
-export { Feature, IHeader, IUriToken, ILineToken };
+export { Feature, ISection, IUriToken, ILineToken };

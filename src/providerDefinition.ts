@@ -18,7 +18,7 @@ class ProviderDefinition implements vscode.DefinitionProvider
             let feature: Feature = new Feature(document);
             let peekLine: vscode.TextLine = feature.getLine(position.line);
     
-            if (feature.isHeader(peekLine.text)) { return null; }
+            if (feature.isSection(peekLine.text)) { return null; }
     
             let lineTokens: ILineToken[] = feature.getLineTokens(peekLine);
             if (lineTokens.length === 0) { return null; }
