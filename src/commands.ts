@@ -1,4 +1,5 @@
 import { getProjectDetail, getTestExecutionDetail, IProjectDetail, ITestExecutionDetail } from "./helper";
+import { Feature, ISection } from "./feature";
 import ProviderStatusBar from "./providerStatusBar";
 import ProviderExecutions from "./providerExecutions";
 import parse = require('parse-curl');
@@ -120,6 +121,13 @@ async function getKarateDebugFile()
 
 async function runAllKarateTests(args)
 {
+  if (args === null)
+  {
+    args = {};
+    args.uri = vscode.window.activeTextEditor.document.uri;
+    args.type = vscode.FileType.File;
+  }
+
   let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(args.uri, args.type);
 
   let commandArgs = new Array();
@@ -133,6 +141,35 @@ async function runAllKarateTests(args)
 
 async function runKarateTest(args)
 {
+  if (args === null)
+  {
+    let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
+    let activeLine = activeEditor.selection.active.line;
+
+    let feature: Feature = new Feature(activeEditor.document);
+    let sections: ISection[] = feature.getTestSections();
+    let activeSection = sections.find((section) =>
+    {
+      return activeLine >= section.startLine && activeLine <= section.endLine;
+    });
+
+    if (activeSection === undefined) { return; }
+
+    let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(activeEditor.document.uri, vscode.FileType.File);
+    let ted: ITestExecutionDetail = tedArray.find((ted) =>
+    {
+      return ted.codelensLine === activeSection.startLine;
+    });
+
+    if (ted === undefined) { return; }
+
+    args = [];
+    args[0] = ted.karateOptions;
+    args[1] = ted.karateJarOptions;
+    args[2] = activeEditor.document.uri;
+    args[3] = vscode.FileType.File;
+  }
+
   let karateRunner = null;
   let karateOptions: String = args[0];
   let karateJarOptions: String = args[1];

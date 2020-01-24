@@ -27,6 +27,28 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 
 *Note if the path being peeked starts with classpath: this extension will search recursively within the target project to find the file, searching first within /project root/src/test, followed by /project root/src and ending with /project root/*
 
+### Key Bindings
+`Key Bindings` will be added to enable running Karate tests and Smart Paste from the keyboard.
+
+`Smart Paste`
+- Requirement: Open any file in VSCode Editor and ensure editor has focus.
+- Windows: `Ctrl+V`
+- Linux: `Ctrl+Shift+V`
+- Mac: `Cmd+V`
+
+`Run Karate Test`
+- Requirement: Open a feature file in VSCode Editor and ensure a line associated with a test has cursor focus.
+- Windows: `Ctrl+R`
+- Linux: `Ctrl+Shift+R`
+- Mac: `Cmd+R`
+
+`Run All Karate Tests`
+- Requirement: Open a feature file in VSCode Editor and ensure editor has focus.
+- Windows: `Ctrl+A`
+- Linux: `Ctrl+Shift+A`
+- Mac: `Cmd+A`
+
+
 ## Setup
 
 ### General

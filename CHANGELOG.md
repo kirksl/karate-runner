@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.7.1
+Add `Key Bindings` to enable running Karate tests from the keyboard.
+
 ## 0.7.0
 Add option to view files referenced within a feature file within an `Inline Peek Editor`.
 

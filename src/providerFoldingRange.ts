@@ -24,7 +24,7 @@ class ProviderFoldingRange implements vscode.FoldingRangeProvider
 
         for (let ndx = 0; ndx < scenarioLines.length - 1; ndx++)
         {
-            let start: number = scenarioLines[ndx].testLine - 1;
+            let start: number = scenarioLines[ndx].testLine;
             let end: number = scenarioLines[ndx + 1].codelensLine - 1;
 
             if (start < 0)
@@ -45,7 +45,7 @@ class ProviderFoldingRange implements vscode.FoldingRangeProvider
             foldingRanges.push(new vscode.FoldingRange(start, end));
         }
 
-        let start: number = scenarioLines[scenarioLines.length - 1].testLine - 1;
+        let start: number = scenarioLines[scenarioLines.length - 1].testLine;
         let end: number = document.lineCount - 1;
         foldingRanges.push(new vscode.FoldingRange(start, end));
 

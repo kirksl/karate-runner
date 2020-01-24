@@ -120,10 +120,10 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
         let lineScenarioMatch = lineText.match(lineScenarioRegExp);
         if (lineScenarioMatch !== null && lineScenarioMatch.index !== undefined)
         {
-          ted.testLine = (line + 1);
+          ted.testLine = line;
           ted.codelensTitle = scenarioTitle;
-          ted.karateOptions += `:${ted.testLine}`;
-          ted.karateJarOptions += `:${ted.testLine}`;
+          ted.karateOptions += `:${ted.testLine + 1}`;
+          ted.karateJarOptions += `:${ted.testLine +  1}`;
         }
         else
         {
