@@ -219,7 +219,16 @@ async function runKarateTest(args = null)
     
       if(runFilePath.toLowerCase().endsWith(mavenBuildFile))
       {
-        // mvn clean test -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='${karateOptions}' -Dexec.classpathScope='test'
+        if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildDirectory').get('cleanBeforeEachRun')))
+        {
+          runPhases = "clean compile";
+        }
+        else
+        {
+          runPhases = "";
+        }
+
+        // mvn clean compile -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='${karateOptions}' -Dexec.classpathScope='test'
         runCommand = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch} "${runFilePath}"`;
         runCommand += ` exec:java -Dexec.mainClass="com.intuit.karate.cli.Main" -Dexec.args="${karateOptions}"`;
         runCommand += ` -Dexec.classpathScope="test"`;
