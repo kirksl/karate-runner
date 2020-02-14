@@ -56,7 +56,7 @@
       "patterns": [
         {
           "name": "entity.name.type.tag.karate",
-          "match": "^\\s*(@\\S*)(.*)",
+          "match": "^(\\s*@\\S*)+(.*)",
           "captures": {
             "2": {
               "name": "invalid.illegal.tag.karate"
@@ -84,9 +84,6 @@
             "2": {
               "name": "meta.control.statement.karate",
               "patterns": [
-                {
-                  "include": "#configure"
-                },
                 {
                   "include": "#http-method"
                 },
@@ -155,32 +152,6 @@
         }
       ]
     },
-    "configure": {
-      "patterns": [
-        {
-          "match": "\\b(configure)\\b\\s*(headers|cookies|logPrettyRequest|logPrettyResponse|printEnabled|report|afterScenario|afterFeature|ssl|followRedirects|connectTimeout|readTimeout|proxy|charset|retry|outlineVariablesAuto|lowerCaseResponseHeaders|httpClientClass|httpClientInstance|userDefined|responseHeaders|cors)?\\s*(\\w*)?(.*)",
-          "captures": {
-            "1": {
-              "name": "support.function.configure.karate"
-            },
-            "2": {
-              "name": "keyword.other.configuration.parameter.karate"
-            },
-            "3": {
-              "name": "support.variable.unknown.configuration.parameter.karate"
-            },
-            "4": {
-              "name": "meta.embedded.configuration.karate",
-              "patterns": [
-                {
-                  "include": "#expression"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
     "http-method": {
       "patterns": [
         {
@@ -220,7 +191,7 @@
     "first-class-functions": {
       "patterns": [
         {
-          "match": "\\b(request|params|retry\\s+until|soap\\s+action|path|url|multipart\\s+files|multipart\\s+fields|form\\s+fields|multipart\\s+entity|cookies|headers|print)\\b(.*)?",
+          "match": "\\b(request|params|retry\\s+until|soap\\s+action|path|url|multipart\\s+files|multipart\\s+fields|form\\s+fields|multipart\\s+entity|cookies|headers|print|call)\\b(.*)?",
           "captures": {
             "1": {
               "name": "support.function.first-class.karate"
@@ -430,7 +401,7 @@
     "type-generic": {
       "patterns": [
         {
-          "match": "\\b(def|yaml|csv|string|json|xml|xmlstring|bytes|copy|)\\b\\s*(.*)$",
+          "match": "\\b(def|yaml|csv|string|json|xml|xmlstring|bytes|copy|configure)\\b\\s*(.*)$",
           "captures": {
             "1": {
               "name": "keyword.other.type.karate"
