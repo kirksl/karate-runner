@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.7.3",
+  "version": "0.7.7",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -383,11 +383,7 @@
       },
       {
         "id": "karate-json",
-        "configuration": "./karate-js-language-configuration.json"
-      },
-      {
-        "id": "karate-js",
-        "configuration": "./karate-js-language-configuration.json"
+        "configuration": "./karate-json-language-configuration.json"
       }
     ],
     "grammars": [
@@ -407,9 +403,9 @@
         "path": "./syntaxes/karate-json.tmLanguage.json"
       },
       {
-        "language": "karate-js",
         "scopeName": "source.js.karate",
-        "path": "./syntaxes/karate-js.tmLanguage.json"
+        "path": "./syntaxes/karate-js.tmLanguage.json",
+        "injectTo": ["source.js", "source.karate"]
       }
     ]
   },
