@@ -1,0 +1,96 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "scopeName": "source.js.karate",
+    "injectionSelector": "L:source.js,L:source.karate",
+    "patterns": [
+      {
+        "include": "#karate-object-expression"
+      },
+      {
+        "include": "#java-object-expression"
+      }
+    ],
+    "repository": {
+      "karate-object-expression": {
+        "patterns": [
+          {
+            "match": "(karate(?:once)?)(\\.)([_$[:alpha:]][_$[:alnum:]]*)\\b(?:\\((.*)\\))*",
+            "captures": {
+              "1": {
+                "name": "support.class.karate"
+              },
+              "2": {
+                "name": "keyword.operator.dot.karate"
+              },
+              "3": {
+                "name": "support.function.karate"
+              },
+              "4": {
+                "name": "meta.args.karate",
+                "patterns": [
+                  {
+                    "include": "#strings"
+                  },
+                  {
+                    "include": "source.json.karate"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "java-object-expression": {
+        "patterns": [
+          {
+            "match": "(Java(?:once)?)(\\.)([_$[:alpha:]][_$[:alnum:]]*)\\b(?:\\((.*)\\))*",
+            "captures": {
+              "1": {
+                "name": "support.class.java.karate"
+              },
+              "2": {
+                "name": "keyword.operator.dot.karate"
+              },
+              "3": {
+                "name": "support.function.java.karate"
+              },
+              "4": {
+                "name": "meta.args.java.karate",
+                "patterns": [
+                  {
+                    "include": "#strings"
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "strings": {
+        "patterns": [
+          {
+            "include": "#singlequote-string"
+          },
+          {
+            "include": "#doublequote-string"
+          }
+        ]
+      },
+      "singlequote-string": {
+        "patterns": [
+          {
+            "match": "(')(\\\\.|[^'])*(')",
+            "name": "string.quoted.single.karate"
+          }
+        ]
+      },
+      "doublequote-string": {
+        "patterns": [
+          {
+            "match": "(\")(\\\\.|[^\"])*(\")",
+            "name": "string.quoted.double.karate"
+          }
+        ]
+      }
+    }
+  }

@@ -94,6 +94,9 @@
                   "include": "#evaluation"
                 },
                 {
+                  "include": "#get"
+                },
+                {
                   "include": "#set"
                 },
                 {
@@ -106,7 +109,46 @@
                   "include": "#assert"
                 },
                 {
+                  "include": "#print"
+                },
+                {
+                  "include": "#call"
+                },
+                {
                   "include": "#match"
+                },
+                {
+                  "include": "#click"
+                },
+                {
+                  "include": "#input"
+                },
+                {
+                  "include": "#submit"
+                },
+                {
+                  "include": "#focus"
+                },
+                {
+                  "include": "#clear"
+                },
+                {
+                  "include": "#value"
+                },
+                {
+                  "include": "#select"
+                },
+                {
+                  "include": "#scroll"
+                },
+                {
+                  "include": "#mouse"
+                },
+                {
+                  "include": "#highlight"
+                },
+                {
+                  "include": "#highlight-all"
                 },
                 {
                   "include": "#functional-assignments"
@@ -191,7 +233,7 @@
     "first-class-functions": {
       "patterns": [
         {
-          "match": "\\b(request|params|retry\\s+until|soap\\s+action|path|url|multipart\\s+files|multipart\\s+fields|form\\s+fields|multipart\\s+entity|cookies|headers|print|call)\\b(.*)?",
+          "match": "\\b(request|params|retry\\s+until|soap\\s+action|path|url|multipart\\s+files|multipart\\s+fields|form\\s+fields|multipart\\s+entity|cookies|headers)\\b(.*)?",
           "captures": {
             "1": {
               "name": "support.function.first-class.karate"
@@ -221,6 +263,246 @@
               "patterns": [
                 {
                   "include": "source.js"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "click": {
+      "patterns": [
+        {
+          "match": "\\b(click)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.click.karate"
+            },
+            "2": {
+              "name": "meta.statement.click.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "input": {
+      "patterns": [
+        {
+          "match": "\\b(input)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.input.karate"
+            },
+            "2": {
+              "name": "meta.statement.input.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "submit": {
+      "patterns": [
+        {
+          "match": "\\b(submit)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.submit.karate"
+            },
+            "2": {
+              "name": "meta.statement.submit.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "focus": {
+      "patterns": [
+        {
+          "match": "\\b(focus)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.focus.karate"
+            },
+            "2": {
+              "name": "meta.statement.focus.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "clear": {
+      "patterns": [
+        {
+          "match": "\\b(clear)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.clear.karate"
+            },
+            "2": {
+              "name": "meta.statement.clear.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "value": {
+      "patterns": [
+        {
+          "match": "\\b(value)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.value.karate"
+            },
+            "2": {
+              "name": "meta.statement.value.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "select": {
+      "patterns": [
+        {
+          "match": "\\b(select)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.select.karate"
+            },
+            "2": {
+              "name": "meta.statement.select.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "scroll": {
+      "patterns": [
+        {
+          "match": "\\b(scroll)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.scroll.karate"
+            },
+            "2": {
+              "name": "meta.statement.scroll.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "mouse": {
+      "patterns": [
+        {
+          "match": "\\b(mouse)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.mouse.karate"
+            },
+            "2": {
+              "name": "meta.statement.mouse.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "highlight": {
+      "patterns": [
+        {
+          "match": "\\b(highlight)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.highlight.karate"
+            },
+            "2": {
+              "name": "meta.statement.highlight.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "highlight-all": {
+      "patterns": [
+        {
+          "match": "\\b(highlightAll)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.highlightall.karate"
+            },
+            "2": {
+              "name": "meta.statement.highlightall.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "get": {
+      "patterns": [
+        {
+          "match": "\\b(get)\\b(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.get.karate"
+            },
+            "2": {
+              "name": "meta.statement.get.karate",
+              "patterns": [
+                {
+                  "include": "source.json.karate"
                 }
               ]
             }
@@ -447,7 +729,19 @@
           "include": "#strings"
         },
         {
+          "include": "#print"
+        },
+        {
           "include": "#call"
+        },
+        {
+          "include": "#read"
+        },
+        {
+          "include": "#evaluation"
+        },
+        {
+          "include": "#get"
         },
         {
           "include": "source.json.karate"
@@ -472,7 +766,55 @@
               "name": "meta.statement.call.karate",
               "patterns": [
                 {
-                  "include": "source.js"
+                  "include": "#expression"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "read": {
+      "patterns": [
+        {
+          "match": "\\b(read(?:once)?)\\b\\s*([^\\s]+)\\s*(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.read.karate"
+            },
+            "2": {
+              "name": "meta.statement.read.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                }
+              ]
+            },
+            "3": {
+              "name": "meta.args.read.karate",
+              "patterns": [
+                {
+                  "include": "source.json.karate"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "print": {
+      "patterns": [
+        {
+          "match": "\\b(print(?:once)?)\\b\\s+(.*)?",
+          "captures": {
+            "1": {
+              "name": "keyword.other.print.karate"
+            },
+            "2": {
+              "name": "meta.statement.print.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
                 }
               ]
             }

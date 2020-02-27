@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.7.7
+Add `Syntax Highlighting` to enable bracket pairing and coloring for the Karate language within .feature files.  Additionally coloring will be enhanced within .js files to support Karate language integration.
+
 ## 0.7.3
 Fix issue where new `Karate Cli` method of running tests always runs all Maven tests.
 

@@ -74,13 +74,13 @@
       "name": "constant.numeric.karate"
     },
     "object": {
-      "begin": "\\{",
+      "begin": "\\{|\\(\\{",
       "beginCaptures": {
         "0": {
           "name": "punctuation.definition.dictionary.begin.karate"
         }
       },
-      "end": "\\}",
+      "end": "\\}|\\)\\}",
       "endCaptures": {
         "0": {
           "name": "punctuation.definition.dictionary.end.karate"

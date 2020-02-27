@@ -50,6 +50,11 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 
 *Note key bindings can be changed if desired by going to Menu > Preferences > Keyboard Shortcuts*
 
+### Syntax Highlighting
+`Syntax Highlighting` will be added to enable bracket pairing and coloring for the Karate language within .feature files.  Additionally coloring will be enhanced within .js files to support Karate language integration.
+
+*Note this is a work in progress as the Karate language grows and custom IDE themes come to market.*
+
 ## Setup
 
 ### General
