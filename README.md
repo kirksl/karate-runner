@@ -1,6 +1,8 @@
 # Karate Runner
 This extension will enable you to Open/Run/Debug Karate Tests and Build Reports by leveraging Codelens, Activity Bar, Debug and much more.
 
+***
+
 ## Features
 
 ### Codelens
@@ -55,12 +57,16 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 
 *Note this is a work in progress as the Karate language grows and custom IDE themes come to market.*
 
+***
+
 ## Setup
 
 ### General
 Please make sure you are using `VSCode Version 1.36.0` or greater. (Required)
 Please make sure you are using `Karate Version 0.9.3` or greater in your Karate projects. (Required)
 Goto the following path to configure this extension `Preferences > Settings > Search for Karate Runner`.
+
+*Note if you are on Windows additionally goto the following path to set `cmd.exe` as your default terminal `Preferences > Settings > Terminal > External: Windows Exec`.  Typically the path for this setting should be `C:\WINDOWS\System32\cmd.exe`.*
 
 ### Debug
 Please make sure you are using `Karate Version 0.9.5` or greater in your Karate projects.  (Required to enable debug mode)

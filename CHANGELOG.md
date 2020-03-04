@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.7.9
+Fix issue where test resources were not being built when using Maven and Karate Cli.
+
 ## 0.7.8
 Fix JS comments coloring issue when comments include Karate language.
 

@@ -221,14 +221,14 @@ async function runKarateTest(args = null)
       {
         if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildDirectory').get('cleanBeforeEachRun')))
         {
-          runPhases = "clean compile";
+          runPhases = "clean test-compile";
         }
         else
         {
           runPhases = "";
         }
 
-        // mvn clean compile -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='${karateOptions}' -Dexec.classpathScope='test'
+        // mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='${karateOptions}' -Dexec.classpathScope='test'
         runCommand = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch} "${runFilePath}"`;
         runCommand += ` exec:java -Dexec.mainClass="com.intuit.karate.cli.Main" -Dexec.args="${karateOptions}"`;
         runCommand += ` -Dexec.classpathScope="test"`;
