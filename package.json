@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.7.9",
+  "version": "0.8.0",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -64,6 +64,10 @@
       {
         "command": "karateRunner.tests.run",
         "title": "Run Karate Test"
+      },
+      {
+        "command": "karateRunner.tests.debug",
+        "title": "Debug Karate Test"
       },
       {
         "command": "karateRunner.buildReports.open",

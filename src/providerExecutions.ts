@@ -81,7 +81,6 @@ class ProviderExecutions
         try
         {
           let execution = ProviderExecutions.executionHistory.filter((item) => item.quickPickItem.label == quickPickExecution.label);
-          console.debug(execution[0].quickPickItem.label);
           runKarateTest(execution[0].executionArgs);
         }
         catch(e)

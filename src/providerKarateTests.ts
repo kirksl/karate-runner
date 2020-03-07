@@ -355,7 +355,7 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, vsc
 					{
 						arguments: [commandArgs],
 						command: "karateRunner.tests.run",
-						title: ted.codelensTitle
+						title: ted.codelensRunTitle
 					};
 
 					karateTests.push(

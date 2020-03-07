@@ -13,19 +13,32 @@ class ProviderCodeLens implements vscode.CodeLensProvider
     tedArray.forEach((ted) =>
     {
       let codeLensLocation = new vscode.Range(ted.codelensLine, 0, ted.codelensLine, 0);
-      let commandArgs = new Array();
-      commandArgs.push(ted.karateOptions);
-      commandArgs.push(ted.karateJarOptions);
-      commandArgs.push(document.uri);
-      commandArgs.push(vscode.FileType.File);
-      let codeLensCommand: vscode.Command =
+
+      let commandRunArgs = new Array();
+      commandRunArgs.push(ted.karateOptions);
+      commandRunArgs.push(ted.karateJarOptions);
+      commandRunArgs.push(document.uri);
+      commandRunArgs.push(vscode.FileType.File);
+
+      let codeLensRunCommand: vscode.Command =
       {
-        arguments: [commandArgs],
+        arguments: [commandRunArgs],
         command: "karateRunner.tests.run",
-        title: ted.codelensTitle
+        title: ted.codelensRunTitle
       };
 
-      codeLensArray.push(new vscode.CodeLens(codeLensLocation, codeLensCommand));
+      let commandDebugArgs = new Array();
+      commandDebugArgs.push(ted.debugLine);
+
+      let codeLensDebugCommand: vscode.Command = 
+      {
+        arguments: [commandDebugArgs],
+        command: "karateRunner.tests.debug",
+        title: ted.codelensDebugTitle
+      };
+
+      codeLensArray.push(new vscode.CodeLens(codeLensLocation, codeLensRunCommand));
+      codeLensArray.push(new vscode.CodeLens(codeLensLocation, codeLensDebugCommand));
     });
 
     return codeLensArray;

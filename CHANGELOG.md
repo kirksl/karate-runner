@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.8.0
+Add new Codelens above each `Feature:`, `Scenario:` and `Scenario Outline:` to debug the applicable test or tests.
+
 ## 0.7.9
 Fix issue where test resources were not being built when using Maven and Karate Cli.
 
@@ -26,7 +29,7 @@ Add option to view files referenced within a feature file within an `Inline Peek
 Add execution results to status bar.  Make status bar clickable to show historical results executed from Codelens or Activity Bar.  Make historical results clickable to re-execute command tied to results.  `Note this feature is dependent on Karate providing a results file called results-json.txt typically found under /<build directory>/surefire-reports`.
 
 ## 0.6.1
-Add `Karate Language` via TextMate and integrate into syntax highlighting, debug, codelens and code folding.
+Add `Karate Language` via TextMate and integrate into Syntax Highlighting, Debug, Codelens and Code Folding.
 
 ## 0.5.5
 Add option to override default Karate Runner with Karate Cli.  Karate Runner refers to the Java files used to run Karate tests.  See `Setup > Karate Cli` section and link to `Karate Cli` on Karate website for greater details.
