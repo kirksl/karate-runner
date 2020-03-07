@@ -14,9 +14,11 @@ interface ITestExecutionDetail
   testTag: string;
   testTitle: string;
   testLine: number;
+  debugLine: number;
   karateOptions: string;
   karateJarOptions: string;
-  codelensTitle: string;
+  codelensRunTitle: string;
+  codelensDebugTitle: string;
   codelensLine: number;
 }
 
@@ -72,8 +74,8 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 
   if (type === vscode.FileType.File)
   {
-    let featureTitle = "Run Karate Tests";
-    let scenarioTitle = "Run Karate Test";
+    let runTitle = "Karate: Run";
+    let debugTitle = "Karate: Debug";
 
     let document = await vscode.workspace.openTextDocument(uri);
 
@@ -86,9 +88,11 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
         testTag: "",
         testTitle: "",
         testLine: 0,
+        debugLine: 0,
         karateOptions: "",
         karateJarOptions: "",
-        codelensTitle: "",
+        codelensRunTitle: "",
+        codelensDebugTitle: "",
         codelensLine: 0
       };
 
@@ -121,14 +125,18 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
         if (lineScenarioMatch !== null && lineScenarioMatch.index !== undefined)
         {
           ted.testLine = line;
-          ted.codelensTitle = scenarioTitle;
+          ted.debugLine = ted.testLine + 1;
+          ted.codelensRunTitle = runTitle;
+          ted.codelensDebugTitle = debugTitle;
           ted.karateOptions += `:${ted.testLine + 1}`;
           ted.karateJarOptions += `:${ted.testLine +  1}`;
         }
         else
         {
           ted.testLine = 0;
-          ted.codelensTitle = featureTitle;
+          ted.debugLine = 0;
+          ted.codelensRunTitle = runTitle;
+          ted.codelensDebugTitle = debugTitle;
         }
 
         tedArray.push(ted);
@@ -185,9 +193,11 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
       testTag: "",
       testTitle: "",
       testLine: 0,
+      debugLine: 0,
       karateOptions: classPathNormalized,
       karateJarOptions: classPathNormalized,
-      codelensTitle: "",
+      codelensRunTitle: "",
+      codelensDebugTitle: "",
       codelensLine: 0
     };
 

@@ -6,6 +6,9 @@ import parse = require('parse-curl');
 import * as vscode from 'vscode';
 
 
+let debugLineNumber: number = 0;
+
+
 async function smartPaste()
 {
   const curlIgnores = ['accept-', 'upgrade-', 'user-', 'connection', 'referer', 'sec-', 'origin', 'host', 'content-length'];
@@ -81,12 +84,15 @@ async function smartPaste()
 
 async function getKarateDebugFile()
 {
+  let debugLine: string = (debugLineNumber === 0) ? "" : `:${debugLineNumber}`;
+  debugLineNumber = 0;
+
   let activeTextEditor = vscode.window.activeTextEditor;
   if (activeTextEditor !== undefined) {
     let activeFile = activeTextEditor.document.fileName;
     if (activeFile.endsWith(".feature"))
     {
-      return activeFile;
+      return activeFile + debugLine;
     }
 
     let openTextDocuments = vscode.workspace.textDocuments;
@@ -371,6 +377,20 @@ async function runKarateTest(args = null)
   vscode.tasks.executeTask(task);
 }
 
+function debugKarateTest(args = null)
+{
+  if (args !== null)
+  {
+    debugLineNumber = args[0];
+  }
+  else
+  {
+    debugLineNumber = 0;
+  }
+
+  vscode.commands.executeCommand('workbench.action.debug.start');
+}
+
 function displayReportsTree(displayType)
 {
   vscode.workspace.getConfiguration().update('karateRunner.buildReports.activityBarDisplayType', displayType);
@@ -392,4 +412,4 @@ function openFileInEditor(args)
   vscode.window.showTextDocument(fileUri);
 }
 
-export { smartPaste, getKarateDebugFile, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor };
+export { smartPaste, getKarateDebugFile, debugKarateTest, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor };

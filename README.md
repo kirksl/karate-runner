@@ -1,12 +1,13 @@
 # Karate Runner
 This extension will enable you to Open/Run/Debug Karate Tests and Build Reports by leveraging Codelens, Activity Bar, Debug and much more.
 
-***
-
+# 
 ## Features
 
 ### Codelens
-A `Codelens` will be added above each `Feature:`, `Scenario:` and `Scenario Outline:` keyword within each Karate feature file.  Clicking on the Codelens for a Feature test will run all Scenario and Scenario Outlines within the target feature file.  Clicking on the Codelens for a Scenario or Scenario Outline test will run only that Scenario or Scenario Outline.
+A `Karate: Run` `Codelens` will be added above each `Feature:`, `Scenario:` and `Scenario Outline:` keyword within each Karate feature file.  Clicking on this Codelens for a Feature test will run all Scenario and Scenario Outlines within the target feature file.  Clicking on this Codelens for a Scenario or Scenario Outline test will run only that Scenario or Scenario Outline.
+
+A `Karate: Debug` `Codelens` will be added above each `Feature:`, `Scenario:` and `Scenario Outline:` keyword within each Karate feature file.  Clicking on this Codelens for a Feature test will debug all Scenario and Scenario Outlines within the target feature file.  Clicking on this Codelens for a Scenario or Scenario Outline test will debug only that Scenario or Scenario Outline.
 
 ### Activity Bar
 A `Karate Activity Bar` will be added to VSCode.  Clicking on the Activity Bar will reveal a `Build Reports` and a `Tests` view.  Clicking on a report will open it within the default program defined for its file type.  Clicking on a Feature test will run all Scenario and Scenario Outlines within the target feature file.  Clicking on a Scenario or Scenario Outline test will run only that Scenario or Scenario Outline.
@@ -57,8 +58,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 
 *Note this is a work in progress as the Karate language grows and custom IDE themes come to market.*
 
-***
-
+# 
 ## Setup
 
 ### General
@@ -96,7 +96,7 @@ Please make sure you are using `Karate Version 0.9.5` or greater in your Karate 
 #### Debug Project
 - Set breakpoint(s) within feature file(s).
 - Keep feature file(s) opened in editor. (Recommended)
-- Start debugging.
+- Start debugging by clicking either a `Karate: Debug` Codelens or by clicking `Start Debugging` within the `Debug Activity`.
 
 ### Karate Cli
 Please make sure you are using `Karate Version 0.9.5` or greater in your Karate projects.  (Required to enable this feature)
