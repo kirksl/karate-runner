@@ -1,8 +1,11 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.8.1
+Fix issue where Debug Configurations are using the incorrect pom.xml / build.gradle when there are multiple in a project.  Update Gradle command to filter tests using `--tests` instead of switch marked for deprecation `-Dtest`.
+
 ## 0.8.0
-Add new Codelens above each `Feature:`, `Scenario:` and `Scenario Outline:` to debug the applicable test or tests.
+Add new Debug Codelens above each `Feature:`, `Scenario:` and `Scenario Outline:` to debug the applicable test or tests.
 
 ## 0.7.9
 Fix issue where test resources were not being built when using Maven and Karate Cli.

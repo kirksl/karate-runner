@@ -7,7 +7,7 @@ import ProviderStatusBar from "./providerStatusBar";
 import ProviderCodeLens from "./providerCodeLens";
 import ProviderDefinition from "./providerDefinition";
 //import ProviderFoldingRange from "./providerFoldingRange";
-import { smartPaste, getKarateDebugFile, debugKarateTest, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor } from "./commands";
+import { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor } from "./commands";
 import * as vscode from 'vscode';
 
 let buildReportsTreeView = null;
@@ -33,7 +33,8 @@ export function activate(context: vscode.ExtensionContext)
   //let foldingRangeTarget = { language: "karate", scheme: "file" };
 
   let smartPasteCommand = vscode.commands.registerCommand('karateRunner.paste', smartPaste);
-  let getDebugFileCommand = vscode.commands.registerCommand("karateRunner.getDebugFile", getKarateDebugFile);
+  let getDebugFileCommand = vscode.commands.registerCommand("karateRunner.getDebugFile", getDebugFile);
+  let getDebugBuildFileCommand = vscode.commands.registerCommand("karateRunner.getDebugBuildFile", getDebugBuildFile);
   let debugTestCommand = vscode.commands.registerCommand("karateRunner.tests.debug", debugKarateTest);
   let runTestCommand = vscode.commands.registerCommand("karateRunner.tests.run", runKarateTest);
   let runAllCommand = vscode.commands.registerCommand("karateRunner.tests.runAll", runAllKarateTests);
@@ -123,6 +124,7 @@ export function activate(context: vscode.ExtensionContext)
 
   context.subscriptions.push(smartPasteCommand);
   context.subscriptions.push(getDebugFileCommand);
+  context.subscriptions.push(getDebugBuildFileCommand);
   context.subscriptions.push(debugTestCommand);
   context.subscriptions.push(runTestCommand);
   context.subscriptions.push(runAllCommand);

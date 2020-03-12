@@ -1,4 +1,4 @@
-import { getProjectDetail, getTestExecutionDetail, IProjectDetail, ITestExecutionDetail } from "./helper";
+import { getProjectDetail, getTestExecutionDetail, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail } from "./helper";
 import { Feature, ISection } from "./feature";
 import ProviderStatusBar from "./providerStatusBar";
 import ProviderExecutions from "./providerExecutions";
@@ -82,47 +82,36 @@ async function smartPaste()
   })
 }
 
-async function getKarateDebugFile()
+async function getDebugFile()
 {
   let debugLine: string = (debugLineNumber === 0) ? "" : `:${debugLineNumber}`;
   debugLineNumber = 0;
 
-  let activeTextEditor = vscode.window.activeTextEditor;
-  if (activeTextEditor !== undefined) {
-    let activeFile = activeTextEditor.document.fileName;
-    if (activeFile.endsWith(".feature"))
-    {
-      return activeFile + debugLine;
-    }
+  let activeKarateFile: string = await getActiveFeatureFile();
 
-    let openTextDocuments = vscode.workspace.textDocuments;
-    let openFeatureFiles = openTextDocuments.filter(e => e.fileName.endsWith(".feature"));
-
-    if (openFeatureFiles.length == 1)
-    {
-      return openFeatureFiles[0].fileName;
-    }
-
-    if (openFeatureFiles.length > 1)
-    {
-      let quickPickItems = openFeatureFiles.map(e => e.fileName);
-      let quickPickOptions = <vscode.QuickPickOptions>
-        {
-          canPickMany: false,
-          ignoreFocusOut: true,
-          placeHolder: "Select feature file to debug..."
-        };
-
-      let quickPickFile = await vscode.window.showQuickPick(quickPickItems, quickPickOptions);
-
-      if (quickPickFile !== undefined)
-      {
-        return quickPickFile;
-      }
-    }
+  if (activeKarateFile !== null)
+  {
+    return activeKarateFile + debugLine;
   }
+  else
+  {
+    return "";
+  }
+}
 
-  return "";
+async function getDebugBuildFile()
+{
+  let activeKarateFile: string = await getActiveFeatureFile();
+
+  if (activeKarateFile !== null)
+  {
+    let projectDetail: IProjectDetail = getProjectDetail(vscode.Uri.file(activeKarateFile), vscode.FileType.File);
+    return projectDetail.runFile;
+  }
+  else
+  {
+    return "";
+  }
 }
 
 async function runAllKarateTests(args = null)
@@ -282,19 +271,26 @@ async function runKarateTest(args = null)
       if (runFilePath.toLowerCase().endsWith(mavenBuildFile))
       {
         runCommandPrefix = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch}`;
+
+        if (runCommandPrefix === null)
+        {
+          return;
+        }
+
+        runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} -Dkarate.options="${karateOptions}"`;
       }
   
       if (runFilePath.toLowerCase().endsWith(gradleBuildFile))
       {
         runCommandPrefix = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch}`;
+
+        if (runCommandPrefix === null)
+        {
+          return;
+        }
+
+        runCommand = `${runCommandPrefix} "${runFilePath}" --tests ${karateRunner} -Dkarate.options="${karateOptions}"`;
       }
-  
-      if (runCommandPrefix === null)
-      {
-        return;
-      }
-  
-      runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} -Dkarate.options="${karateOptions}"`;
     }
   }
   else
@@ -412,4 +408,4 @@ function openFileInEditor(args)
   vscode.window.showTextDocument(fileUri);
 }
 
-export { smartPaste, getKarateDebugFile, debugKarateTest, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor };
+export { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor };
