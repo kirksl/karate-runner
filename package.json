@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.8.0",
+  "version": "0.8.1",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -60,6 +60,10 @@
       {
         "command": "karateRunner.getDebugFile",
         "title": "Get File To Debug"
+      },
+      {
+        "command": "karateRunner.getDebugBuildFile",
+        "title": "Get Build File To Debug"
       },
       {
         "command": "karateRunner.tests.run",
@@ -330,7 +334,7 @@
               "request": "launch",
               "feature": "^\"\\${command:karateRunner.getDebugFile}\"",
               "karateOptions": "",
-              "karateCli": "mvn test-compile -f pom.xml exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args='-d' -Dexec.classpathScope=test"
+              "karateCli": "^\"mvn test-compile -f \\\"\\${command:karateRunner.getDebugBuildFile}\\\" exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args=\\\"-d\\\" -Dexec.classpathScope=\\\"test\\\"\""
             }
           },
           {
@@ -342,7 +346,7 @@
               "request": "launch",
               "feature": "^\"\\${command:karateRunner.getDebugFile}\"",
               "karateOptions": "",
-              "karateCli": "gradle compileTestJava -b build.gradle karateExecute -DmainClass=com.intuit.karate.cli.Main --args='-d'"
+              "karateCli": "^\"gradle compileTestJava -b \\\"\\${command:karateRunner.getDebugBuildFile}\\\" karateExecute -DmainClass=com.intuit.karate.cli.Main --args=\\\"-d\\\"\""
             }
           }
         ]

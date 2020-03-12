@@ -241,4 +241,53 @@ function getChildAbsolutePath(basePath: string, childPath: string): string
   }
 }
 
-export { getProjectDetail, getTestExecutionDetail, getChildAbsolutePath, IProjectDetail, ITestExecutionDetail };
+async function getActiveFeatureFile(): Promise<string>
+{
+  let activeFeatureFile: string = null;
+  let activeTextEditor: vscode.TextEditor = vscode.window.activeTextEditor;
+
+  if (activeTextEditor !== undefined)
+  {
+    let activeFile: string = activeTextEditor.document.fileName;
+
+    if (activeFile.toLowerCase().endsWith(".feature"))
+    {
+      activeFeatureFile = activeFile;
+    }
+    else
+    {
+      let activeFiles: vscode.TextDocument[] = vscode.workspace.textDocuments;
+      let activeFeatureFiles = activeFiles.filter(e => e.fileName.toLowerCase().endsWith(".feature"));
+
+      if (activeFeatureFiles.length === 1)
+      {
+        activeFeatureFile = activeFeatureFiles[0].fileName;
+      }
+      else
+      {
+        if (activeFeatureFiles.length > 1)
+        {
+          let quickPickItems: string[] = activeFeatureFiles.map(e => e.fileName);
+
+          let quickPickOptions = <vscode.QuickPickOptions>
+            {
+              canPickMany: false,
+              ignoreFocusOut: true,
+              placeHolder: "Select feature file to debug..."
+            };
+    
+          let quickPickFile = await vscode.window.showQuickPick(quickPickItems, quickPickOptions);
+    
+          if (quickPickFile !== undefined)
+          {
+            activeFeatureFile = quickPickFile;
+          }
+        }
+      }
+    }
+  }
+
+  return activeFeatureFile;
+}
+
+export { getProjectDetail, getTestExecutionDetail, getChildAbsolutePath, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail };
