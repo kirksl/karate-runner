@@ -41,15 +41,15 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 
 `Run Karate Test`
 - Requirement: Open a feature file in VSCode Editor and ensure a line associated with a test has cursor focus.
-- Windows: `Ctrl+R`
-- Linux: `Ctrl+Shift+R`
-- Mac: `Cmd+R`
+- Windows: `Ctrl+R+1`
+- Linux: `Ctrl+Shift+R+1`
+- Mac: `Cmd+R+1`
 
 `Run All Karate Tests`
 - Requirement: Open a feature file in VSCode Editor and ensure editor has focus.
-- Windows: `Ctrl+A`
-- Linux: `Ctrl+Shift+A`
-- Mac: `Cmd+A`
+- Windows: `Ctrl+R+A`
+- Linux: `Ctrl+Shift+R+A`
+- Mac: `Cmd+R+A`
 
 *Note key bindings can be changed if desired by going to Menu > Preferences > Keyboard Shortcuts*
 

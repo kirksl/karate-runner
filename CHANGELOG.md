@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.8.2
+Fix conflicting `Key Bindings` for `Run Karate Test` and `Run All Karate Tests`.
+
 ## 0.8.1
 Fix issue where Debug Configurations are using the incorrect pom.xml / build.gradle when there are multiple in a project.  Update Gradle command to filter tests using `--tests` instead of switch marked for deprecation `-Dtest`.
 
