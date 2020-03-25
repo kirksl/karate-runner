@@ -2,6 +2,7 @@
 Notable changes to this project will be documented in this file.
 
 ## 0.8.2
+## 0.8.3
 Fix conflicting `Key Bindings` for `Run Karate Test` and `Run All Karate Tests`.
 
 ## 0.8.1
