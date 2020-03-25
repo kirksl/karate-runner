@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.8.2",
+  "version": "0.8.3",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -363,17 +363,17 @@
       {
         "command": "karateRunner.tests.run",
         "args": null,
-        "key": "Ctrl+R+1",
-        "linux": "Ctrl+Shift+R+1",
-        "mac": "Cmd+R+1",
+        "key": "Ctrl+R Ctrl+1",
+        "linux": "Ctrl+Shift+R Ctrl+Shift+1",
+        "mac": "Cmd+R Cmd+1",
         "when": "editorTextFocus && editorLangId == karate"
       },
       {
         "command": "karateRunner.tests.runAll",
         "args": null,
-        "key": "Ctrl+R+A",
-        "linux": "Ctrl+Shift+R+A",
-        "mac": "Cmd+R+A",
+        "key": "Ctrl+R Ctrl+A",
+        "linux": "Ctrl+Shift+R Ctrl+Shift+A",
+        "mac": "Cmd+R Cmd+A",
         "when": "editorTextFocus && editorLangId == karate"
       }
     ],
