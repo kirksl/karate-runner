@@ -66,7 +66,7 @@ Please make sure you are using `VSCode Version 1.36.0` or greater. (Required)
 Please make sure you are using `Karate Version 0.9.3` or greater in your Karate projects. (Required)
 Goto the following path to configure this extension `Preferences > Settings > Search for Karate Runner`.
 
-*Note if you are on Windows additionally goto the following path to set `cmd.exe` as your default terminal `Preferences > Settings > Terminal > External: Windows Exec`.  Typically the path for this setting should be `C:\WINDOWS\System32\cmd.exe`.*
+*Note if you are on Windows additionally you need to set `cmd.exe` as your default terminal by opening up a terminal in VSCode, clicking the dropdown in the upper right corner of the terminal view, selecting `Select Default Shell` and selecting `C:\WINDOWS\System32\cmd.exe` in the command palette that opens up.*
 
 ### Debug
 Please make sure you are using `Karate Version 0.9.5` or greater in your Karate projects.  (Required to enable debug mode)
