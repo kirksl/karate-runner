@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.8.3",
+  "version": "0.8.4",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -309,7 +309,7 @@
               "karateCli": {
                 "type": "string",
                 "description": "[karateCli]\n\nThis property specifies the command to start Karate Debug Server.",
-                "default": "java -jar karate.jar -d"
+                "default": "${config:karateRunner.karateJar.commandLineArgs} -d"
               }
             }
           }
@@ -321,7 +321,7 @@
             "request": "launch",
             "feature": "${command:karateRunner.getDebugFile}",
             "karateOptions": "",
-            "karateCli": "java -jar karate.jar -d"
+            "karateCli": "${config:karateRunner.karateJar.commandLineArgs} -d"
           }
         ],
         "configurationSnippets": [
