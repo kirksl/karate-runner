@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.8.4
+Update `Karate: Standalone` Debug Configuration to utilize the same command line specified at `Karate Runner > Karate Jar: Command Line Args` in settings.
+
 ## 0.8.2
 ## 0.8.3
 Fix conflicting `Key Bindings` for `Run Karate Test` and `Run All Karate Tests`.

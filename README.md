@@ -1,7 +1,7 @@
 # Karate Runner
 This extension will enable you to Open/Run/Debug Karate Tests and Build Reports by leveraging Codelens, Activity Bar, Debug and much more.
 
-# 
+
 ## Features
 
 ### Codelens
@@ -58,7 +58,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 
 *Note this is a work in progress as the Karate language grows and custom IDE themes come to market.*
 
-# 
+
 ## Setup
 
 ### General
