@@ -1,6 +1,7 @@
 import ProviderBuildReports from "./providerBuildReports";
 import ProviderKarateTests from "./providerKarateTests";
 import ProviderDebugAdapter from "./providerDebugAdapter";
+import ProviderDebugConfiguration from "./providerDebugConfiguration";
 import ProviderResults from "./providerResults";
 import ProviderExecutions from "./providerExecutions";
 import ProviderStatusBar from "./providerStatusBar";
@@ -21,6 +22,7 @@ export function activate(context: vscode.ExtensionContext)
   let buildReportsProvider = new ProviderBuildReports();
   let karateTestsProvider = new ProviderKarateTests();
   let debugAdapterProvider = new ProviderDebugAdapter();
+  let debugConfigurationProvider = new ProviderDebugConfiguration();
   let resultsProvider = new ProviderResults();
   let executionsProvider = new ProviderExecutions();
   let statusBarProvider = new ProviderStatusBar(context);
@@ -48,6 +50,7 @@ export function activate(context: vscode.ExtensionContext)
   let openFileCommand = vscode.commands.registerCommand("karateRunner.tests.open", openFileInEditor);
 
   let registerDebugAdapterProvider = vscode.debug.registerDebugAdapterDescriptorFactory('karate', debugAdapterProvider);
+  let registerDebugConfigurationProvider = vscode.debug.registerDebugConfigurationProvider('karate', debugConfigurationProvider);
   let registerCodeLensProvider = vscode.languages.registerCodeLensProvider(codeLensTarget, codeLensProvider);
   let registerDefinitionProvider = vscode.languages.registerDefinitionProvider(definitionTarget, definitionProvider);
   //let registerFoldingRangeProvider = vscode.languages.registerFoldingRangeProvider(foldingRangeTarget, foldingRangeProvider);
@@ -137,6 +140,7 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(refreshTestsTreeCommand);
   context.subscriptions.push(openFileCommand);
   context.subscriptions.push(registerDebugAdapterProvider);
+  context.subscriptions.push(registerDebugConfigurationProvider);
   context.subscriptions.push(registerCodeLensProvider);
   context.subscriptions.push(registerDefinitionProvider);
   context.subscriptions.push(resultsProvider);
