@@ -1,13 +1,13 @@
 {
   "name": "karate-runner",
   "displayName": "Karate Runner",
-  "description": "Open/Run/Debug Karate Tests and Build Reports by leveraging Codelens, Activity Bar, Debug and much more.",
+  "description": "Open/Run/Debug Karate Tests and Build Reports by leveraging Codelens, Activity Bar, Debugger and much more.",
   "icon": "resources/karate.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.8.4",
+  "version": "0.8.5",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -314,16 +314,6 @@
             }
           }
         },
-        "initialConfigurations": [
-          {
-            "type": "karate",
-            "name": "Karate (debug): Standalone",
-            "request": "launch",
-            "feature": "${command:karateRunner.getDebugFile}",
-            "karateOptions": "",
-            "karateCli": "${config:karateRunner.karateJar.commandLineArgs} -d"
-          }
-        ],
         "configurationSnippets": [
           {
             "label": "Karate (debug): Maven",
@@ -413,7 +403,10 @@
       {
         "scopeName": "source.js.karate",
         "path": "./syntaxes/karate-js.tmLanguage.json",
-        "injectTo": ["source.js", "source.karate"]
+        "injectTo": [
+          "source.js",
+          "source.karate"
+        ]
       }
     ]
   },
@@ -430,15 +423,15 @@
     "@types/node": "^12.6.9",
     "@types/vscode": "^1.36.0",
     "glob": "^7.1.4",
-    "mocha": "^6.2.0",
-    "tslint": "^5.18.0",
+    "mocha": "^7.1.2",
+    "tslint": "^6.1.2",
     "typescript": "3.5.3",
     "vscode-test": "^1.1.0",
     "js-yaml": "^3.13.1"
   },
   "dependencies": {
     "fs-extra": "^8.1.0",
-    "mkdirp": "^0.5.1",
+    "mkdirp": "^1.0.4",
     "rimraf": "^2.6.3",
     "parse-curl": "0.2.6"
   }
