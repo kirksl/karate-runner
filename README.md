@@ -71,6 +71,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 
 ### Debugger
 
+- To setup from a feature file's Codelens...
 - Click `Karate: Debug` Codelens in any feature file.
 - Click `Karate (debug)` option from popup.
 - Click `Add Configurations` in launch.json to edit configurations if needed.
@@ -87,6 +88,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 
 &nbsp;
 
+- To setup from VSCode Debug/Run Activity...
 - Click `Debug/Run` icon in Activity Bar to open debugger.
 - Click `Gear/Cog` icon at the top.
 - Follow same steps above for setting up from a feature file except for first Codelens step.
