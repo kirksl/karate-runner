@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.8.6
+Add support for `debugPreStep` property to Karate Debug Configurations coming in Karate 0.9.6.
+
 ## 0.8.5
 Open Debug Configuration picker and launch.json if not previously setup when attempting to start a debug session from `Karate: Debug` Codelens.
 
