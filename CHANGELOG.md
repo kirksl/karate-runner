@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.8.7
+Fix issue where feature file and path were not enclosed with double quotes when running with Karate Jar.
+
 ## 0.8.6
 Add support for `debugPreStep` property to Karate Debug Configurations coming in Karate 0.9.6.
 

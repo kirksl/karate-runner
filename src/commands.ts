@@ -302,7 +302,7 @@ async function runKarateTest(args = null)
       return;
     }
 
-    runCommand = `${karateJarArgs} ${karateJarOptions}`;
+    runCommand = `${karateJarArgs} "${karateJarOptions}"`;
   }
 
   let relativePattern = new vscode.RelativePattern(projectRootPath, String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget')));
