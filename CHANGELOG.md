@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.9.0
+Add option to specify command line arguments for Maven and Gradle from settings.  Improve Karate Language coloring.
+
 ## 0.8.9
 ## 0.8.8
 Add busy indicators to Karate Activity Bar icon and to Tests view within Activity Bar when Karate tests are running.  Note this is not applicable when debugging a Karate test.

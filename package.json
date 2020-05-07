@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.8.9",
+  "version": "0.9.0",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -207,7 +207,13 @@
         "karateRunner.karateCli.commandLineArgs": {
           "type": "string",
           "default": "",
-          "description": "Karate Cli command line.  Karate Runner will handle build commands, setting the command line with the feature file being tested and suffixing the feature file with a ':number' when running individual Scenarios.  Only applies when using Maven or Gradle.",
+          "description": "Karate Cli command line.  Karate Cli specific arguments are specified here as defined at https://github.com/intuit/karate/wiki/Debug-Server#karate-options.  Only applies when using Maven or Gradle.",
+          "scope": "resource"
+        },
+        "karateRunner.karateRunner.commandLineArgs": {
+          "type": "string",
+          "default": "",
+          "description": "Karate Runner command line.  Arguments accepted by Maven or Gradle are specified here such as JVM args.  Karate Runner will handle build commands, setting the command line with the feature file being tested and suffixing the feature file with a ':number' when running individual Scenarios.  Only applies when using Maven or Gradle.",
           "scope": "resource"
         },
         "karateRunner.karateRunner.default": {
@@ -329,7 +335,7 @@
               "request": "launch",
               "feature": "^\"\\${command:karateRunner.getDebugFile}\"",
               "karateOptions": "",
-              "karateCli": "^\"mvn test-compile -f \\\"\\${command:karateRunner.getDebugBuildFile}\\\" exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args=\\\"-d\\\" -Dexec.classpathScope=\\\"test\\\"\""
+              "karateCli": "^\"mvn test-compile -f \\\"\\${command:karateRunner.getDebugBuildFile}\\\" exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args=\\\"-d\\\" -Dexec.classpathScope=\\\"test\\\" \\${config:karateRunner.karateRunner.commandLineArgs}\""
             }
           },
           {
@@ -341,7 +347,7 @@
               "request": "launch",
               "feature": "^\"\\${command:karateRunner.getDebugFile}\"",
               "karateOptions": "",
-              "karateCli": "^\"gradle compileTestJava -b \\\"\\${command:karateRunner.getDebugBuildFile}\\\" karateExecute -DmainClass=com.intuit.karate.cli.Main --args=\\\"-d\\\"\""
+              "karateCli": "^\"gradle compileTestJava -b \\\"\\${command:karateRunner.getDebugBuildFile}\\\" karateExecute -DmainClass=com.intuit.karate.cli.Main --args=\\\"-d\\\" \\${config:karateRunner.karateRunner.commandLineArgs}\""
             }
           }
         ]

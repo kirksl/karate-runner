@@ -204,9 +204,12 @@ async function runKarateTest(args = null)
       runPhases = "test";
     }
 
+    let karateRunnerArgs = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('commandLineArgs'));
+  
     if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateCli').get('overrideKarateRunner')))
     {
       let karateCliArgs = String(vscode.workspace.getConfiguration('karateRunner.karateCli').get('commandLineArgs'));
+
       if(karateCliArgs !== undefined && karateCliArgs !== "")
       {
         karateOptions = `${karateCliArgs} ${karateOptions}`
@@ -223,17 +226,18 @@ async function runKarateTest(args = null)
           runPhases = "";
         }
 
-        // mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='${karateOptions}' -Dexec.classpathScope='test'
+        // mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='file.feature' -Dexec.classpathScope='test'
         runCommand = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch} "${runFilePath}"`;
         runCommand += ` exec:java -Dexec.mainClass="com.intuit.karate.cli.Main" -Dexec.args="${karateOptions}"`;
-        runCommand += ` -Dexec.classpathScope="test"`;
+        runCommand += ` -Dexec.classpathScope="test" ${karateRunnerArgs}`;
       }
     
       if(runFilePath.toLowerCase().endsWith(gradleBuildFile))
       {
-        // gradle clean test -b build.gradle karateExecute -DmainClass='com.intuit.karate.cli.Main' --args='-d'
+        // gradle clean test -b build.gradle karateExecute -DmainClass='com.intuit.karate.cli.Main' --args='file.feature'
         runCommand = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch} "${runFilePath}"`;
         runCommand += ` karateExecute -DmainClass="com.intuit.karate.cli.Main" --args="${karateOptions}"`;
+        runCommand += ` ${karateRunnerArgs}`;
       }
     
       if(runCommand === null)
@@ -277,7 +281,7 @@ async function runKarateTest(args = null)
           return;
         }
 
-        runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} -Dkarate.options="${karateOptions}"`;
+        runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} -Dkarate.options="${karateOptions}" ${karateRunnerArgs}`;
       }
   
       if (runFilePath.toLowerCase().endsWith(gradleBuildFile))
@@ -289,7 +293,7 @@ async function runKarateTest(args = null)
           return;
         }
 
-        runCommand = `${runCommandPrefix} "${runFilePath}" --tests ${karateRunner} -Dkarate.options="${karateOptions}"`;
+        runCommand = `${runCommandPrefix} "${runFilePath}" --tests ${karateRunner} -Dkarate.options="${karateOptions}" ${karateRunnerArgs}`;
       }
     }
   }
