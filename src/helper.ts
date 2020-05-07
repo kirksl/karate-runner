@@ -256,7 +256,7 @@ async function getActiveFeatureFile(): Promise<string>
     }
     else
     {
-      let activeFiles: vscode.TextDocument[] = vscode.workspace.textDocuments;
+      let activeFiles: readonly vscode.TextDocument[] = vscode.workspace.textDocuments;
       let activeFeatureFiles = activeFiles.filter(e => e.fileName.toLowerCase().endsWith(".feature"));
 
       if (activeFeatureFiles.length === 1)
