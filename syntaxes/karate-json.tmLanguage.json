@@ -247,8 +247,15 @@
         }
       ]
     },
+    "variable": {
+      "match": "\\b([_$[:alpha:]][_$[:alnum:]]*)\\b",
+      "name": "support.variable.other.karate"
+    },
     "value": {
       "patterns": [
+        {
+          "include": "#variable"
+        },
         {
           "include": "#constant"
         },
