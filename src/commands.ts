@@ -350,7 +350,7 @@ async function runKarateTest(args = null)
   {
     if (e.execution.task.name == 'Karate Runner')
     {
-      task = null;
+      isTaskExecuting = false;
       watcher.dispose();
 
       ProviderExecutions.addExecutionToHistory();
@@ -382,17 +382,19 @@ async function runKarateTest(args = null)
       {
         await new Promise((resolve) =>
         {
-          let interval = setInterval((task) =>
+          let interval = setInterval(() =>
           {
-            if (task == null)
+            if (!isTaskExecuting)
             {
               clearInterval(interval);
               resolve();
             }
-          }, 3000);
+          }, 1000);
         });
       });
   };
+
+  let isTaskExecuting = true;
 
   vscode.tasks.executeTask(task)
   .then(task => showProgress(task));
