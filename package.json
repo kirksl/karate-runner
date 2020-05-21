@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.9.0",
+  "version": "0.9.1",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -320,7 +320,7 @@
               "debugPreStep": {
                 "type": "string",
                 "description": "[debugPreStep]\n\nThis property specifies the command Karate Debug Server should run before resuming execution of the debug session.\nTypically used by Karate-Robot to switch focus to the application under test.",
-                "default": "robot.input(Key.ALT, Key.TAB)"
+                "default": "input(Key.ALT + Key.TAB)"
               }
             }
           }
