@@ -69,8 +69,12 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 ### This Extension
 - Goto the following path to configure all settings for this extension `Preferences > Settings > Search for Karate Runner`.
 
-### Debugger
+### Execution
+- Ensure an `execution option` (`karate.jar`, `pom.xml (Maven)` or `build.gradle (Gradle)`) exists at the root of your project.
+- This extension will detect which `execution option` exists at your project root and execute the appropriate command.
+- Note if multiple `execution options` exist `karate.jar` will be favored and used, followed by `pom.xml (Maven)` and lastly `build.gradle (Gradle)`.
 
+### Debugger
 - To setup from a feature file's Codelens...
 - Click `Karate: Debug` Codelens in any feature file.
 - Click `Karate (debug)` option from popup.
