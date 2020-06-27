@@ -195,6 +195,12 @@ async function runKarateTest(args = null)
 
   if (!runFilePath.toLowerCase().endsWith(standaloneBuildFile))
   {
+    if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildSystem').get('useWrapper')))
+    {
+      mavenCmd = "mvnw";
+      gradleCmd = "gradlew";
+    }
+
     if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildDirectory').get('cleanBeforeEachRun')))
     {
       runPhases = "clean test";

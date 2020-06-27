@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.9.2
+Add option to specify running with or without wrapper for Maven and Gradle from settings.
+
 ## 0.9.1
 Update readme to align with changelog.  Update `debugPreSet` default value to align with new syntax.
 
