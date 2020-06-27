@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.9.1",
+  "version": "0.9.2",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -232,6 +232,12 @@
           "type": "boolean",
           "default": true,
           "description": "Clean build directory before running Karate tests.  Only applies when using Maven or Gradle.",
+          "scope": "resource"
+        },
+        "karateRunner.buildSystem.useWrapper": {
+          "type": "boolean",
+          "default": false,
+          "description": "Use build system wrapper.  Only applies when using Maven or Gradle.",
           "scope": "resource"
         },
         "karateRunner.buildReports.openAfterEachRun": {
