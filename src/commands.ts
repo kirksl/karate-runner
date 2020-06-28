@@ -4,7 +4,7 @@ import ProviderStatusBar from "./providerStatusBar";
 import ProviderExecutions from "./providerExecutions";
 import parse = require('parse-curl');
 import * as vscode from 'vscode';
-
+let os = require('os')
 
 let debugLineNumber: number = 0;
 
@@ -197,8 +197,16 @@ async function runKarateTest(args = null)
   {
     if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildSystem').get('useWrapper')))
     {
-      mavenCmd = "mvnw";
-      gradleCmd = "gradlew";
+      if (os.platform() == 'win32')
+      {
+        mavenCmd = "mvnw";
+        gradleCmd = "gradlew";
+      }
+      else
+      {
+        mavenCmd = "./mvnw";
+        gradleCmd = "./gradlew";
+      }
     }
 
     if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildDirectory').get('cleanBeforeEachRun')))
