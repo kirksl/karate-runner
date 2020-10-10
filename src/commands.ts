@@ -295,7 +295,7 @@ async function runKarateTest(args = null)
           return;
         }
 
-        runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} -Dkarate.options="${karateOptions}" ${karateRunnerArgs}`;
+        runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} "-Dkarate.options=${karateOptions}" ${karateRunnerArgs}`;
       }
   
       if (runFilePath.toLowerCase().endsWith(gradleBuildFile))
