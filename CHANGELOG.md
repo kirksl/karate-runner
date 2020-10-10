@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.9.4
+Update Maven command wrapping `-Dkarate.options=value` in quotes to address issues and guard against spaces in RValue.  Improve Karate Language coloring.
+
 ## 0.9.3
 ## 0.9.2
 Add option to specify running with or without wrapper for Maven and Gradle from settings.
