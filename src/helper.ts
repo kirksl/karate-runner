@@ -36,7 +36,8 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetai
   for (let ndx = filePathArray.length; ndx > 0; ndx--)
   {
     let mavenBuildFile = "pom.xml";
-    let gradleBuildFile = "build.gradle";
+    let gradleBuildGroovyFile = "build.gradle";
+    let gradleBuildKotlinFile = "build.gradle.kts";
     let karateJarFile = "karate.jar";
 
     let runFileTestPath = filePathArray.join(path.sep);
@@ -55,10 +56,16 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetai
       break;
     }
 
-    if (fs.existsSync(runFileTestPath + path.sep + gradleBuildFile))
+    if (fs.existsSync(runFileTestPath + path.sep + gradleBuildGroovyFile))
     {
       projectRootPath = runFileTestPath;
-      runFilePath = runFileTestPath + path.sep + gradleBuildFile;
+      runFilePath = runFileTestPath + path.sep + gradleBuildGroovyFile;
+      break;
+    }
+    if (fs.existsSync(runFileTestPath + path.sep + gradleBuildKotlinFile))
+    {
+      projectRootPath = runFileTestPath;
+      runFilePath = runFileTestPath + path.sep + gradleBuildKotlinFile;
       break;
     }
 

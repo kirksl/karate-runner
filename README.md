@@ -108,11 +108,18 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 ### Gradle (If Applicable)
 - Required for debugger and Karate Cli.
 - Open build.gradle for target project.
-- Add the following task to build.gradle.
+- Add the following task to `build.gradle`:
     ```java
     task karateExecute(type: JavaExec) {
         classpath = sourceSets.test.runtimeClasspath
         main = System.properties.getProperty('mainClass')
+    }
+    ```
+- If your are using kotlin dsl, add the following task definition instead:
+    ```java
+    tasks.register<JavaExec>("karateExecute") {
+        classpath = sourceSets.test.get().runtimeClasspath
+        main = System.getProperty("mainClass")
     }
     ```
 
