@@ -62,6 +62,7 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetai
       runFilePath = runFileTestPath + path.sep + gradleBuildGroovyFile;
       break;
     }
+    
     if (fs.existsSync(runFileTestPath + path.sep + gradleBuildKotlinFile))
     {
       projectRootPath = runFileTestPath;
