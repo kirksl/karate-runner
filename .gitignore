@@ -2,3 +2,5 @@
 out
 node_modules
 karate-runner-*.vsix
+.idea
+.vscode-test

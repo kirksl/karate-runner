@@ -174,7 +174,8 @@ async function runKarateTest(args = null)
   let mavenCmd = "mvn";
   let gradleCmd = "gradle";
   let mavenBuildFile = "pom.xml";
-  let gradleBuildFile = "build.gradle";
+  let gradleGroovyBuildFile = "build.gradle";
+  let gradleKotlinBuildFile = "build.gradle.kts";
   let standaloneBuildFile = "karate.jar";
   let mavenBuildFileSwitch = "-f";
   let gradleBuildFileSwitch = "-b";
@@ -246,7 +247,7 @@ async function runKarateTest(args = null)
         runCommand += ` -Dexec.classpathScope="test" ${karateRunnerArgs}`;
       }
     
-      if(runFilePath.toLowerCase().endsWith(gradleBuildFile))
+      if(runFilePath.toLowerCase().endsWith(gradleGroovyBuildFile)|| runFilePath.toLowerCase().endsWith(gradleKotlinBuildFile))
       {
         // gradle clean test -b build.gradle karateExecute -DmainClass='com.intuit.karate.cli.Main' --args='file.feature'
         runCommand = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch} "${runFilePath}"`;
@@ -298,7 +299,7 @@ async function runKarateTest(args = null)
         runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} "-Dkarate.options=${karateOptions}" ${karateRunnerArgs}`;
       }
   
-      if (runFilePath.toLowerCase().endsWith(gradleBuildFile))
+      if (runFilePath.toLowerCase().endsWith(gradleGroovyBuildFile)|| runFilePath.toLowerCase().endsWith(gradleKotlinBuildFile))
       {
         runCommandPrefix = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch}`;
 

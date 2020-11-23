@@ -70,9 +70,9 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 - Goto the following path to configure all settings for this extension `Preferences > Settings > Search for Karate Runner`.
 
 ### Execution
-- Ensure an `execution option` (`karate.jar`, `pom.xml (Maven)` or `build.gradle (Gradle)`) exists at the root of your project.
+- Ensure an `execution option` (`karate.jar`, `pom.xml (Maven)`, `build.gradle (Gradle Groovy)`, `build.gradle.kts (Gradle Kotlin)`) exists at the root of your project.
 - This extension will detect which `execution option` exists at your project root and execute the appropriate command.
-- Note if multiple `execution options` exist `karate.jar` will be favored and used, followed by `pom.xml (Maven)` and lastly `build.gradle (Gradle)`.
+- Note if multiple `execution options` exist `karate.jar` will be favored and used first, followed by `pom.xml (Maven)`, then `build.gradle (Gradle Groovy)` and lastly `build.gradle.kts (Gradle Kotlin)`.
 
 ### Debugger
 - To setup from a feature file's Codelens...
@@ -106,13 +106,23 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 - See `### Gradle` section at the bottom if applicable.
 
 ### Gradle (If Applicable)
-- Required for debugger and Karate Cli.
-- Open build.gradle for target project.
-- Add the following task to build.gradle.
+- Required for Debugger and Karate Cli.
+- If using Groovy DSL:
+  - Open `build.gradle` for target project.
+  - Add the following task to `build.gradle`:
     ```java
     task karateExecute(type: JavaExec) {
         classpath = sourceSets.test.runtimeClasspath
         main = System.properties.getProperty('mainClass')
+    }
+    ```
+- If using Kotlin DSL:
+  - Open `build.gradle.kts` for target project.
+  - Add the following task to `build.gradle.kts`:
+    ```java
+    tasks.register<JavaExec>("karateExecute") {
+        classpath = sourceSets.test.get().runtimeClasspath
+        main = System.getProperty("mainClass")
     }
     ```
 

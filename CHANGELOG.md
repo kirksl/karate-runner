@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.9.5
+Add support for Gradle using Kotlin DSL syntax.
+
 ## 0.9.4
 Update Maven command wrapping `-Dkarate.options=value` in quotes to address issues and guard against spaces in RValue.  Improve Karate Language coloring.
 
