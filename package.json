@@ -49,6 +49,10 @@
         {
           "id": "karate-tests",
           "name": "Tests"
+        },
+        {
+          "id": "karate-network-logs",
+          "name": "Karate Network Logs"
         }
       ]
     },
@@ -80,6 +84,14 @@
       {
         "command": "karateRunner.buildReports.refreshTree",
         "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
+        }
+      },
+      {
+        "command": "karateRunner.karateNetworkLogs.clearTree",
+        "title": "Clear",
         "icon": {
           "light": "resources/light/refresh.svg",
           "dark": "resources/dark/refresh.svg"
@@ -173,6 +185,11 @@
           "command": "karateRunner.tests.displayDeep",
           "when": "view == karate-tests && config.karateRunner.tests.activityBarDisplayType == Shallow",
           "group": "navigation@2"
+        },
+        {
+          "command": "karateRunner.karateNetworkLogs.clearTree",
+          "when": "view == karate-network-logs",
+          "group": "navigation@1"
         }
       ],
       "view/item/context": [
@@ -288,6 +305,12 @@
             "Deep"
           ],
           "description": "Display Karate tests as a flat list (Shallow) or natural directory structure (Deep) within Activity Bar.",
+          "scope": "resource"
+        },
+        "karateRunner.logsServerSocketAppender.port": {
+          "type": "number",
+          "default": 9999,
+          "description": "LogsServerSocketAppender port.",
           "scope": "resource"
         }
       }

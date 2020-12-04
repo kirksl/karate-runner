@@ -7,6 +7,8 @@ import ProviderExecutions from "./providerExecutions";
 import ProviderStatusBar from "./providerStatusBar";
 import ProviderCodeLens from "./providerCodeLens";
 import ProviderDefinition from "./providerDefinition";
+import KarateNetworkLogsProvider from './KarateNetworkLogsProvider';
+import LogsServerSocketAppender  from './LogsServerSocketAppender';
 import HoverRunDebugProvider from './HoverRunDebugProvider';
 //import ProviderFoldingRange from "./providerFoldingRange";
 import { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor } from "./commands";
@@ -16,6 +18,7 @@ let buildReportsTreeView = null;
 let karateTestsTreeView = null;
 let buildReportsWatcher = null;
 let karateTestsWatcher = null;
+let karateNetworkTreeView = null;
 
 
 export function activate(context: vscode.ExtensionContext)
@@ -60,6 +63,18 @@ export function activate(context: vscode.ExtensionContext)
   karateTestsTreeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: karateTestsProvider });
 
   const registerHoverRunDebugProvider = vscode.languages.registerHoverProvider(codeLensTarget, new HoverRunDebugProvider(context));
+  const karateNetworkLogsProvider = new KarateNetworkLogsProvider();
+  const clearNetworkLogsTreeCommand = vscode.commands.registerCommand('karateRunner.karateNetworkLogs.clearTree', () => karateNetworkLogsProvider.clear());
+  const logsServerSocketAppender = new LogsServerSocketAppender(data => karateNetworkLogsProvider.processLoggingEvent(data));
+  karateNetworkTreeView = vscode.window.createTreeView('karate-network-logs', {
+    showCollapseAll: true,
+    treeDataProvider: karateNetworkLogsProvider,
+  });
+  const logsServerPort: number = vscode.workspace.getConfiguration('karateRunner.logsServerSocketAppender').get('port');
+  if (logsServerPort) {
+    logsServerSocketAppender.start(logsServerPort);
+  }
+
   setupWatcher(
     buildReportsWatcher,
     String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget')),
@@ -125,6 +140,14 @@ export function activate(context: vscode.ExtensionContext)
         karateTestsProvider
       )
     }
+
+    const port: number = vscode.workspace.getConfiguration('karateRunner.logsServerSocketAppender').get('port');
+    if (logsServerSocketAppender.port !== port) {
+      logsServerSocketAppender.stop();
+      if (port) {
+        logsServerSocketAppender.start(port);
+      }
+    }
   });
 
   context.subscriptions.push(smartPasteCommand);
@@ -148,6 +171,8 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(resultsProvider);
   //context.subscriptions.push(registerFoldingRangeProvider);
   context.subscriptions.push(registerHoverRunDebugProvider);
+  context.subscriptions.push(karateNetworkTreeView);
+  context.subscriptions.push(clearNetworkLogsTreeCommand);
 }
 
 export function deactivate()
@@ -156,6 +181,7 @@ export function deactivate()
   karateTestsTreeView.dispose();
   buildReportsWatcher.dispose();
   karateTestsWatcher.dispose();
+  karateNetworkTreeView.dispose();
 }
 
 function setupWatcher(watcher, watcherGlob, provider)
