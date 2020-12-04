@@ -7,6 +7,7 @@ import ProviderExecutions from "./providerExecutions";
 import ProviderStatusBar from "./providerStatusBar";
 import ProviderCodeLens from "./providerCodeLens";
 import ProviderDefinition from "./providerDefinition";
+import HoverRunDebugProvider from './HoverRunDebugProvider';
 //import ProviderFoldingRange from "./providerFoldingRange";
 import { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor } from "./commands";
 import * as vscode from 'vscode';
@@ -58,6 +59,7 @@ export function activate(context: vscode.ExtensionContext)
   buildReportsTreeView = vscode.window.createTreeView('karate-reports', { showCollapseAll: true, treeDataProvider: buildReportsProvider });
   karateTestsTreeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: karateTestsProvider });
 
+  const registerHoverRunDebugProvider = vscode.languages.registerHoverProvider(codeLensTarget, new HoverRunDebugProvider(context));
   setupWatcher(
     buildReportsWatcher,
     String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget')),
@@ -145,6 +147,7 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(registerDefinitionProvider);
   context.subscriptions.push(resultsProvider);
   //context.subscriptions.push(registerFoldingRangeProvider);
+  context.subscriptions.push(registerHoverRunDebugProvider);
 }
 
 export function deactivate()
