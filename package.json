@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.9.5",
+  "version": "0.9.6",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -248,7 +248,7 @@
         },
         "karateRunner.buildReports.toTarget": {
           "type": "string",
-          "default": "**/{jacoco/test/html/index,cucumber-html-reports/overview-features,surefire-reports/timeline}.htm*",
+          "default": "**/{karate-reports/karate-*,**/gatling/*/index,lcov-report/index,jacoco/test/html/index,jacoco/index,cucumber-html-reports/overview-features,surefire-reports/timeline}.htm*",
           "description": "Display reports targeted by glob pattern within Activity Bar.",
           "scope": "resource"
         },

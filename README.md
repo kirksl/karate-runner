@@ -9,6 +9,8 @@ A `Karate: Run` `Codelens` will be added above each `Feature:`, `Scenario:` and 
 
 A `Karate: Debug` `Codelens` will be added above each `Feature:`, `Scenario:` and `Scenario Outline:` keyword within each Karate feature file.  Clicking on this Codelens for a Feature test will debug all Scenario and Scenario Outlines within the target feature file.  Clicking on this Codelens for a Scenario or Scenario Outline test will debug only that Scenario or Scenario Outline.
 
+A `Karate: Run | Karate: Debug` `Codelens` will be shown when hovering over any row within a `Scenario Outline:` `Examples:` table to enable running individual tests.
+
 ### Activity Bar
 A `Karate Activity Bar` will be added to VSCode.  Clicking on the Activity Bar will reveal a `Build Reports` and a `Tests` view.  Clicking on a report will open it within the default program defined for its file type.  Clicking on a Feature test will run all Scenario and Scenario Outlines within the target feature file.  Clicking on a Scenario or Scenario Outline test will run only that Scenario or Scenario Outline.
 
@@ -56,7 +58,10 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 ### Syntax Highlighting
 `Syntax Highlighting` will be added to enable bracket pairing and coloring for the Karate language within .feature files.  Additionally coloring will be enhanced within .js files to support Karate language integration.
 
-*Note this is a work in progress as the Karate language grows and custom IDE themes come to market.*
+*Note this is a work in progress as the Karate language evolves and custom IDE themes come to market.*
+
+### Intellisense
+`Intellisense` will be added to the Karate `read()` command to enumerate all files in the same directory.  Additionally if `<project root>/src/test/java`,  `<project root>/src/test/resources` exist, all files within those directories will be enumerated.
 
 
 ## Setup
@@ -105,6 +110,10 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 - Note this extension will handle all Maven and Gradle commands and specifying the feature file(and line number if needed).
 - See `### Gradle` section at the bottom if applicable.
 
+### Karate Jar
+- Open `Preferences > Settings > Search for Karate Runner`.
+- [Configure](https://github.com/intuit/karate/tree/master/karate-netty#standalone-jar) the Karate Standalone Jar by setting `Karate Runner > Karate Jar: Command Line Args`.
+
 ### Gradle (If Applicable)
 - Required for Debugger and Karate Cli.
 - If using Groovy DSL:
@@ -125,10 +134,3 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
         main = System.getProperty("mainClass")
     }
     ```
-
-### Windows (If applicable)
-- Required as only `cmd.exe` is supported on Windows.
-- Open a terminal in VSCode.
-- Click dropdown in terminal (typically located in the upper right).
-- Click `Select Default Shell`.
-- Click `Command Prompt` in the popup.

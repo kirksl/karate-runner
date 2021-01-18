@@ -344,7 +344,13 @@ async function runKarateTest(args = null)
     }
   });
 
-  let seo: vscode.ShellExecutionOptions = { cwd: projectRootPath }
+  let seo: vscode.ShellExecutionOptions = { cwd: projectRootPath };
+  if (os.platform() == 'win32')
+  {
+    seo.executable = "cmd.exe";
+    seo.shellArgs = ["/d", "/c"];
+  }
+
   let exec = new vscode.ShellExecution(runCommand, seo);
   let task = new vscode.Task
     (
@@ -393,24 +399,24 @@ async function runKarateTest(args = null)
   let showProgress = (task: vscode.TaskExecution) =>
   {
     vscode.window.withProgress(
+    {
+      location: { viewId: 'karate-tests' },
+      cancellable: false
+    },
+    async (progress) =>
+    {
+      await new Promise<void>((resolve) =>
       {
-        location: { viewId: 'karate-tests' },
-        cancellable: false
-      },
-      async (progress) =>
-      {
-        await new Promise((resolve) =>
+        let interval = setInterval(() =>
         {
-          let interval = setInterval(() =>
+          if (!isTaskExecuting)
           {
-            if (!isTaskExecuting)
-            {
-              clearInterval(interval);
-              resolve();
-            }
-          }, 1000);
-        });
+            clearInterval(interval);
+            resolve();
+          }
+        }, 1000);
       });
+    });
   };
 
   let isTaskExecuting = true;

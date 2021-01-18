@@ -20,7 +20,7 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
         }
         else
         {
-          projectRootPath = vscode.workspace.rootPath;
+          projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
         }
   
         let relativePattern = new vscode.RelativePattern(projectRootPath, '**/karate-debug-port.txt');
