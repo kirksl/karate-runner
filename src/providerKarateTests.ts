@@ -105,7 +105,7 @@ namespace _ {
 	{
 		return new Promise<boolean>((resolve, reject) =>
 		{
-			fs.exists(path, exists => handleResult(resolve, reject, null, exists));
+			fs.access(path, fs.constants.F_OK, error => handleResult(resolve, reject, error, void 0));
 		});
 	}
 

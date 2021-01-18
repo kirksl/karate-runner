@@ -7,8 +7,10 @@ import ProviderExecutions from "./providerExecutions";
 import ProviderStatusBar from "./providerStatusBar";
 import ProviderCodeLens from "./providerCodeLens";
 import ProviderDefinition from "./providerDefinition";
-import HoverRunDebugProvider from './HoverRunDebugProvider';
+import ProviderHoverRunDebug from './providerHoverRunDebug';
+import ProviderCompletionItem from './providerCompletionItem';
 //import ProviderFoldingRange from "./providerFoldingRange";
+
 import { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor } from "./commands";
 import * as vscode from 'vscode';
 
@@ -29,11 +31,11 @@ export function activate(context: vscode.ExtensionContext)
   let statusBarProvider = new ProviderStatusBar(context);
   let codeLensProvider = new ProviderCodeLens();
   let definitionProvider = new ProviderDefinition();
+  let hoverRunDebugProvider = new ProviderHoverRunDebug(context);
+  let completionItemProvider = new ProviderCompletionItem();
   //let foldingRangeProvider = new ProviderFoldingRange();
   
-  let codeLensTarget = { language: "karate", scheme: "file" };
-  let definitionTarget = { language: "karate", scheme: "file" };
-  //let foldingRangeTarget = { language: "karate", scheme: "file" };
+  let karateFile = { language: "karate", scheme: "file" };
 
   let smartPasteCommand = vscode.commands.registerCommand('karateRunner.paste', smartPaste);
   let getDebugFileCommand = vscode.commands.registerCommand("karateRunner.getDebugFile", getDebugFile);
@@ -52,14 +54,15 @@ export function activate(context: vscode.ExtensionContext)
 
   let registerDebugAdapterProvider = vscode.debug.registerDebugAdapterDescriptorFactory('karate', debugAdapterProvider);
   let registerDebugConfigurationProvider = vscode.debug.registerDebugConfigurationProvider('karate', debugConfigurationProvider);
-  let registerCodeLensProvider = vscode.languages.registerCodeLensProvider(codeLensTarget, codeLensProvider);
-  let registerDefinitionProvider = vscode.languages.registerDefinitionProvider(definitionTarget, definitionProvider);
-  //let registerFoldingRangeProvider = vscode.languages.registerFoldingRangeProvider(foldingRangeTarget, foldingRangeProvider);
+  let registerCodeLensProvider = vscode.languages.registerCodeLensProvider(karateFile, codeLensProvider);
+  let registerDefinitionProvider = vscode.languages.registerDefinitionProvider(karateFile, definitionProvider);
+  let registerProviderHoverRunDebug = vscode.languages.registerHoverProvider(karateFile, hoverRunDebugProvider);
+  let registerCompletionItemProvider = vscode.languages.registerCompletionItemProvider(karateFile, completionItemProvider, ...['\'', '\"']);
+  //let registerFoldingRangeProvider = vscode.languages.registerFoldingRangeProvider(karateFile, foldingRangeProvider);
 
   buildReportsTreeView = vscode.window.createTreeView('karate-reports', { showCollapseAll: true, treeDataProvider: buildReportsProvider });
   karateTestsTreeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: karateTestsProvider });
 
-  const registerHoverRunDebugProvider = vscode.languages.registerHoverProvider(codeLensTarget, new HoverRunDebugProvider(context));
   setupWatcher(
     buildReportsWatcher,
     String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget')),
@@ -146,8 +149,9 @@ export function activate(context: vscode.ExtensionContext)
   context.subscriptions.push(registerCodeLensProvider);
   context.subscriptions.push(registerDefinitionProvider);
   context.subscriptions.push(resultsProvider);
+  context.subscriptions.push(registerProviderHoverRunDebug);
+  context.subscriptions.push(registerCompletionItemProvider);
   //context.subscriptions.push(registerFoldingRangeProvider);
-  context.subscriptions.push(registerHoverRunDebugProvider);
 }
 
 export function deactivate()

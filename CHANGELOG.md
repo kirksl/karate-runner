@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.9.6
+Add option to run or debug individual tests within `Examples` table for `Scenario Outline`.  Hover over any row in Examples table to display `Karate: Run | Karate: Debug` codelens.  Add intellisense for Karate `read()` command to enumerate files in the same directory and within `<project root>/src/test/java`, `<project root>/src/test/resources`.  Remove requirement to set VSCode terminal to cmd.exe on Windows.  Task runner will always use cmd.exe regardless of user selection.
+
 ## 0.9.5
 Add support for Gradle using Kotlin DSL syntax.
 
