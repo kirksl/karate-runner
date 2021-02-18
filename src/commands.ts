@@ -444,9 +444,45 @@ function displayReportsTree(displayType)
   vscode.workspace.getConfiguration().update('karateRunner.buildReports.activityBarDisplayType', displayType);
 }
 
+async function filterReportsTree()
+{
+  let filter = null;
+
+  filter = await vscode.window.showInputBox
+  (
+    {
+      prompt: "Build Reports Filter (e.g. text, **/*.html)",
+      value: String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget'))
+    }
+  );
+
+  if (filter !== undefined && filter !== "")
+  {
+    await vscode.workspace.getConfiguration().update('karateRunner.buildReports.toTarget', filter);
+  }
+}
+
 function displayTestsTree(displayType)
 {
   vscode.workspace.getConfiguration().update('karateRunner.tests.activityBarDisplayType', displayType);
+}
+
+async function filterTestsTree()
+{
+  let filter = null;
+
+  filter = await vscode.window.showInputBox
+  (
+    {
+      prompt: "Tests Filter (e.g. text, **/*.feature)",
+      value: String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTarget'))
+    }
+  );
+
+  if (filter !== undefined && filter !== "")
+  {
+    await vscode.workspace.getConfiguration().update('karateRunner.tests.toTarget', filter);
+  }
 }
 
 function openBuildReport(reportUri)
@@ -460,4 +496,9 @@ function openFileInEditor(args)
   vscode.window.showTextDocument(fileUri);
 }
 
-export { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, displayReportsTree, displayTestsTree, openBuildReport, openFileInEditor };
+function openKarateSettings()
+{
+  vscode.commands.executeCommand( 'workbench.action.openSettings', 'Karate Runner' );
+}
+
+export { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, displayReportsTree, filterReportsTree, displayTestsTree, filterTestsTree, openBuildReport, openFileInEditor, openKarateSettings };

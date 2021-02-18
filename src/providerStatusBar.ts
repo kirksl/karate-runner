@@ -19,12 +19,12 @@ class ProviderStatusBar
     context.subscriptions.push(ProviderStatusBar.statusBarItem);
     context.subscriptions.push(ProviderStatusBar.statusBarCommand);
 
-    ProviderResults.onResultsJson((json) => { ProviderStatusBar.setFromResults(json); });
+    ProviderResults.onSummaryResults((json) => { ProviderStatusBar.setFromResults(json); });
   }
 
   public static set(passed, failed, tooltip)
   {
-    ProviderStatusBar.statusBarItem.text = `Karate $(check) ${passed} $(bug) ${failed}`;
+    ProviderStatusBar.statusBarItem.text = `Karate $(pass) ${passed} $(error) ${failed}`;
     ProviderStatusBar.statusBarItem.tooltip = tooltip;
     ProviderStatusBar.statusBarItem.show();
   }
@@ -37,7 +37,16 @@ class ProviderStatusBar
   private static setFromResults(json)
   {
     let resultsTime: string = `${json.lastModified}`;
-    let resultsStats: string = `Features: ${json.features} | Scenarios: ${json.scenarios} | Passed: ${json.passed} | Failed: ${json.failed} | Elapsed: ${(json.elapsedTime/1000).toFixed(2)}`;
+    let resultsStats: string;
+    
+    if ("featuresPassed" in json)
+    {
+      resultsStats = `Features: ${json.featuresPassed + json.featuresFailed} | Scenarios: ${json.scenariosPassed + json.scenariosfailed} | Passed: ${json.scenariosPassed} | Failed: ${json.scenariosfailed} | Elapsed: ${(json.elapsedTime/1000).toFixed(2)}`;
+    }
+    else
+    {
+      resultsStats = `Features: ${json.features} | Scenarios: ${json.scenarios} | Passed: ${json.passed} | Failed: ${json.failed} | Elapsed: ${(json.elapsedTime/1000).toFixed(2)}`;
+    }
     
     let resultsClassPath: any = null;
     if(ProviderExecutions.executionArgs !== null && ProviderExecutions.executionArgs.length >= 2)
@@ -54,8 +63,15 @@ class ProviderStatusBar
     {
       tooltip = `${resultsTime}\n${resultsStats}`;
     }
-    
-    ProviderStatusBar.set(json.passed, json.failed, tooltip);
+
+    if ("featuresPassed" in json)
+    {
+      ProviderStatusBar.set(json.scenariosPassed, json.scenariosfailed, tooltip);
+    }
+    else
+    {
+      ProviderStatusBar.set(json.passed, json.failed, tooltip);
+    }
   }
 }
 

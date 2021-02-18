@@ -13,16 +13,16 @@ class ProviderExecutions
 {
     private static executionHistory: IExecutionItem[] = [];
     public static executionArgs: any = null;
-    private static jsonResultsData: any = null;
+    private static summaryResultsData: any = null;
 
     constructor()
     {
-        ProviderResults.onResultsJson((json) => { ProviderExecutions.jsonResultsData = json; });
+        ProviderResults.onSummaryResults((json) => { ProviderExecutions.summaryResultsData = json; });
     }
 
     public static addExecutionToHistory()
     {
-      let json = ProviderExecutions.jsonResultsData;
+      let json = ProviderExecutions.summaryResultsData;
       if(json === null)
       {
         return;
@@ -34,8 +34,21 @@ class ProviderExecutions
       }
 
       let executionDate: string = `${json.lastModified}`;
-      let executionStats: string = `Features: ${json.features} | Scenarios: ${json.scenarios} | Passed: ${json.passed} | Failed: ${json.failed} | Elapsed: ${(json.elapsedTime/1000).toFixed(2)}`;
-      let executionIcon: string = (json.failed > 0) ? `$(bug) [F]` : `$(check) [P]`;
+      let executionStats: string;
+      let executionIcon: string;
+
+      if ("featuresPassed" in json)
+      {
+        executionStats = `Features: ${json.featuresPassed + json.featuresFailed} | Scenarios: ${json.scenariosPassed + json.scenariosfailed} | Passed: ${json.scenariosPassed} | Failed: ${json.scenariosfailed} | Elapsed: ${(json.elapsedTime/1000).toFixed(2)}`;
+        executionIcon = ((json.featuresFailed + json.scenariosfailed) > 0) ? `$(error) [F]` : `$(pass) [P]`;
+      }
+      else
+      {
+        executionStats = `Features: ${json.features} | Scenarios: ${json.scenarios} | Passed: ${json.passed} | Failed: ${json.failed} | Elapsed: ${(json.elapsedTime/1000).toFixed(2)}`;
+        executionIcon = (json.failed > 0) ? `$(error) [F]` : `$(pass) [P]`;
+      }
+
+
       let executionItem: IExecutionItem = 
         {
           executionArgs: ProviderExecutions.executionArgs,
@@ -57,7 +70,7 @@ class ProviderExecutions
 
       ProviderExecutions.executionHistory.unshift(executionItem);
 
-      ProviderExecutions.jsonResultsData = null;
+      ProviderExecutions.summaryResultsData = null;
     }
 
     public static async showExecutionHistory()
