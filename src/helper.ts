@@ -298,4 +298,15 @@ async function getActiveFeatureFile(): Promise<string>
   return activeFeatureFile;
 }
 
-export { getProjectDetail, getTestExecutionDetail, getChildAbsolutePath, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail };
+function createTreeViewWatcher(watcher, watcherGlob, provider)
+{
+  watcher = vscode.workspace.createFileSystemWatcher(watcherGlob);
+
+  watcher.onDidCreate((e) => { provider.refresh() });
+  watcher.onDidChange((e) => { provider.refresh() });
+  watcher.onDidDelete((e) => { provider.refresh() });
+
+  provider.refresh();
+}
+
+export { getProjectDetail, getTestExecutionDetail, getChildAbsolutePath, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail, createTreeViewWatcher };

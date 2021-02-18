@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/kirksl/karate-runner"
   },
-  "version": "0.9.6",
+  "version": "0.9.7",
   "license": "MIT",
   "author": {
     "name": "Kirk Slota"
@@ -86,30 +86,6 @@
         }
       },
       {
-        "command": "karateRunner.tests.refreshTree",
-        "title": "Refresh",
-        "icon": {
-          "light": "resources/light/refresh.svg",
-          "dark": "resources/dark/refresh.svg"
-        }
-      },
-      {
-        "command": "karateRunner.tests.open",
-        "title": "Open In Editor",
-        "icon": {
-          "light": "resources/light/open-file.svg",
-          "dark": "resources/dark/open-file.svg"
-        }
-      },
-      {
-        "command": "karateRunner.tests.runAll",
-        "title": "Run All Tests",
-        "icon": {
-          "light": "resources/light/run-all.svg",
-          "dark": "resources/dark/run-all.svg"
-        }
-      },
-      {
         "command": "karateRunner.buildReports.displayShallow",
         "title": "Display Shallow",
         "icon": {
@@ -123,6 +99,30 @@
         "icon": {
           "light": "resources/light/display-shallow.svg",
           "dark": "resources/dark/display-shallow.svg"
+        }
+      },
+      {
+        "command": "karateRunner.buildReports.filterTree",
+        "title": "Filter",
+        "icon": {
+          "light": "resources/light/filter.svg",
+          "dark": "resources/dark/filter.svg"
+        }
+      },
+      {
+        "command": "karateRunner.tests.clearResultsFromTree",
+        "title": "Clear Results",
+        "icon": {
+          "light": "resources/light/clear-all.svg",
+          "dark": "resources/dark/clear-all.svg"
+        }
+      },
+      {
+        "command": "karateRunner.tests.refreshTree",
+        "title": "Refresh",
+        "icon": {
+          "light": "resources/light/refresh.svg",
+          "dark": "resources/dark/refresh.svg"
         }
       },
       {
@@ -140,6 +140,38 @@
           "light": "resources/light/display-shallow.svg",
           "dark": "resources/dark/display-shallow.svg"
         }
+      },
+      {
+        "command": "karateRunner.tests.filterTree",
+        "title": "Filter",
+        "icon": {
+          "light": "resources/light/filter.svg",
+          "dark": "resources/dark/filter.svg"
+        }
+      },
+      {
+        "command": "karateRunner.tests.openSettings",
+        "title": "Open Settings",
+        "icon": {
+          "light": "resources/light/gear.svg",
+          "dark": "resources/dark/gear.svg"
+        }
+      },
+      {
+        "command": "karateRunner.tests.open",
+        "title": "Open In Editor",
+        "icon": {
+          "light": "resources/light/open-file.svg",
+          "dark": "resources/dark/open-file.svg"
+        }
+      },
+      {
+        "command": "karateRunner.tests.runAll",
+        "title": "Run All Tests",
+        "icon": {
+          "light": "resources/light/run-all.svg",
+          "dark": "resources/dark/run-all.svg"
+        }
       }
     ],
     "menus": {
@@ -147,11 +179,6 @@
         {
           "command": "karateRunner.buildReports.refreshTree",
           "when": "view == karate-reports",
-          "group": "navigation@1"
-        },
-        {
-          "command": "karateRunner.tests.refreshTree",
-          "when": "view == karate-tests",
           "group": "navigation@1"
         },
         {
@@ -165,26 +192,56 @@
           "group": "navigation@2"
         },
         {
+          "command": "karateRunner.buildReports.filterTree",
+          "when": "view == karate-reports",
+          "group": "navigation@3"
+        },
+        {
+          "command": "karateRunner.tests.clearResultsFromTree",
+          "when": "view == karate-tests",
+          "group": "navigation@1"
+        },
+        {
+          "command": "karateRunner.tests.refreshTree",
+          "when": "view == karate-tests",
+          "group": "navigation@2"
+        },
+        {
           "command": "karateRunner.tests.displayShallow",
           "when": "view == karate-tests && config.karateRunner.tests.activityBarDisplayType == Deep",
-          "group": "navigation@2"
+          "group": "navigation@3"
         },
         {
           "command": "karateRunner.tests.displayDeep",
           "when": "view == karate-tests && config.karateRunner.tests.activityBarDisplayType == Shallow",
-          "group": "navigation@2"
+          "group": "navigation@3"
+        },
+        {
+          "command": "karateRunner.tests.filterTree",
+          "when": "view == karate-tests",
+          "group": "navigation@4"
+        },
+        {
+          "command": "karateRunner.tests.openSettings",
+          "when": "view == karate-tests",
+          "group": "navigation@5"
         }
       ],
       "view/item/context": [
         {
-          "command": "karateRunner.tests.open",
-          "when": "view == karate-tests && viewItem == testFile",
+          "command": "karateRunner.tests.runAll",
+          "when": "view == karate-tests && viewItem == testDirectory",
           "group": "inline"
         },
         {
           "command": "karateRunner.tests.runAll",
-          "when": "view == karate-tests && viewItem == testDirectory",
-          "group": "inline"
+          "when": "view == karate-tests && viewItem == testFile",
+          "group": "inline@1"
+        },
+        {
+          "command": "karateRunner.tests.open",
+          "when": "view == karate-tests && viewItem == testFile",
+          "group": "inline@2"
         }
       ]
     },
@@ -440,16 +497,16 @@
     "@types/node": "^12.6.9",
     "@types/vscode": "^1.44.0",
     "glob": "^7.1.4",
+    "js-yaml": "^3.13.1",
     "mocha": "^7.1.2",
     "tslint": "^6.1.2",
     "typescript": "3.5.3",
-    "vscode-test": "^1.1.0",
-    "js-yaml": "^3.13.1"
+    "vscode-test": "^1.1.0"
   },
   "dependencies": {
     "fs-extra": "^8.1.0",
     "mkdirp": "^1.0.4",
-    "rimraf": "^2.6.3",
-    "parse-curl": "0.2.6"
+    "parse-curl": "0.2.6",
+    "rimraf": "^2.6.3"
   }
 }

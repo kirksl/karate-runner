@@ -5,14 +5,16 @@ This extension will enable you to Open/Run/Debug Karate Tests and Build Reports 
 ## Features
 
 ### Codelens
-A `Karate: Run` `Codelens` will be added above each `Feature:`, `Scenario:` and `Scenario Outline:` keyword within each Karate feature file.  Clicking on this Codelens for a Feature test will run all Scenario and Scenario Outlines within the target feature file.  Clicking on this Codelens for a Scenario or Scenario Outline test will run only that Scenario or Scenario Outline.
+A `Karate: Run` `Codelens` will be added above each `Feature:`, `Scenario:` and `Scenario Outline:` keyword within each feature file.  Clicking on a Feature Codelens will run all Scenario and Scenario Outlines within its feature file.  Clicking on a Scenario or Scenario Outline Codelens will run only that Scenario or Scenario Outline.
 
-A `Karate: Debug` `Codelens` will be added above each `Feature:`, `Scenario:` and `Scenario Outline:` keyword within each Karate feature file.  Clicking on this Codelens for a Feature test will debug all Scenario and Scenario Outlines within the target feature file.  Clicking on this Codelens for a Scenario or Scenario Outline test will debug only that Scenario or Scenario Outline.
+A `Karate: Debug` `Codelens` will be added above each `Feature:`, `Scenario:` and `Scenario Outline:` keyword within each feature file.  Clicking on a Feature Codelens will debug all Scenario and Scenario Outlines within its feature file.  Clicking on a Scenario or Scenario Outline Codelens will debug only that Scenario or Scenario Outline.
 
-A `Karate: Run | Karate: Debug` `Codelens` will be shown when hovering over any row within a `Scenario Outline:` `Examples:` table to enable running individual tests.
+A `Karate: Run | Karate: Debug` `Codelens` will be shown when hovering over any row within a `Scenario Outline:` `Examples:` table to enable running/debugging a single row.
 
 ### Activity Bar
-A `Karate Activity Bar` will be added to VSCode.  Clicking on the Activity Bar will reveal a `Build Reports` and a `Tests` view.  Clicking on a report will open it within the default program defined for its file type.  Clicking on a Feature test will run all Scenario and Scenario Outlines within the target feature file.  Clicking on a Scenario or Scenario Outline test will run only that Scenario or Scenario Outline.
+A `Karate Activity Bar` will be added to VSCode.  Clicking on the Activity Bar will reveal a `Build Reports` and a `Tests` view.  Clicking on a report will open it within the default program defined for its file type.  Clicking on a Feature will run all Scenario and Scenario Outlines within its feature file.  Clicking on a Scenario or Scenario Outline will run only that Scenario or Scenario Outline.
+
+*Note icons are now shown in the `Tests` view to reflect pass/fail state.  This feature is dependent on Karate Version >= 1.0 and Karate providing result files under the root of your project within a /karate-reports directory.  Each file must end with a format of `.karate-json.txt`.*
 
 *Note Karate Features and Scenarios marked with exclusions such as `@KarateOptions(tags = {"~@ignore"})` will not be run.*
 
@@ -25,12 +27,14 @@ A `Smart Paste` option will be added to detect paste operations into feature fil
 ### Status Bar
 A `Karate Status Bar` will be added to VSCode showing execution results.  Clicking `Karate Status Bar` will reveal historical results executed from `Codelens` or `Karate Activity Bar`.  Clicking historical results will re-execute the command which produced those results.
 
-*Note this feature is dependent on Karate providing a results file called results-json.txt typically found under /build directory/surefire-reports*
+*Note this feature is dependent on Karate providing a results file under the root of your project.*
+*For Karate Version < 1.0 a file called results-json.txt*
+*For Karate Version >= 1.0 a file called karate-summary-json.txt*
 
 ### Peek
 A `Peek` option will be added to the `Control-Click` or `Right-Click` context menu in the VSCode Editor.  Clicking `Peek > Peek Definition` on a string or reference (or any combination of if concat'd) which equates to an existing file will display the contents of that file within an `Inline Peek Editor`.  
 
-*Note if the path being peeked starts with classpath: this extension will search recursively within the target project to find the file, searching first within /project root/src/test, followed by /project root/src and ending with /project root/*
+*Note if the path being peeked starts with classpath: this extension will search recursively within the target project to find the file, searching first within `<project root>/src/test`, followed by `<project root>/src` and ending with `<project root>/`*
 
 ### Key Bindings
 `Key Bindings` will be added to enable running Karate tests and Smart Paste from the keyboard.
@@ -70,9 +74,10 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 - `VSCode Version 1.44.0` or greater. (Required)
 - `Karate Version 0.9.3` or greater in your Karate projects. (Required)
 - `Karate Version 0.9.5` or greater in your Karate projects. (Required for Debugger or Karate Cli)
+- `Karate Version 1.0.0` or greater in your Karate projects. (Required for Tests View results)
 
 ### This Extension
-- Goto the following path to configure all settings for this extension `Preferences > Settings > Search for Karate Runner`.
+- Goto the following path to configure all settings for this extension `Preferences > Settings > Search for Karate Runner` or click the gear icon in the header of the Tests View.
 
 ### Execution
 - Ensure an `execution option` (`karate.jar`, `pom.xml (Maven)`, `build.gradle (Gradle Groovy)`, `build.gradle.kts (Gradle Kotlin)`) exists at the root of your project.
