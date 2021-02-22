@@ -243,7 +243,11 @@ class Feature
             {
                 let deref = this.dereferenceToken(tokens[ndx]);
 
-                if (deref === null) { return null; }
+                if (deref === null && ndx < tokens.length) {
+                    continue;
+                } else if (deref === null) {
+                    return null;
+                }
 
                 let lTokens = this.getLineTokens(deref);
                 let position: vscode.Position = new vscode.Position(0, deref.text.length);

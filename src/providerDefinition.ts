@@ -108,6 +108,15 @@ class ProviderDefinition implements vscode.DefinitionProvider
             {
                 return uriPath;
             }
+            
+            let workspaceFolders = vscode.workspace.workspaceFolders;
+            for (var i = 0; i < workspaceFolders.length; i ++) {
+                let workspaceUriPath = path.join(workspaceFolders[i].uri.fsPath, normalizedPath);
+                if (fs.existsSync(workspaceUriPath) && fs.lstatSync(workspaceUriPath).isFile())
+                {
+                    return workspaceUriPath;
+                }
+            }
         }
         
         return null;

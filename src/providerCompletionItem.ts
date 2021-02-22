@@ -35,7 +35,7 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
             return completionItems;
         }
 
-        const getGlobals = (baseDir, subDir, completionItems) =>
+        const getGlobals = (baseDir, subDir, completionItems, includeClassPath) =>
         {
             subDir = subDir || '';
 
@@ -46,7 +46,7 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
             {
                 if (fs.statSync(searchDir + path.sep + file).isDirectory())
                 {
-                    completionItems = getGlobals(baseDir, subDir + path.sep + file, completionItems)
+                    completionItems = getGlobals(baseDir, subDir + path.sep + file, completionItems, includeClassPath)
                 }
                 else
                 {
@@ -55,7 +55,7 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
                     {
                         f = f.substring(baseDir.length);
                         f = f.replace(/\\/g, "/");
-                        let ci = new vscode.CompletionItem(`classpath:${f}`, vscode.CompletionItemKind.Text);
+                        let ci = new vscode.CompletionItem(includeClassPath ? `classpath:${f}` : `${f}`, vscode.CompletionItemKind.Text);
                         completionItems.push(ci);
                     }
                 }
@@ -75,14 +75,28 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
         paths[0] = path.join(...[projectRootPath, 'src', 'test', 'java'], path.sep);
         paths[1] = path.join(...[projectRootPath, 'src', 'test', 'resources'], path.sep);
 
+        let workspaceFolders = vscode.workspace.workspaceFolders;
+        for (var i = 0; i < workspaceFolders.length; i ++) {
+            paths.push(path.join(...[projectRootPath, workspaceFolders[i].uri.fsPath], path.sep));
+        }
+
+        let pathFound : boolean = false;
         if (fs.existsSync(paths[0]))
         {
-            completionItems = getGlobals(paths[0], null, completionItems);
+            completionItems = getGlobals(paths[0], null, completionItems, true);
+            pathFound = true;
         }
 
         if (fs.existsSync(paths[1]))
         {
-            completionItems = getGlobals(paths[1], null, completionItems);
+            completionItems = getGlobals(paths[1], null, completionItems, true);
+            pathFound = true;
+        }
+        
+        if (!pathFound) {
+            for (var i = 2; i < paths.length; i ++) {
+                completionItems.push(getGlobals(paths[i], null, completionItems, false));
+            }
         }
 
         if (completionItems.length === 0)
