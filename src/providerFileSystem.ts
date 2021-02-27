@@ -11,7 +11,8 @@ namespace _ {
 		if (error)
 		{
 			reject(messageError(error));
-		} else
+		}
+        else
 		{
 			resolve(result);
 		}
@@ -142,7 +143,9 @@ namespace _ {
 
 export class FileStat implements vscode.FileStat
 {
-	constructor(private fsStat: fs.Stats) { }
+	constructor(private fsStat: fs.Stats)
+    {
+    }
 
 	get type(): vscode.FileType
 	{

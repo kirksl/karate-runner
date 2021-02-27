@@ -14,8 +14,6 @@ A `Karate: Run | Karate: Debug` `Codelens` will be shown when hovering over any 
 ### Activity Bar
 A `Karate Activity Bar` will be added to VSCode.  Clicking on the Activity Bar will reveal a `Build Reports` and a `Tests` view.  Clicking on a report will open it within the default program defined for its file type.  Clicking on a Feature will run all Scenario and Scenario Outlines within its feature file.  Clicking on a Scenario or Scenario Outline will run only that Scenario or Scenario Outline.
 
-*Note icons are now shown in the `Tests` view to reflect pass/fail state.  This feature is dependent on Karate Version >= 1.0 and Karate providing result files under the root of your project within a /karate-reports directory.  Each file must end with a format of `.karate-json.txt`.*
-
 *Note Karate Features and Scenarios marked with exclusions such as `@KarateOptions(tags = {"~@ignore"})` will not be run.*
 
 ### Debugger
@@ -25,11 +23,21 @@ A `Karate Activity Bar` will be added to VSCode.  Clicking on the Activity Bar w
 A `Smart Paste` option will be added to detect paste operations into feature files.  If a `curl` command is detected it will be transformed into Karate syntax and pasted into the VSCode Editor.
 
 ### Status Bar
-A `Karate Status Bar` will be added to VSCode showing execution results.  Clicking `Karate Status Bar` will reveal historical results executed from `Codelens` or `Karate Activity Bar`.  Clicking historical results will re-execute the command which produced those results.
+A `Karate Status Bar` will be added to VSCode showing results for the last execution.  Clicking `Karate Status Bar` will reveal historical results executed from `Codelens` or `Karate Activity Bar`.  Clicking historical results will re-execute the command which produced those results.
 
 *Note this feature is dependent on Karate providing a results file under the root of your project.*
 *For Karate Version < 1.0 a file called results-json.txt*
 *For Karate Version >= 1.0 a file called karate-summary-json.txt*
+
+### Test Results
+Test Results will now be shown next to each test within the `Tests` view and Feature files starting with Karate 1.0.
+Test Results shown next to each test are rolling results meaning they accumulate and reset only when you reset them.
+Test Results are represented by Karate icons showing a green dot (pass) or red dot (fail).
+
+*Note this feature is dependent on Karate Version >= 1.0 and Karate providing result files under the root of your project within a /karate-reports directory.  Each file must end with a format of `.karate-json.txt`.*
+
+### Editor Menu Bar
+A `Karate Menu` will be added to the VSCode Editor Menu Bar for feature files.  A menu option will be added to open Karate Runner settings, clear test results from Tests view and the gutter for feature files and finally to toggle showing test results within the gutter for feature files.
 
 ### Peek
 A `Peek` option will be added to the `Control-Click` or `Right-Click` context menu in the VSCode Editor.  Clicking `Peek > Peek Definition` on a string or reference (or any combination of if concat'd) which equates to an existing file will display the contents of that file within an `Inline Peek Editor`.  

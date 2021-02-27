@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.9.8
+Fix issue where `Inline Peek Editor` failed to discover files when project structure was not Java-based.  Add option to show test results within the gutter for feature files; next to each `Feature:`, `Scenario:` and `Scenario Outline:`.  Add `Karate Menu` to VSCode Editor Menu Bar for feature files.  Add options to `Karate Menu` to open Karate Runner settings, clear test results from Tests view and the gutter for feature files and to toggle showing test results within the gutter for feature files.  Update Tests view within Activity Bar with buttons to run and debug tests.
+
 ## 0.9.7
 Add option to filter Build Reports and Tests views within Activity Bar.  Add option to open Karate Runner settings from Tests view.  Fix random sorting issue in Build Reports and Tests views.  Add icons to show pass/fail state of each Feature/Scenario/Scenario Outline within Tests view.  `Note this feature is dependent on Karate Version >= 1.0 and Karate providing result files under the root of your project within a /karate-reports directory.  Each file must end with a format of .karate-json.txt`  Add option to clear test results from Tests view.  Update execution results and status bar to support Karate 1.0.  `Note this feature is dependent on Karate providing a results file under the root of your project.  For Karate Version < 1.0 a file called results-json.txt.  For Karate Version >= 1.0 a file called karate-summary-json.txt`
 
