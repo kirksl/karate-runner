@@ -474,22 +474,22 @@
 					}
 				},
 				"configurationSnippets": [
-						{
-							"label": "Karate (debug): Maven",
-							"description": "Karate (debug) for a Maven project",
-							"body": {
-								"type": "karate",
-								"name": "Karate (debug): Maven",
-								"request": "launch",
-								"feature": "^\"\\${command:karateRunner.getDebugFile}\"",
-								"karateOptions": "",
-								"karateCli": "^\"mvn test-compile -f \\\"\\${command:karateRunner.getDebugBuildFile}\\\" exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args=\\\"-d\\\" -Dexec.classpathScope=\\\"test\\\" \\${config:karateRunner.karateRunner.commandLineArgs}\""
-							}
-						},
-						{
-							"label": "Karate (debug): Gradle",
-							"description": "Karate (debug) for a Gradle project",
-							"body": {
+					{
+						"label": "Karate (debug): Maven",
+						"description": "Karate (debug) for a Maven project",
+						"body": {
+							"type": "karate",
+							"name": "Karate (debug): Maven",
+							"request": "launch",
+							"feature": "^\"\\${command:karateRunner.getDebugFile}\"",
+							"karateOptions": "",
+							"karateCli": "^\"mvn test-compile -f \\\"\\${command:karateRunner.getDebugBuildFile}\\\" exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args=\\\"-d\\\" -Dexec.classpathScope=\\\"test\\\" \\${config:karateRunner.karateRunner.commandLineArgs}\""
+						}
+					},
+					{
+						"label": "Karate (debug): Gradle",
+						"description": "Karate (debug) for a Gradle project",
+						"body": {
 							"type": "karate",
 							"name": "Karate (debug): Gradle",
 							"request": "launch",
