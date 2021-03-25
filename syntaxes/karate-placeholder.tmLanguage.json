@@ -1,0 +1,30 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"scopeName": "source.placeholder.karate",
+	"injectionSelector": "L:string, L:meta.control.statement",
+	"patterns": [
+		{
+			"include": "#placeholder"
+		}
+	],
+	"repository": {
+        "placeholder": {
+            "patterns": [
+                {
+                  "match": "\\s*(<)([^>\\s]+)(>)\\s*",
+                  "captures": {
+                    "1": {
+                      "name": "punctuation.definition.tag.karate"
+                    },
+                    "2": {
+                      "name": "entity.name.tag.localname.karate"
+                    },
+                    "3": {
+                      "name": "punctuation.definition.tag.karate"
+                    }
+                  }
+                }
+              ]
+        }
+	}
+}

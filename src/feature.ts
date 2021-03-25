@@ -467,7 +467,7 @@ class Feature
 		let variables = ['def', 'text', 'table', 'yaml', 'csv', 'string', 'json', 'xml', 'xmlstring', 'bytes', 'copy'];
 		if (variables.includes(word.toLowerCase())) { return true; }
 
-		let actions = ['assert', 'print', 'replace', 'get', 'set', 'remove', 'configure', 'call', 'callonce', 'eval', 'read', 'karate', 'java.type'];
+		let actions = ['assert', 'print', 'replace', 'get', 'set', 'remove', 'configure', 'call', 'callonce', 'eval', 'listen', 'read', 'karate', 'java.type'];
 		if (actions.includes(word.toLowerCase())) { return true; }
 
 		let https = ['url', 'path', 'request', 'method', 'status', 'soap', 'action', 'retry', 'until', 'soap action', 'retry until'];
@@ -476,11 +476,38 @@ class Feature
 		let requests = ['param', 'params', 'header', 'headers', 'cookie', 'cookies', 'form', 'field', 'fields', 'multipart', 'file', 'files', 'entity', 'form field', 'multipart file', 'multipart field', 'multipart entity', 'form fields', 'multipart files', 'multipart fields'];
 		if (requests.includes(word.toLowerCase())) { return true; }
 
-		let responses = ['response', 'responsebytes', 'responsestatus', 'responseheaders', 'responsecookies', 'responsetime', 'responsetimestamp'];
+		let responses = ['response', 'responsebytes', 'responsestatus', 'responseheaders', 'responsecookies', 'responsetime', 'responsetype', 'responsetimestamp'];
 		if (responses.includes(word.toLowerCase())) { return true; }
 
-		let asserts = ['match', 'contains', '!contains', 'only', 'any', 'each', 'match ==', 'match !=', 'match contains', 'match contains only', 'match contains any', 'match !contains', 'match each', 'match header'];
+		let asserts = ['match', 'contains', '!contains', 'only', 'any', 'each', 'deep', 'match ==', 'match !=', 'match contains', 'match contains only', 'match contains any', 'match contains deep', 'match !contains', 'match each', 'match header'];
 		if (asserts.includes(word.toLowerCase())) { return true; }
+
+        let locators = ['rightof', 'leftof', 'above', 'below', 'near'];
+		if (locators.includes(word.toLowerCase())) { return true; }
+
+        let browser = ['driver.url', 'driver.dimensions', 'refresh', 'reload', 'back', 'forward', 'maximize', 'minimize', 'fullscreen', 'quit'];
+		if (browser.includes(word.toLowerCase())) { return true; }
+
+        let page = ['dialog', 'switchpage', 'switchframe', 'close', 'driver.title', 'screenshot', 'pdf'];
+		if (page.includes(word.toLowerCase())) { return true; }
+
+        let uiactions = ['click', 'input', 'submit', 'focus', 'clear', 'value', 'select', 'scroll', 'mouse', 'highlight', 'highlightall'];
+		if (uiactions.includes(word.toLowerCase())) { return true; }
+
+        let state = ['html', 'text', 'value', 'attribute', 'enabled', 'exists', 'optional', 'locate', 'locateall', 'position'];
+        if (state.includes(word.toLowerCase())) { return true; }
+
+        let wait = ['retry', 'waitfor', 'waitforany', 'waitforurl', 'waitfortext', 'waitforenabled', 'waitforresultcount', 'waituntil', 'delay', 'script', 'scriptall'];
+        if (wait.includes(word.toLowerCase())) { return true; }
+
+        let cookies = ['cookie', 'driver.cookies', 'deletecookie', 'clearcookies']
+        if (cookies.includes(word.toLowerCase())) { return true; }
+
+        let chrome = ['driver.pdf', 'driver.screenshotfull', 'driver.intercept', 'driver.inputfile', 'driver.emulatedevice', 'driver.scriptawait'];
+        if (chrome.includes(word.toLowerCase())) { return true; }
+
+        let appium = ['driver.startrecordingscreen', 'driver.saverecordingscreen', 'driver.hidekeyboard'];
+        if (appium.includes(word.toLowerCase())) { return true; }
 
 		if (word.startsWith('<') && word.endsWith('>')) { return true; }
 

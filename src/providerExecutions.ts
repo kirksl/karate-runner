@@ -54,7 +54,7 @@ class ProviderExecutions
 			quickPickItem:
 			{
 				label: `${executionIcon} ${executionDate}`,
-				description: ProviderExecutions.executionArgs[1],
+				description: ProviderExecutions.executionArgs.karateJarOptions,
 				detail: `${executionStats}`
 			}
 		};
@@ -93,7 +93,7 @@ class ProviderExecutions
 			try
 			{
 				let execution = ProviderExecutions.executionHistory.filter((item) => item.quickPickItem.label == quickPickExecution.label);
-				runKarateTest(execution[0].executionArgs);
+				runKarateTest([execution[0].executionArgs]);
 			}
 			catch(e)
 			{

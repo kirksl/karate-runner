@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "0.9.8",
+	"version": "0.9.9",
 	"license": "MIT",
 	"author": {
 		"name": "Kirk Slota"
@@ -558,6 +558,13 @@
 				"language": "karate-json",
 				"scopeName": "source.json.karate",
 				"path": "./syntaxes/karate-json.tmLanguage.json"
+			},
+			{
+				"scopeName": "source.placeholder.karate",
+				"path": "./syntaxes/karate-placeholder.tmLanguage.json",
+				"injectTo": [
+					"source.karate"
+				]
 			},
 			{
 				"scopeName": "source.js.karate",
