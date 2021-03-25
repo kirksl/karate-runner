@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 0.9.9
+Improve Karate Language support.  Fix issue where status bar and historical execution results fail to show classpath and re-execute tests.
+
 ## 0.9.8
 Fix issue where `Inline Peek Editor` failed to discover files when project structure was not Java-based.  Add option to show test results within the gutter for feature files; next to each `Feature:`, `Scenario:` and `Scenario Outline:`.  Add `Karate Menu` to VSCode Editor Menu Bar for feature files.  Add options to `Karate Menu` to open Karate Runner settings, clear test results from Tests view and the gutter for feature files and to toggle showing test results within the gutter for feature files.  Update Tests view within Activity Bar with buttons to run and debug tests.
 

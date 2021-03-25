@@ -38,7 +38,12 @@
               "name": "constant.character.section.colon.karate"
             },
             "3": {
-              "name": "string.unquoted.text.karate"
+              "name": "string.unquoted.text.karate",
+              "patterns": [
+                {
+                  "include": "meta.embedded.inline.xml"
+                }
+              ]
             }
           }
         }
@@ -118,43 +123,34 @@
                   "include": "#match"
                 },
                 {
-                  "include": "#click"
-                },
-                {
-                  "include": "#input"
-                },
-                {
-                  "include": "#submit"
-                },
-                {
-                  "include": "#focus"
-                },
-                {
-                  "include": "#clear"
-                },
-                {
-                  "include": "#value"
-                },
-                {
-                  "include": "#select"
-                },
-                {
-                  "include": "#scroll"
-                },
-                {
-                  "include": "#mouse"
-                },
-                {
-                  "include": "#highlight"
-                },
-                {
-                  "include": "#highlight-all"
-                },
-                {
                   "include": "#functional-assignments"
                 },
                 {
+                  "include": "#driver-object-expression"
+                },
+                {
                   "include": "#first-class-functions"
+                },
+                {
+                  "include": "#locator-functions"
+                },
+                {
+                  "include": "#browser-functions"
+                },
+                {
+                  "include": "#page-functions"
+                },
+                {
+                  "include": "#action-functions"
+                },
+                {
+                  "include": "#state-functions"
+                },
+                {
+                  "include": "#wait-functions"
+                },
+                {
+                  "include": "#cookie-functions"
                 },
                 {
                   "include": "#types"
@@ -230,26 +226,6 @@
         }
       ]
     },
-    "first-class-functions": {
-      "patterns": [
-        {
-          "match": "\\b(request|params|retry\\s+until|soap\\s+action|path|url|multipart\\s+files|multipart\\s+fields|form\\s+fields|multipart\\s+entity|cookies|headers)\\b(.*)?",
-          "captures": {
-            "1": {
-              "name": "support.function.first-class.karate"
-            },
-            "2": {
-              "name": "meta.statement.first-class.karate",
-              "patterns": [
-                {
-                  "include": "#expression"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
     "evaluation": {
       "patterns": [
         {
@@ -270,19 +246,19 @@
         }
       ]
     },
-    "click": {
+    "first-class-functions": {
       "patterns": [
         {
-          "match": "\\b(click)\\b(.*)?",
+          "match": "\\b(driver|request|params|retry\\s+until|soap\\s+action|path|url|multipart\\s+files|multipart\\s+fields|form\\s+fields|multipart\\s+entity|cookies|headers)\\b(.*)?",
           "captures": {
             "1": {
-              "name": "keyword.other.click.karate"
+              "name": "support.function.first-class.karate"
             },
             "2": {
-              "name": "meta.statement.click.karate",
+              "name": "meta.statement.first-class.karate",
               "patterns": [
                 {
-                  "include": "#strings"
+                  "include": "#expression"
                 }
               ]
             }
@@ -290,19 +266,19 @@
         }
       ]
     },
-    "input": {
+    "locator-functions": {
       "patterns": [
         {
-          "match": "\\b(input)\\b(.*)?",
+          "match": "\\b(leftOf|rightOf|below|above|near)\\b(.*)?",
           "captures": {
             "1": {
-              "name": "keyword.other.input.karate"
+              "name": "keyword.other.locator.karate"
             },
             "2": {
-              "name": "meta.statement.input.karate",
+              "name": "meta.statement.locator.karate",
               "patterns": [
                 {
-                  "include": "#strings"
+                  "include": "source.js"
                 }
               ]
             }
@@ -310,19 +286,19 @@
         }
       ]
     },
-    "submit": {
+    "browser-functions": {
       "patterns": [
         {
-          "match": "\\b(submit)\\b(.*)?",
+          "match": "\\b(refresh|reload|back|forward|maximize|minimize|fullscreen|quit)\\b(.*)?",
           "captures": {
             "1": {
-              "name": "keyword.other.submit.karate"
+              "name": "keyword.other.browser.karate"
             },
             "2": {
-              "name": "meta.statement.submit.karate",
+              "name": "meta.statement.browser.karate",
               "patterns": [
                 {
-                  "include": "#strings"
+                  "include": "source.js"
                 }
               ]
             }
@@ -330,19 +306,19 @@
         }
       ]
     },
-    "focus": {
+    "page-functions": {
       "patterns": [
         {
-          "match": "\\b(focus)\\b(.*)?",
+          "match": "\\b(dialog|switchPage|switchFrame|close|screenshot|pdf)\\b(.*)?",
           "captures": {
             "1": {
-              "name": "keyword.other.focus.karate"
+              "name": "keyword.other.page.karate"
             },
             "2": {
-              "name": "meta.statement.focus.karate",
+              "name": "meta.statement.page.karate",
               "patterns": [
                 {
-                  "include": "#strings"
+                  "include": "source.js"
                 }
               ]
             }
@@ -350,19 +326,19 @@
         }
       ]
     },
-    "clear": {
+    "action-functions": {
       "patterns": [
         {
-          "match": "\\b(clear)\\b(.*)?",
+          "match": "\\b(click|input|submit|focus|clear|value|select|scroll|mouse|highlight|highlightAll)\\b(.*)?",
           "captures": {
             "1": {
-              "name": "keyword.other.clear.karate"
+              "name": "keyword.other.uiaction.karate"
             },
             "2": {
-              "name": "meta.statement.clear.karate",
+              "name": "meta.statement.uiaction.karate",
               "patterns": [
                 {
-                  "include": "#strings"
+                  "include": "source.js"
                 }
               ]
             }
@@ -370,19 +346,19 @@
         }
       ]
     },
-    "value": {
+    "state-functions": {
       "patterns": [
         {
-          "match": "\\b(value)\\b(.*)?",
+          "match": "\\b(html|text|value|attribute|enabled|exists|optional|locate|locateAll|position)\\b(.*)?",
           "captures": {
             "1": {
-              "name": "keyword.other.value.karate"
+              "name": "keyword.other.state.karate"
             },
             "2": {
-              "name": "meta.statement.value.karate",
+              "name": "meta.statement.state.karate",
               "patterns": [
                 {
-                  "include": "#strings"
+                  "include": "source.js"
                 }
               ]
             }
@@ -390,19 +366,19 @@
         }
       ]
     },
-    "select": {
+    "wait-functions": {
       "patterns": [
         {
-          "match": "\\b(select)\\b(.*)?",
+          "match": "\\b(retry|waitFor|waitForAny|waitForUrl|waitForText|waitForEnabled|waitForResultCount|waitUntil|delay|script|scriptAll|timeout)\\b(.*)?",
           "captures": {
             "1": {
-              "name": "keyword.other.select.karate"
+              "name": "keyword.other.wait.karate"
             },
             "2": {
-              "name": "meta.statement.select.karate",
+              "name": "meta.statement.wait.karate",
               "patterns": [
                 {
-                  "include": "#strings"
+                  "include": "source.js"
                 }
               ]
             }
@@ -410,76 +386,16 @@
         }
       ]
     },
-    "scroll": {
+    "cookie-functions": {
       "patterns": [
         {
-          "match": "\\b(scroll)\\b(.*)?",
+          "match": "\\b(cookie|deleteCookie|clearCookies)\\b(.*)?",
           "captures": {
             "1": {
-              "name": "keyword.other.scroll.karate"
+              "name": "keyword.other.cookie.karate"
             },
             "2": {
-              "name": "meta.statement.scroll.karate",
-              "patterns": [
-                {
-                  "include": "#strings"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    "mouse": {
-      "patterns": [
-        {
-          "match": "\\b(mouse)\\b(.*)?",
-          "captures": {
-            "1": {
-              "name": "keyword.other.mouse.karate"
-            },
-            "2": {
-              "name": "meta.statement.mouse.karate",
-              "patterns": [
-                {
-                  "include": "#strings"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    "highlight": {
-      "patterns": [
-        {
-          "match": "\\b(highlight)\\b(.*)?",
-          "captures": {
-            "1": {
-              "name": "keyword.other.highlight.karate"
-            },
-            "2": {
-              "name": "meta.statement.highlight.karate",
-              "patterns": [
-                {
-                  "include": "#strings"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    "highlight-all": {
-      "patterns": [
-        {
-          "match": "\\b(highlightAll)\\b(.*)?",
-          "captures": {
-            "1": {
-              "name": "keyword.other.highlightall.karate"
-            },
-            "2": {
-              "name": "meta.statement.highlightall.karate",
+              "name": "meta.statement.cookie.karate",
               "patterns": [
                 {
                   "include": "#strings"
@@ -726,6 +642,18 @@
     "expression": {
       "patterns": [
         {
+          "include": "#driver-object-expression"
+        },
+        {
+          "include": "#state-functions"
+        },
+        {
+          "include": "#cookie-functions"
+        },
+        {
+          "include": "#page-functions"
+        },
+        {
           "include": "#strings"
         },
         {
@@ -822,6 +750,35 @@
         }
       ]
     },
+    "driver-object-expression": {
+      "patterns": [
+        {
+          "match": "(driver(?:once)?)(\\.)([_$[:alpha:]][_$[:alnum:]]*)\\b(?:\\((.*)\\))*",
+          "captures": {
+            "1": {
+              "name": "support.class.karate"
+            },
+            "2": {
+              "name": "keyword.operator.dot.karate"
+            },
+            "3": {
+              "name": "support.function.karate"
+            },
+            "4": {
+              "name": "meta.args.karate",
+              "patterns": [
+                {
+                  "include": "#strings"
+                },
+                {
+                  "include": "source.json.karate"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
     "strings": {
       "patterns": [
         {
@@ -835,16 +792,46 @@
     "singlequote-string": {
       "patterns": [
         {
-          "match": "(')(\\\\.|[^'])*(')",
-          "name": "string.quoted.single.karate"
+          "match": "(')([^']*)(')",
+          "captures": {
+            "1": {
+              "name": "string.quoted.single.karate"
+            },
+            "2": {
+              "name": "string.quoted.single.karate",
+              "patterns": [
+                {
+                  "include": "meta.embedded.inline.xml"
+                }
+              ]
+            },
+            "3": {
+              "name": "string.quoted.single.karate"
+            }
+          }
         }
       ]
     },
     "doublequote-string": {
       "patterns": [
         {
-          "match": "(\")(\\\\.|[^\"])*(\")",
-          "name": "string.quoted.double.karate"
+          "match": "(\")([^\"]*)(\")",
+          "captures": {
+            "1": {
+              "name": "string.quoted.double.karate"
+            },
+            "2": {
+              "name": "string.quoted.double.karate",
+              "patterns": [
+                {
+                  "include": "meta.embedded.inline.xml"
+                }
+              ]
+            },
+            "3": {
+              "name": "string.quoted.double.karate"
+            }
+          }
         }
       ]
     },

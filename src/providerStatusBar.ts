@@ -48,9 +48,9 @@ class ProviderStatusBar
 		}
 		
 		let resultsClassPath: any = null;
-		if (ProviderExecutions.executionArgs !== null && ProviderExecutions.executionArgs.length >= 2)
+		if (ProviderExecutions.executionArgs !== null)
 		{
-			resultsClassPath = `${ProviderExecutions.executionArgs[1]}`;
+			resultsClassPath = `${ProviderExecutions.executionArgs.karateJarOptions}`;
 		}
 		
 		let tooltip: string;
