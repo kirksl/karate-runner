@@ -16,8 +16,6 @@ import { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarate
 import { createTreeViewWatcher } from "./helper";
 import * as vscode from 'vscode';
 
-let buildReportsTreeView = null;
-let karateTestsTreeView = null;
 let buildReportsWatcher = null;
 let karateTestsWatcher = null;
 
@@ -69,10 +67,7 @@ export function activate(context: vscode.ExtensionContext)
 	let registerCompletionItemProvider = vscode.languages.registerCompletionItemProvider(karateFile, completionItemProvider, ...['\'', '\"']);
 	//let registerFoldingRangeProvider = vscode.languages.registerFoldingRangeProvider(karateFile, foldingRangeProvider);
 
-	buildReportsTreeView = vscode.window.createTreeView('karate-reports', { showCollapseAll: true, treeDataProvider: buildReportsProvider });
-	karateTestsTreeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: karateTestsProvider });
-
-	createTreeViewWatcher(
+    createTreeViewWatcher(
 		buildReportsWatcher,
 		String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget')),
 		buildReportsProvider
@@ -178,8 +173,6 @@ export function activate(context: vscode.ExtensionContext)
 
 export function deactivate()
 {
-	buildReportsTreeView.dispose();
-	karateTestsTreeView.dispose();
 	buildReportsWatcher.dispose();
 	karateTestsWatcher.dispose();
 }
