@@ -2,14 +2,20 @@ import ProviderFileSystem from "./providerFileSystem";
 import * as vscode from 'vscode';
 import * as path from 'path';
 
+interface IDisposable
+{
+	dispose(): void;
+}
+
 interface IEntry
 {
 	uri: any;
 	type: vscode.FileType;
 }
 
-export class ProviderBuildReports implements vscode.TreeDataProvider<IEntry>
+export class ProviderBuildReports implements vscode.TreeDataProvider<IEntry>, IDisposable
 {
+    private treeView: vscode.TreeView<any>;
 	private providerFileSystem: ProviderFileSystem;
 	private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
 	readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
@@ -17,6 +23,7 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<IEntry>
 	constructor()
 	{
 		this.providerFileSystem = new ProviderFileSystem();
+        this.treeView = vscode.window.createTreeView('karate-reports', { showCollapseAll: true, treeDataProvider: this });
 	}
 
 	public refresh(): any
@@ -123,10 +130,23 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<IEntry>
 		{
 			treeItem.command = { command: 'karateRunner.buildReports.open', title: "Open Build Report", arguments: [element.uri] };
 			treeItem.contextValue = 'file';
-		}
+        }
+        else
+        {
+            treeItem.iconPath =
+            {
+                light: path.join(__dirname, '..', 'resources', 'light', 'folder-none.svg'),
+                dark: path.join(__dirname, '..', 'resources', 'dark', 'folder-none.svg')
+            };
+        }
 
 		return treeItem;
 	}
+
+    public dispose(): void
+    {
+        this.treeView.dispose();
+    }
 }
 
 export default ProviderBuildReports;

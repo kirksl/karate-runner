@@ -1,6 +1,9 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+## 1.0.0
+Improve Karate Language support.  Add icons to show pass/fail state and annotations to show fail counts at the aggregate file and folder levels within the Tests view.
+
 ## 0.9.9
 Improve Karate Language support.  Fix issue where status bar and historical execution results fail to show classpath and re-execute tests.
 

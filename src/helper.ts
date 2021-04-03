@@ -226,32 +226,6 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 	return tedArray;
 }
 
-function getTestResult(ted: ITestExecutionDetail): ProviderResults.ENTRY_STATE
-{
-	let path = ted.testUri.path;
-	let state = ProviderResults.ENTRY_STATE.NONE;
-	
-	if (ted.testTitle.startsWith("Feature:"))
-	{
-		path = path + ":0";
-		let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path + ":" + e.line));	
-		if (filteredResults.length === 1)
-		{
-			state = filteredResults[0].state;
-		}
-	}
-    else
-    {
-		let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path) && ted.testTitle.endsWith(e.name));
-		if (filteredResults.length === 1)
-		{
-			state = filteredResults[0].state;
-		}
-    }
-
-	return state;
-}
-
 function getChildAbsolutePath(basePath: string, childPath: string): string
 {
 	try
@@ -349,4 +323,4 @@ function createTreeViewWatcher(watcher, watcherGlob, provider)
 	provider.refresh();
 }
 
-export { getProjectDetail, getTestExecutionDetail, getTestResult, getChildAbsolutePath, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail, createTreeViewWatcher };
+export { getProjectDetail, getTestExecutionDetail, getChildAbsolutePath, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail, createTreeViewWatcher };

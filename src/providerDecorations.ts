@@ -1,4 +1,4 @@
-import { getTestExecutionDetail, ITestExecutionDetail, getTestResult } from "./helper";
+import { getTestExecutionDetail, ITestExecutionDetail } from "./helper";
 import { ProviderResults } from "./providerResults";
 import * as path from 'path';
 import * as vscode from 'vscode';
@@ -60,7 +60,7 @@ class ProviderDecorations
 	
 				tedArray.forEach((ted) =>
 				{
-					let state = getTestResult(ted);
+					let state = ProviderResults.getTestResult(ted);
 					let range = new vscode.Range(ted.testLine, 0, ted.testLine, 0);
 		
 					switch (state)
@@ -88,7 +88,7 @@ class ProviderDecorations
 
 	private getDecorationType(state: ProviderResults.ENTRY_STATE): vscode.TextEditorDecorationType
 	{
-		let icon = 'karate-test.svg';
+		let icon = 'karate-test-none.svg';
 
 		if (state === ProviderResults.ENTRY_STATE.PASS)
 		{

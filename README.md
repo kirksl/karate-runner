@@ -29,10 +29,12 @@ A `Karate Status Bar` will be added to VSCode showing results for the last execu
 *For Karate Version < 1.0 a file called results-json.txt*
 *For Karate Version >= 1.0 a file called karate-summary-json.txt*
 
-### Test Results
-Test Results will now be shown next to each test within the `Tests` view and Feature files starting with Karate 1.0.
-Test Results shown next to each test are rolling results meaning they accumulate and reset only when you reset them.
+### Test Results (Karate 1.0 or greater)
+Test Results will be shown next to each `Feature:`, `Scenario:`, `Scenario Outline:` and parent folder in the `Tests` view.
+Test Results will be shown next to each `Feature:`, `Scenario:`, `Scenario Outline:` within each Feature file.
+Test Results are rolling results meaning they will accumulate and reset only when you click the `Clear Results`.
 Test Results are represented by Karate icons showing a green dot (pass) or red dot (fail).
+Test Results are additionally represented by a failure count showing how many failures are below each folder or file.
 
 *Note this feature is dependent on Karate Version >= 1.0 and Karate providing result files under the root of your project within a /karate-reports directory.  Each file must end with a format of `.karate-json.txt`.*
 

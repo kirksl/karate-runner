@@ -211,13 +211,21 @@
     "http-status": {
       "patterns": [
         {
-          "match": "\\b(status)\\b\\s*(\\d{3}\\b)?(.*)?",
+          "match": "\\b(status)\\b\\s*(\\d{3}|<.+>)?(.*)?",
           "captures": {
             "1": {
               "name": "support.function.http-status.karate"
             },
             "2": {
-              "name": "constant.numeric.http-status.karate"
+              "name": "meta.statement.http-status.karate",
+              "patterns": [
+                {
+                  "include": "source.js"
+                },
+                {
+                  "include": "meta.embedded.inline.xml"
+                }
+              ]
             },
             "3": {
               "name": "invalid.illegal.http-status.karate"

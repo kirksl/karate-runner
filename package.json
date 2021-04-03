@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "0.9.9",
+	"version": "1.0.0",
 	"license": "MIT",
 	"author": {
 		"name": "Kirk Slota"

@@ -1,20 +1,26 @@
-import { getTestExecutionDetail, ITestExecutionDetail, getTestResult } from "./helper";
+import { getTestExecutionDetail, ITestExecutionDetail } from "./helper";
 import ProviderFileSystem from "./providerFileSystem";
 import { ProviderResults } from "./providerResults";
 import * as vscode from 'vscode';
 import * as path from 'path';
 
+interface IDisposable
+{
+	dispose(): void;
+}
 
 interface IEntry
 {
 	uri: any;
 	type: vscode.FileType;
 	command?: vscode.Command;
-	state?: ProviderResults.ENTRY_STATE;
+	state: ProviderResults.ENTRY_STATE;
+    fails?: number;
 }
 
-export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>
+export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposable
 {
+    private treeView: vscode.TreeView<any>;
 	private providerFileSystem: ProviderFileSystem;
 	private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
 	readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
@@ -22,8 +28,10 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>
 	constructor()
 	{
 		this.providerFileSystem = new ProviderFileSystem();
-		ProviderResults.onTestResults((json) => { this.refresh(); });
-	}
+        this.treeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: this });
+
+        ProviderResults.onTestResults((json) => { this.refresh(); });
+    }
 
 	public refresh()
 	{
@@ -57,13 +65,12 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>
 						title: ted.codelensRunTitle
 					};
 
-					let state = getTestResult(ted);
 					tests.push(
 					{
 						uri: ted.testTitle,
 						type: vscode.FileType.Unknown,
 						command: testCommand,
-						state: state
+						state: ProviderResults.getTestResult(ted)
 					});
 				});
 
@@ -80,18 +87,22 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>
 				});
 
 				return testFilesFiltered.sort().map((testFile) =>
-					(
-						{
-							uri: testFile,
-							type: vscode.FileType.File,
-							command: {
-                                arguments: [{ testUri: testFile, debugLine: 0 }],
-								command: "karateRunner.tests.open",
-								title: "karateRunner.tests.open"
-							}
-						}
-					)
-				);
+                {
+                    let result = ProviderResults.getFileResult(testFile);
+
+                    return {
+                        uri: testFile,
+                        type: vscode.FileType.File,
+                        command:
+                        {
+                            arguments: [{ testUri: testFile, debugLine: 0 }],
+                            command: "karateRunner.tests.open",
+                            title: "karateRunner.tests.open"
+                        },
+                        state: result.state,
+                        fails: result.fails
+                    }
+                });
 			}
 			else
 			{
@@ -110,25 +121,25 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>
 				});
 
 				return childrenFiltered.map(([name, type]) =>
-					(
-						{
-							uri: vscode.Uri.file(path.join(element.uri.fsPath, name)),
-							type: type,
-							command: (type === vscode.FileType.File) ?
-								{
-                                    arguments: [{ testUri: vscode.Uri.file(path.join(element.uri.fsPath, name)), debugLine: 0 }],
-									command: "karateRunner.tests.open",
-									title: "karateRunner.tests.open"
-								}
-								:
-								{
-                                    arguments: [{ testUri: vscode.Uri.file(path.join(element.uri.fsPath, name)), debugLine: 0 }],
-									command: "karateRunner.tests.runAll",
-									title: "karateRunner.tests.runAll"
-								}
-						}
-					)
-				);
+                {
+                    let uri = vscode.Uri.file(path.join(element.uri.fsPath, name));
+                    let cmd = (type === vscode.FileType.File) ? "karateRunner.tests.open" : "karateRunner.tests.runAll";
+                    let result = (type === vscode.FileType.File) ? ProviderResults.getFileResult(uri) : ProviderResults.getFolderResult(uri);
+
+                    return {
+                        uri: uri,
+                        type: type,
+                        command:
+                        {
+                            arguments: [{ testUri: uri, debugLine: 0 }],
+                            command: cmd,
+                            title: cmd
+                        },
+                        state: result.state,
+                        fails: result.fails
+                    };
+                });
+
 			}
 		}
 
@@ -151,7 +162,7 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>
 
 			if (childrenFiltered.length <= 0)
 			{
-				return [{ uri: "No tests found...", type: vscode.FileType.Unknown }];
+				return [{ uri: "No tests found...", type: vscode.FileType.Unknown, state: ProviderResults.ENTRY_STATE.NONE }];
 			}
 
 			childrenFiltered.sort((a, b) =>
@@ -165,20 +176,43 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>
 			});
 
 			return childrenFiltered.map(([name, type]) =>
-				(
-					{
-                        uri: vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, name)),
-                        type: type
-                    }
-				)
-			);
+            {
+                let uri = vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, name));
+                let result = ProviderResults.getFolderResult(uri);
+
+                return {
+                    uri: uri,
+                    type: type,
+                    state: result.state,
+                    fails: result.fails
+                }
+            });
 		}
 
-		return [{ uri: "No tests found...", type: vscode.FileType.Unknown }];
+		return [{ uri: "No tests found...", type: vscode.FileType.Unknown, state: ProviderResults.ENTRY_STATE.NONE }];
 	}
+
+    getParent(element: IEntry): IEntry | undefined
+    {
+        return undefined;
+    }
 
 	getTreeItem(element: IEntry): vscode.TreeItem
 	{
+        let icon: string = '';
+
+        let executionState: string = 'none';
+        switch (element.state)
+        {
+            case ProviderResults.ENTRY_STATE.PASS:
+                executionState = 'pass';
+                break;
+
+            case ProviderResults.ENTRY_STATE.FAIL:
+                executionState = 'fail';
+                break;
+        }
+
 		let collapsibleState: vscode.TreeItemCollapsibleState;
 		switch (element.type)
 		{
@@ -207,37 +241,44 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>
 
 		if (collapsibleState === vscode.TreeItemCollapsibleState.None && element.command !== undefined)
 		{
-			let icon: string = 'karate-test.svg';
-
-			if (element.state === ProviderResults.ENTRY_STATE.PASS)
-			{
-				icon = 'karate-test-pass.svg';
-			}
-			else if (element.state === ProviderResults.ENTRY_STATE.FAIL)
-			{
-				icon = 'karate-test-fail.svg';
-			}
-
-			treeItem.iconPath =
-			{
-				light: path.join(__dirname, '..', 'resources', 'light', icon),
-				dark: path.join(__dirname, '..', 'resources', 'dark', icon)
-			};
-
+            icon = `karate-test-${executionState}.svg`;
 			treeItem.command = element.command;
 			treeItem.contextValue = (element.uri.startsWith('Feature:') ? 'testFeature' : 'testScenario');
 		}
 		else if (element.type === vscode.FileType.File)
 		{
+            icon = `folder-${executionState}.svg`;
 			treeItem.contextValue = 'testFile';
+
+            if (element.fails > 0)
+            {
+                treeItem.description = element.fails + '';
+            }
 		}
 		else if (element.type === vscode.FileType.Directory)
 		{
+            icon = `folder-${executionState}.svg`;
 			treeItem.contextValue = 'testDirectory';
+
+            if (element.fails > 0)
+            {
+                treeItem.description = element.fails + '';
+            }
 		}
+
+        treeItem.iconPath =
+        {
+            light: path.join(__dirname, '..', 'resources', 'light', icon),
+            dark: path.join(__dirname, '..', 'resources', 'dark', icon)
+        };
 
 		return treeItem;
 	}
+
+    public dispose(): void
+    {
+        this.treeView.dispose();
+    }
 }
 
 export default ProviderKarateTests;
