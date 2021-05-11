@@ -1,6 +1,10 @@
 # Change Log
 Notable changes to this project will be documented in this file.
 
+
+## 1.0.1
+Fix icon size issue in editor exposed from latest VSCode releases.
+
 ## 1.0.0
 Improve Karate Language support.  Add icons to show pass/fail state and annotations to show fail counts at the aggregate file and folder levels within the Tests view.
 

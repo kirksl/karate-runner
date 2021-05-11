@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"license": "MIT",
 	"author": {
 		"name": "Kirk Slota"
@@ -319,8 +319,8 @@
 				"id": "KarateRunner.editor.menu",
 				"label": "Editor Settings",
 				"icon": {
-					"dark": "resources/dark/karate.svg",
-					"light": "resources/light/karate.svg"
+					"dark": "resources/dark/karate-editor.svg",
+					"light": "resources/light/karate-editor.svg"
 				}
 			}
 		],
