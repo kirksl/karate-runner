@@ -18,6 +18,7 @@ interface ITestExecutionDetail
 	testTitle: string;
     testRange: vscode.Range;
 	testLine: number;
+    testIgnored: boolean;
 	debugLine: number;
 	karateOptions: string;
 	karateJarOptions: string;
@@ -88,6 +89,9 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 	{
 		let runTitle = "Karate: Run";
 		let debugTitle = "Karate: Debug";
+        let isIgnored = false;
+        let scenarioCount = 0;
+        let scenarioIgnoredCount = 0;
 		
 		let document = await vscode.workspace.openTextDocument(uri);
 		
@@ -103,6 +107,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 				testTitle: "",
                 testRange: null,
 				testLine: 0,
+                testIgnored: isIgnored,
 				debugLine: 0,
 				karateOptions: "",
 				karateJarOptions: "",
@@ -136,10 +141,18 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 						ted.testTag = "";
 					}
 				}
+                
 				let lineScenarioRegExp = new RegExp("^\\s*(Scenario|Scenario Outline):(.*)$");
 				let lineScenarioMatch = lineText.match(lineScenarioRegExp);
 				if (lineScenarioMatch !== null && lineScenarioMatch.index !== undefined)
 				{
+                    scenarioCount++;
+                    if (isIgnored || ted.testTag.split(/\s+/).includes("@ignore"))
+                    {
+                        scenarioIgnoredCount++;
+                        ted.testIgnored = true;
+                    }
+
 					ted.testLine = line;
 					ted.debugLine = ted.testLine + 1;
 					ted.codelensRunTitle = runTitle;
@@ -149,6 +162,12 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 				}
 				else
 				{
+                    if (ted.testTag.split(/\s+/).includes("@ignore"))
+                    {
+                        isIgnored = true;
+                        ted.testIgnored = true;
+                    }
+
 					ted.testLine = line;
 					ted.debugLine = 0;
 					ted.codelensRunTitle = runTitle;
@@ -158,6 +177,14 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 				tedArray.push(ted);
 			}
 		}
+
+        if (scenarioCount > 0)
+        {
+            if (scenarioCount == scenarioIgnoredCount)
+            {
+                tedArray[0].testIgnored = true;
+            }
+        }
 	}
 	else
 	{
@@ -212,6 +239,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 			testTitle: "",
             testRange: null,
 			testLine: 0,
+            testIgnored: false,
 			debugLine: 0,
 			karateOptions: classPathNormalized,
 			karateJarOptions: classPathNormalized,

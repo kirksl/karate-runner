@@ -2,6 +2,9 @@
 Notable changes to this project will be documented in this file.
 
 
+## 1.0.2
+Add option to hide tests from Test view annotated with `@ignore` tag.  Remove option to run tests from Test view and Codelens when tagged with `@ignore` tag.
+
 ## 1.0.1
 Fix icon size issue in editor exposed from latest VSCode releases.
 

@@ -16,6 +16,7 @@ interface IEntry
 	command?: vscode.Command;
 	state: ProviderResults.ENTRY_STATE;
     fails?: number;
+    ignored: boolean;
 }
 
 export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposable
@@ -48,33 +49,42 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDi
 	{
 		let glob = String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTarget'));
 		let testFiles = await vscode.workspace.findFiles(glob).then((value) => { return value; });
+        let hideIgnored = Boolean(vscode.workspace.getConfiguration('karateRunner.tests').get('hideIgnored'));
 
 		if (element)
 		{
 			if (element.type === vscode.FileType.File)
 			{
-				let tests: IEntry[] = [];
+				let entries: IEntry[] = [];
 				let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(element.uri, vscode.FileType.File);
 
 				tedArray.forEach((ted) =>
 				{
-					let testCommand: vscode.Command =
-					{
-						arguments: [ted],
-						command: "karateRunner.tests.open",
-						title: ted.codelensRunTitle
-					};
-
-					tests.push(
-					{
-						uri: ted.testTitle,
-						type: vscode.FileType.Unknown,
-						command: testCommand,
-						state: ProviderResults.getTestResult(ted)
-					});
+                    if (ted.testIgnored && hideIgnored)
+                    {
+                        // do nothing
+                    }
+                    else
+                    {
+                        let testCommand: vscode.Command =
+                        {
+                            arguments: [ted],
+                            command: "karateRunner.tests.open",
+                            title: ted.codelensRunTitle
+                        };
+    
+                        entries.push(
+                        {
+                            uri: ted.testTitle,
+                            type: vscode.FileType.Unknown,
+                            command: testCommand,
+                            state: ProviderResults.getTestResult(ted),
+                            ignored: ted.testIgnored
+                        });
+                    }
 				});
 
-				return tests;
+				return entries;
 			}
 
 			let displayType = String(vscode.workspace.getConfiguration('karateRunner.tests').get('activityBarDisplayType'));
@@ -86,23 +96,39 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDi
 					return testFile.toString().startsWith(element.uri.toString());
 				});
 
-				return testFilesFiltered.sort().map((testFile) =>
-                {
-                    let result = ProviderResults.getFileResult(testFile);
+                testFilesFiltered.sort();
 
-                    return {
-                        uri: testFile,
-                        type: vscode.FileType.File,
-                        command:
-                        {
-                            arguments: [{ testUri: testFile, debugLine: 0 }],
-                            command: "karateRunner.tests.open",
-                            title: "karateRunner.tests.open"
-                        },
-                        state: result.state,
-                        fails: result.fails
+                let entries: IEntry[] = [];
+                for (let ndx = 0; ndx < testFilesFiltered.length; ndx++)
+                {
+                    let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(testFilesFiltered[ndx], vscode.FileType.File);
+
+                    if (tedArray[0].testIgnored && hideIgnored)
+                    {
+                        // do nothing
                     }
-                });
+                    else
+                    {
+                        let result = ProviderResults.getFileResult(testFilesFiltered[ndx]);
+
+                        entries.push(
+                        {
+                            uri: testFilesFiltered[ndx],
+                            type: vscode.FileType.File,
+                            command:
+                            {
+                                arguments: [{ testUri: testFilesFiltered[ndx], debugLine: 0 }],
+                                command: "karateRunner.tests.open",
+                                title: "karateRunner.tests.open"
+                            },
+                            state: result.state,
+                            fails: result.fails,
+                            ignored: tedArray[0].testIgnored
+                        });
+                    }
+                }
+
+                return entries;
 			}
 			else
 			{
@@ -120,26 +146,42 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDi
 					return found !== undefined;
 				});
 
-				return childrenFiltered.map(([name, type]) =>
+                let entries: IEntry[] = [];
+                for (let ndx = 0; ndx < childrenFiltered.length; ndx++)
                 {
+                    let name = childrenFiltered[ndx][0];
+                    let type = childrenFiltered[ndx][1];
                     let uri = vscode.Uri.file(path.join(element.uri.fsPath, name));
-                    let cmd = (type === vscode.FileType.File) ? "karateRunner.tests.open" : "karateRunner.tests.runAll";
-                    let result = (type === vscode.FileType.File) ? ProviderResults.getFileResult(uri) : ProviderResults.getFolderResult(uri);
 
-                    return {
-                        uri: uri,
-                        type: type,
-                        command:
+                    let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(uri, type);
+
+                    if (tedArray[0].testIgnored && hideIgnored)
+                    {
+                        // do nothing
+                    }
+                    else
+                    {
+                        let cmd = (type === vscode.FileType.File) ? "karateRunner.tests.open" : "karateRunner.tests.runAll";
+                        let result = (type === vscode.FileType.File) ? ProviderResults.getFileResult(uri) : ProviderResults.getFolderResult(uri);
+                        
+                        entries.push(
                         {
-                            arguments: [{ testUri: uri, debugLine: 0 }],
-                            command: cmd,
-                            title: cmd
-                        },
-                        state: result.state,
-                        fails: result.fails
-                    };
-                });
+                            uri: uri,
+                            type: type,
+                            command:
+                            {
+                                arguments: [{ testUri: uri, debugLine: 0 }],
+                                command: cmd,
+                                title: cmd
+                            },
+                            state: result.state,
+                            fails: result.fails,
+                            ignored: tedArray[0].testIgnored
+                        });
+                    }
+                }
 
+                return entries;
 			}
 		}
 
@@ -162,7 +204,7 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDi
 
 			if (childrenFiltered.length <= 0)
 			{
-				return [{ uri: "No tests found...", type: vscode.FileType.Unknown, state: ProviderResults.ENTRY_STATE.NONE }];
+				return [{ uri: "No tests found...", type: vscode.FileType.Unknown, state: ProviderResults.ENTRY_STATE.NONE, ignored: false }];
 			}
 
 			childrenFiltered.sort((a, b) =>
@@ -184,12 +226,13 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDi
                     uri: uri,
                     type: type,
                     state: result.state,
-                    fails: result.fails
+                    fails: result.fails,
+                    ignored: false
                 }
             });
 		}
 
-		return [{ uri: "No tests found...", type: vscode.FileType.Unknown, state: ProviderResults.ENTRY_STATE.NONE }];
+		return [{ uri: "No tests found...", type: vscode.FileType.Unknown, state: ProviderResults.ENTRY_STATE.NONE, ignored: false }];
 	}
 
     getParent(element: IEntry): IEntry | undefined
@@ -242,17 +285,36 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDi
 		if (collapsibleState === vscode.TreeItemCollapsibleState.None && element.command !== undefined)
 		{
             icon = `karate-test-${executionState}.svg`;
-			treeItem.command = element.command;
-			treeItem.contextValue = (element.uri.startsWith('Feature:') ? 'testFeature' : 'testScenario');
+
+            if (element.ignored)
+            {
+                treeItem.command = element.command;
+                treeItem.contextValue = 'testIgnored';
+                treeItem.description = 'ignored';
+            }
+            else
+            {
+                treeItem.command = element.command;
+                treeItem.contextValue = (element.uri.startsWith('Feature:') ? 'testFeature' : 'testScenario');
+            }
 		}
 		else if (element.type === vscode.FileType.File)
 		{
             icon = `folder-${executionState}.svg`;
-			treeItem.contextValue = 'testFile';
 
-            if (element.fails > 0)
+            if (element.ignored)
             {
-                treeItem.description = element.fails + '';
+                treeItem.contextValue = 'testFileIgnored';
+                treeItem.description = 'ignored';
+            }
+            else
+            {
+                treeItem.contextValue = 'testFile';
+
+                if (element.fails > 0)
+                {
+                    treeItem.description = element.fails + '';
+                }
             }
 		}
 		else if (element.type === vscode.FileType.Directory)

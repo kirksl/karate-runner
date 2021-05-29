@@ -133,11 +133,14 @@ export class ProviderBuildReports implements vscode.TreeDataProvider<IEntry>, ID
         }
         else
         {
-            treeItem.iconPath =
+            if (element.uri != "No reports found...")
             {
-                light: path.join(__dirname, '..', 'resources', 'light', 'folder-none.svg'),
-                dark: path.join(__dirname, '..', 'resources', 'dark', 'folder-none.svg')
-            };
+                treeItem.iconPath =
+                {
+                    light: path.join(__dirname, '..', 'resources', 'light', 'folder-none.svg'),
+                    dark: path.join(__dirname, '..', 'resources', 'dark', 'folder-none.svg')
+                };
+            }
         }
 
 		return treeItem;
