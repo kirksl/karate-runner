@@ -115,9 +115,10 @@ export function activate(context: vscode.ExtensionContext)
 		}
 
 		let karateTestsDisplayType = e.affectsConfiguration("karateRunner.tests.activityBarDisplayType");
+        let karateTestsHideIgnored = e.affectsConfiguration("karateRunner.tests.hideIgnored");
 		let karateTestsToTarget = e.affectsConfiguration("karateRunner.tests.toTarget");
 
-		if (karateTestsDisplayType)
+		if (karateTestsDisplayType || karateTestsHideIgnored)
 		{
 			karateTestsProvider.refresh();
 		}

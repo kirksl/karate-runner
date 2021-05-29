@@ -7,14 +7,14 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"license": "MIT",
 	"author": {
 		"name": "Kirk Slota"
 	},
 	"publisher": "kirkslota",
 	"engines": {
-		"vscode": "^1.44.0"
+		"vscode": "^1.53.0"
 	},
 	"categories": [
 		"Other"
@@ -269,6 +269,11 @@
 					"group": "inline@3"
 				},
 				{
+					"command": "karateRunner.tests.open",
+					"when": "view == karate-tests && viewItem == testFileIgnored",
+					"group": "inline@1"
+				},
+				{
 					"command": "karateRunner.tests.runAll",
 					"when": "view == karate-tests && viewItem == testFeature",
 					"group": "inline@1"
@@ -414,6 +419,12 @@
 					"type": "string",
 					"default": "**/src/test/**/*.feature",
 					"description": "Display Karate tests targeted by glob pattern within Activity Bar.",
+					"scope": "resource"
+				},
+				"karateRunner.tests.hideIgnored": {
+					"type": "boolean",
+					"default": false,
+					"description": "Hide Karate tests annotated with @ignore tag within Activity Bar.",
 					"scope": "resource"
 				},
 				"karateRunner.tests.activityBarDisplayType": {
