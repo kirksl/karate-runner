@@ -4,7 +4,6 @@ import path = require("path");
 import fs = require("fs");
 import * as vscode from 'vscode';
 
-
 class ProviderDefinition implements vscode.DefinitionProvider
 {
 	constructor()

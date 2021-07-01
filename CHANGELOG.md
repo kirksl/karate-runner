@@ -2,6 +2,9 @@
 Notable changes to this project will be documented in this file.
 
 
+## 1.0.4
+https://github.com/kirksl/karate-runner/milestone/1
+
 ## 1.0.3
 Decrease indent on lines starting with `Feature`, `Background:`, `Scenario:`, `Scenario Outline:`.  Increase indent on lines after `Background:`, `Scenario:`, `Scenario Outline:`.
 
@@ -21,7 +24,7 @@ Improve Karate Language support.  Fix issue where status bar and historical exec
 Fix issue where `Inline Peek Editor` failed to discover files when project structure was not Java-based.  Add option to show test results within the gutter for feature files; next to each `Feature:`, `Scenario:` and `Scenario Outline:`.  Add `Karate Menu` to VSCode Editor Menu Bar for feature files.  Add options to `Karate Menu` to open Karate Runner settings, clear test results from Tests view and the gutter for feature files and to toggle showing test results within the gutter for feature files.  Update Tests view within Activity Bar with buttons to run and debug tests.
 
 ## 0.9.7
-Add option to filter Build Reports and Tests views within Activity Bar.  Add option to open Karate Runner settings from Tests view.  Fix random sorting issue in Build Reports and Tests views.  Add icons to show pass/fail state of each Feature/Scenario/Scenario Outline within Tests view.  `Note this feature is dependent on Karate Version >= 1.0 and Karate providing result files under the root of your project within a /karate-reports directory.  Each file must end with a format of .karate-json.txt`  Add option to clear test results from Tests view.  Update execution results and status bar to support Karate 1.0.  `Note this feature is dependent on Karate providing a results file under the root of your project.  For Karate Version < 1.0 a file called results-json.txt.  For Karate Version >= 1.0 a file called karate-summary-json.txt`
+Add option to filter Reports and Tests views within Activity Bar.  Add option to open Karate Runner settings from Tests view.  Fix random sorting issue in Reports and Tests views.  Add icons to show pass/fail state of each Feature/Scenario/Scenario Outline within Tests view.  `Note this feature is dependent on Karate Version >= 1.0 and Karate providing result files under the root of your project within a /karate-reports directory.  Each file must end with a format of .karate-json.txt`  Add option to clear test results from Tests view.  Update execution results and status bar to support Karate 1.0.  `Note this feature is dependent on Karate providing a results file under the root of your project.  For Karate Version < 1.0 a file called results-json.txt.  For Karate Version >= 1.0 a file called karate-summary-json.txt`
 
 ## 0.9.6
 Add option to run or debug individual tests within `Examples` table for `Scenario Outline`.  Hover over any row in Examples table to display `Karate: Run | Karate: Debug` codelens.  Add intellisense for Karate `read()` command to enumerate files in the same directory and within `<project root>/src/test/java`, `<project root>/src/test/resources`.  Remove requirement to set VSCode terminal to cmd.exe on Windows.  Task runner will always use cmd.exe regardless of user selection.
@@ -102,7 +105,7 @@ Add option to override default Karate Runner with Karate Cli.  Karate Runner ref
 Add option to cancel debug session while it's attempting to start.
 
 ## 0.5.2
-Add `Display Shallow` and `Display Deep` actions to Build Reports and Tests views within Activity Bar.  Remove `clean` build task for Maven and Gradle from default debug configurations.  Add option to set `Debugger: Server Port Timeout` in settings and view timeout in UI while debugger starts.
+Add `Display List` and `Display Tree` actions to Reports and Tests views within Activity Bar.  Remove `clean` build task for Maven and Gradle from default debug configurations.  Add option to set `Debugger: Server Port Timeout` in settings and view timeout in UI while debugger starts.
 
 ## 0.5.1
 Icon refresh to align with latest VSCode.
@@ -129,7 +132,7 @@ Add option to specify entire karate.jar(Standalone) command in settings.
 Remove reliance on tests having to exist under `src/test/java` especially for karate.jar(Standalone).  Downstream this will simplify setting the property `Karate Runner > Tests: To Target` to something like `**/*.feature`.  Add `Run All Tests` action for every folder node that is an ancestor of a *.feature file within Activity Bar Tests view.  This will enable running all tests that are scoped below target folders and in scope based on the setting `Karate Runner > Tests: To Target`.
 
 ## 0.2.0
-Add `Open In Editor` action for *.feature file nodes within Activity Bar Tests view.  Add `Collapse All` action to Build Reports and Tests views within Activity Bar.  Add support for Standalone execution mode via karate.jar.  Please note the first karate.jar(Standalone), pom.xml(Maven) or build.gradle(Gradle) found **in that order** when traversing backwards from the *.feature file will be used for execution.  This will also constitute your project root directory.
+Add `Open In Editor` action for *.feature file nodes within Activity Bar Tests view.  Add `Collapse All` action to Reports and Tests views within Activity Bar.  Add support for Standalone execution mode via karate.jar.  Please note the first karate.jar(Standalone), pom.xml(Maven) or build.gradle(Gradle) found **in that order** when traversing backwards from the *.feature file will be used for execution.  This will also constitute your project root directory.
 
 ## 0.1.3
 Hide tests that are commented from Codelens and Activity Bar.  Remember last Karate Runner when using `Prompt To Specify` Karate Runner popup.
@@ -141,7 +144,7 @@ Connect to Github Repo.
 Resolve project dependencies missing when publishing.
 
 ## 0.1.0
-Add support for Gradle and Maven.  Please note the first pom.xml(Maven) or build.gradle(Gradle) found when traversing backwards from the *.feature file being tested will be used to run all Maven and Gradle commands.  This will also constitute your project root directory.  Add support to automatically open any file(s) once tests finish running.  For example you may want specific html reports to automatically load into a browser.  Add a Karate Activity Bar to VSCode to enable management of build reports and tests in a central location.
+Add support for Gradle and Maven.  Please note the first pom.xml(Maven) or build.gradle(Gradle) found when traversing backwards from the *.feature file being tested will be used to run all Maven and Gradle commands.  This will also constitute your project root directory.  Add support to automatically open any file(s) once tests finish running.  For example you may want specific html reports to automatically load into a browser.  Add a Karate Activity Bar to VSCode to enable management of reports and tests in a central location.
 
 ## 0.0.3
 Remove requirement to specify a regular expression to determine where to show a Codelens.  A Codelens will now be shown above every `Feature:` and `Scenario:`.

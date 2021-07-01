@@ -482,32 +482,32 @@ class Feature
 		let asserts = ['match', 'contains', '!contains', 'only', 'any', 'each', 'deep', 'match ==', 'match !=', 'match contains', 'match contains only', 'match contains any', 'match contains deep', 'match !contains', 'match each', 'match header'];
 		if (asserts.includes(word.toLowerCase())) { return true; }
 
-        let locators = ['rightof', 'leftof', 'above', 'below', 'near'];
+		let locators = ['rightof', 'leftof', 'above', 'below', 'near'];
 		if (locators.includes(word.toLowerCase())) { return true; }
 
-        let browser = ['driver.url', 'driver.dimensions', 'refresh', 'reload', 'back', 'forward', 'maximize', 'minimize', 'fullscreen', 'quit'];
+		let browser = ['driver.url', 'driver.dimensions', 'refresh', 'reload', 'back', 'forward', 'maximize', 'minimize', 'fullscreen', 'quit'];
 		if (browser.includes(word.toLowerCase())) { return true; }
 
-        let page = ['dialog', 'switchpage', 'switchframe', 'close', 'driver.title', 'screenshot', 'pdf'];
+		let page = ['dialog', 'switchpage', 'switchframe', 'close', 'driver.title', 'screenshot', 'pdf'];
 		if (page.includes(word.toLowerCase())) { return true; }
 
-        let uiactions = ['click', 'input', 'submit', 'focus', 'clear', 'value', 'select', 'scroll', 'mouse', 'highlight', 'highlightall'];
+		let uiactions = ['click', 'input', 'submit', 'focus', 'clear', 'value', 'select', 'scroll', 'mouse', 'highlight', 'highlightall'];
 		if (uiactions.includes(word.toLowerCase())) { return true; }
 
-        let state = ['html', 'text', 'value', 'attribute', 'enabled', 'exists', 'optional', 'locate', 'locateall', 'position'];
-        if (state.includes(word.toLowerCase())) { return true; }
+		let state = ['html', 'text', 'value', 'attribute', 'enabled', 'exists', 'optional', 'locate', 'locateall', 'position'];
+		if (state.includes(word.toLowerCase())) { return true; }
 
-        let wait = ['retry', 'waitfor', 'waitforany', 'waitforurl', 'waitfortext', 'waitforenabled', 'waitforresultcount', 'waituntil', 'delay', 'script', 'scriptall'];
-        if (wait.includes(word.toLowerCase())) { return true; }
+		let wait = ['retry', 'waitfor', 'waitforany', 'waitforurl', 'waitfortext', 'waitforenabled', 'waitforresultcount', 'waituntil', 'delay', 'script', 'scriptall'];
+		if (wait.includes(word.toLowerCase())) { return true; }
 
-        let cookies = ['cookie', 'driver.cookies', 'deletecookie', 'clearcookies']
-        if (cookies.includes(word.toLowerCase())) { return true; }
+		let cookies = ['cookie', 'driver.cookies', 'deletecookie', 'clearcookies']
+		if (cookies.includes(word.toLowerCase())) { return true; }
 
-        let chrome = ['driver.pdf', 'driver.screenshotfull', 'driver.intercept', 'driver.inputfile', 'driver.emulatedevice', 'driver.scriptawait'];
-        if (chrome.includes(word.toLowerCase())) { return true; }
+		let chrome = ['driver.pdf', 'driver.screenshotfull', 'driver.intercept', 'driver.inputfile', 'driver.emulatedevice', 'driver.scriptawait'];
+		if (chrome.includes(word.toLowerCase())) { return true; }
 
-        let appium = ['driver.startrecordingscreen', 'driver.saverecordingscreen', 'driver.hidekeyboard'];
-        if (appium.includes(word.toLowerCase())) { return true; }
+		let appium = ['driver.startrecordingscreen', 'driver.saverecordingscreen', 'driver.hidekeyboard'];
+		if (appium.includes(word.toLowerCase())) { return true; }
 
 		if (word.startsWith('<') && word.endsWith('>')) { return true; }
 
@@ -515,4 +515,10 @@ class Feature
 	}
 }
 
-export { Feature, ISection, IUriToken, ILineToken };
+export
+{
+	Feature,
+	ISection,
+	IUriToken,
+	ILineToken
+};

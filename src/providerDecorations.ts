@@ -1,6 +1,6 @@
-import { getTestExecutionDetail, ITestExecutionDetail } from "./helper";
+import { getDarkIcon, getLightIcon, getTestExecutionDetail, ITestExecutionDetail } from "./helper";
 import { ProviderResults } from "./providerResults";
-import * as path from 'path';
+import { ENTRY_TYPE, ENTRY_STATE } from "./types/entry";
 import * as vscode from 'vscode';
 
 class ProviderDecorations
@@ -8,7 +8,7 @@ class ProviderDecorations
 	private timeout: NodeJS.Timeout;
 	private context: vscode.ExtensionContext;
 
-    private readonly decorationNone: vscode.TextEditorDecorationType;
+	private readonly decorationNone: vscode.TextEditorDecorationType;
 	private readonly decorationPass: vscode.TextEditorDecorationType;
 	private readonly decorationFail: vscode.TextEditorDecorationType;
 
@@ -16,9 +16,9 @@ class ProviderDecorations
 	{
 		this.context = context;
 
-		this.decorationNone = this.getDecorationType(ProviderResults.ENTRY_STATE.NONE);
-		this.decorationPass = this.getDecorationType(ProviderResults.ENTRY_STATE.PASS);
-		this.decorationFail = this.getDecorationType(ProviderResults.ENTRY_STATE.FAIL);
+		this.decorationNone = this.getDecorationType(ENTRY_STATE.NONE);
+		this.decorationPass = this.getDecorationType(ENTRY_STATE.PASS);
+		this.decorationFail = this.getDecorationType(ENTRY_STATE.FAIL);
 
 		vscode.window.onDidChangeActiveTextEditor(editor =>
 		{
@@ -45,10 +45,10 @@ class ProviderDecorations
 	{
 		vscode.window.visibleTextEditors.forEach(async (editor) =>
 		{
-            if (editor.document.languageId !== 'karate')
-            {
-                return;
-            }
+			if (editor.document.languageId !== 'karate')
+			{
+				return;
+			}
 
 			let rangeNone = [];
 			let rangePass = [];
@@ -56,7 +56,7 @@ class ProviderDecorations
 	
 			if (Boolean(vscode.workspace.getConfiguration('karateRunner.editor').get('toggleResultsInGutter')))
 			{
-				let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(editor.document.uri, vscode.FileType.File);
+				let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(editor.document.uri, ENTRY_TYPE.FILE);
 	
 				tedArray.forEach((ted) =>
 				{
@@ -65,15 +65,15 @@ class ProviderDecorations
 		
 					switch (state)
 					{
-						case ProviderResults.ENTRY_STATE.NONE:
+						case ENTRY_STATE.NONE:
 							rangeNone.push({ range });
 							break;
 						
-						case ProviderResults.ENTRY_STATE.PASS:
+						case ENTRY_STATE.PASS:
 							rangePass.push({ range });
 							break;
 		
-						case ProviderResults.ENTRY_STATE.FAIL:
+						case ENTRY_STATE.FAIL:
 							rangeFail.push({ range });
 							break;
 					}
@@ -86,29 +86,18 @@ class ProviderDecorations
 		});
 	}
 
-	private getDecorationType(state: ProviderResults.ENTRY_STATE): vscode.TextEditorDecorationType
+	private getDecorationType(state: ENTRY_STATE): vscode.TextEditorDecorationType
 	{
-		let icon = 'karate-test-none.svg';
-
-		if (state === ProviderResults.ENTRY_STATE.PASS)
-		{
-			icon = 'karate-test-pass.svg';
-		}
-		else if (state === ProviderResults.ENTRY_STATE.FAIL)
-		{
-			icon = 'karate-test-fail.svg';
-		}
-
 		const decorationType = vscode.window.createTextEditorDecorationType(
 		{
 			light:
 			{
-				gutterIconPath: path.join(__dirname, '..', 'resources', 'light', icon),
+				gutterIconPath: getLightIcon(`karate-test-${state}.svg`),
 				gutterIconSize: '85%',
 			},
 			dark:
 			{
-				gutterIconPath: path.join(__dirname, '..', 'resources', 'dark', icon),
+				gutterIconPath: getDarkIcon(`karate-test-${state}.svg`),
 				gutterIconSize: '85%'
 			}
 		});

@@ -2,7 +2,6 @@ import { ProviderResults } from "./providerResults";
 import { runKarateTest } from "./commands";
 import * as vscode from 'vscode';
 
-
 interface IExecutionItem
 {
 	executionArgs: any;

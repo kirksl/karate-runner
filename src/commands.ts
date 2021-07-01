@@ -1,10 +1,12 @@
-import{ getProjectDetail, getTestExecutionDetail, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail } from "./helper";
+import { getProjectDetail, getTestExecutionDetail, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail } from "./helper";
 import { Feature, ISection } from "./feature";
+import { ENTRY_TYPE } from "./types/entry";
 import ProviderStatusBar from "./providerStatusBar";
 import ProviderExecutions from "./providerExecutions";
 import parse = require('parse-curl');
 import * as vscode from 'vscode';
-let os = require('os')
+import os = require('os');
+import open = require('open');
 
 let debugLineNumber: number = 0;
 let debugFeatureFile: string = '';
@@ -88,7 +90,7 @@ function getDebugFile()
 	let debugLine: string = (debugLineNumber === 0) ? "" : `:${debugLineNumber}`;
 	debugLineNumber = 0;
 
-    let debugFile: string = debugFeatureFile;
+	let debugFile: string = debugFeatureFile;
 	
 	if (debugFile !== null)
 	{
@@ -102,13 +104,13 @@ function getDebugFile()
 
 async function getDebugBuildFile()
 {
-    let debugFile: string = debugFeatureFile;
-    debugFeatureFile = '';
+	let debugFile: string = debugFeatureFile;
+	debugFeatureFile = '';
 
-    if (debugFile === '')
-    {
-        debugFile = await getActiveFeatureFile();
-    }
+	if (debugFile === '')
+	{
+		debugFile = await getActiveFeatureFile();
+	}
 	
 	if (debugFile !== null && debugFile !== '')
 	{
@@ -121,38 +123,53 @@ async function getDebugBuildFile()
 	}
 }
 
+async function runTagKarateTests(args)
+{
+	args.karateOptions = `--tags ${args.tag}`;
+	args.karateJarOptions = `-t ${args.tag}`;
+	args.fileType = vscode.FileType.Directory;
+	args.testUri = args.uri;
+	runKarateTest([args]);
+}
+
 async function runAllKarateTests(args = null)
 {
-    if (args === null)
-    {
+	if (args === null)
+	{
 		let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-        if (activeEditor === undefined || activeEditor.document.languageId !== 'karate')
-        {
-            return;
-        }
+		if (activeEditor === undefined || activeEditor.document.languageId !== 'karate')
+		{
+			return;
+		}
 
-        args = { uri: activeEditor.document.uri, type: vscode.FileType.File };
-    }
+		args = { uri: activeEditor.document.uri, type: ENTRY_TYPE.FILE };
+	}
 
-    if (args.type !== vscode.FileType.Unknown)
-    {
-        let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(args.uri, args.type);
-        let ted: ITestExecutionDetail = tedArray[0];
+	if (args.type !== ENTRY_TYPE.TEST)
+	{
+		let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(args.uri, args.type);
+		let ted: ITestExecutionDetail = tedArray[0];
 
-        if (ted === undefined)
-        {
-            return;
-        }
+		if (ted === undefined)
+		{
+			return;
+		}
 
-        args = [];
-        args[0] = 
-        {
-            karateOptions: ted.karateOptions,
-            karateJarOptions: ted.karateJarOptions,
-            testUri: ted.testUri,
-            fileType: ted.fileType
-        };
-    }
+		if (args.tag)
+		{
+			ted.karateOptions = `--tags ${args.tag} ${ted.karateOptions}`;
+			ted.karateJarOptions = `-t ${args.tag} ${ted.karateJarOptions}`;
+		}
+
+		args = [];
+		args[0] = 
+		{
+			karateOptions: ted.karateOptions,
+			karateJarOptions: ted.karateJarOptions,
+			testUri: ted.testUri,
+			fileType: ted.fileType
+		};
+	}
 
 	runKarateTest(args);
 }
@@ -165,13 +182,13 @@ async function runKarateTest(args = null)
 	let targetTestUri: vscode.Uri;
 	let targetTestUriType: vscode.FileType;
 
-    if (args === null)
+	if (args === null)
 	{
 		let activeEditor: vscode.TextEditor = vscode.window.activeTextEditor;
-        if (activeEditor === undefined || activeEditor.document.languageId !== 'karate')
-        {
-            return;
-        }
+		if (activeEditor === undefined || activeEditor.document.languageId !== 'karate')
+		{
+			return;
+		}
 
 		let activeLine = activeEditor.selection.active.line;
 		
@@ -183,20 +200,20 @@ async function runKarateTest(args = null)
 		});
 		
 		if (activeSection === undefined)
-        {
-            return;
-        }
+		{
+			return;
+		}
 		
-		let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(activeEditor.document.uri, vscode.FileType.File);
+		let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(activeEditor.document.uri, ENTRY_TYPE.FILE);
 		let ted: ITestExecutionDetail = tedArray.find((ted) =>
 		{
 			return ted.codelensLine === activeSection.startLine;
 		});
 		
 		if (ted === undefined)
-        {
-            return;
-        }
+		{
+			return;
+		}
 		
 		args = {};
 		args.karateOptions = ted.karateOptions;
@@ -204,15 +221,15 @@ async function runKarateTest(args = null)
 		args.testUri = activeEditor.document.uri;
 		args.fileType = ted.fileType;
 	}
-    else
-    {
-        args = (args.command) ? args.command.arguments[0] : args[0];
-    }
+	else
+	{
+		args = (args.command) ? args.command.arguments[0] : args[0];
+	}
 
-    karateOptions = args.karateOptions;
-    karateJarOptions = args.karateJarOptions;
-    targetTestUri = args.testUri;
-    targetTestUriType = args.fileType;
+	karateOptions = args.karateOptions;
+	karateJarOptions = args.karateJarOptions;
+	targetTestUri = args.testUri;
+	targetTestUriType = args.fileType;
 	
 	let mavenCmd = "mvn";
 	let gradleCmd = "gradle";
@@ -366,7 +383,7 @@ async function runKarateTest(args = null)
 		runCommand = `${karateJarArgs} "${karateJarOptions}"`;
 	}
 		
-	let relativePattern = new vscode.RelativePattern(projectRootPath, String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget')));
+	let relativePattern = new vscode.RelativePattern(projectRootPath, String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTarget')));
 	let watcher = vscode.workspace.createFileSystemWatcher(relativePattern);
 	let reportUrisFound: vscode.Uri[] = [];
 		
@@ -423,11 +440,11 @@ async function runKarateTest(args = null)
 			ProviderExecutions.addExecutionToHistory();
 			ProviderExecutions.executionArgs = null;
 					
-			if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildReports').get('openAfterEachRun')))
+			if (Boolean(vscode.workspace.getConfiguration('karateRunner.reports').get('openAfterEachRun')))
 			{
 				reportUrisFound.forEach((reportUri) =>
 				{
-					openBuildReport(reportUri);
+					openExternalUri(reportUri);
 				});
 			}
 		}
@@ -468,16 +485,16 @@ async function runKarateTest(args = null)
 
 async function debugKarateTest(args = null)
 {
-    if (args !== null)
+	if (args !== null)
 	{
-        args = (args.command) ? args.command.arguments[0] : args[0];
+		args = (args.command) ? args.command.arguments[0] : args[0];
 
-        debugFeatureFile = args.testUri.fsPath;
-        debugLineNumber = args.debugLine;
+		debugFeatureFile = args.testUri.fsPath;
+		debugLineNumber = args.debugLine;
 	}
 	else
 	{
-        debugFeatureFile = await getActiveFeatureFile();
+		debugFeatureFile = await getActiveFeatureFile();
 		debugLineNumber = 0;
 	}
 	
@@ -486,7 +503,7 @@ async function debugKarateTest(args = null)
 
 function displayReportsTree(displayType)
 {
-	vscode.workspace.getConfiguration().update('karateRunner.buildReports.activityBarDisplayType', displayType);
+	vscode.workspace.getConfiguration().update('karateRunner.reports.activityBarDisplayType', displayType);
 }
 
 async function filterReportsTree()
@@ -496,14 +513,14 @@ async function filterReportsTree()
 	filter = await vscode.window.showInputBox
 	(
 		{
-			prompt: "Build Reports Filter (e.g. text, **/*.html)",
-			value: String(vscode.workspace.getConfiguration('karateRunner.buildReports').get('toTarget'))
+			prompt: "Reports Filter (e.g. text, **/*.html)",
+			value: String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTarget'))
 		}
 	);
 		
 	if (filter !== undefined && filter !== "")
 	{
-		await vscode.workspace.getConfiguration().update('karateRunner.buildReports.toTarget', filter);
+		await vscode.workspace.getConfiguration().update('karateRunner.reports.toTarget', filter);
 	}
 }
 
@@ -530,28 +547,34 @@ async function filterTestsTree()
 	}
 }
 
-function openBuildReport(reportUri)
+function openExternalUri(uri)
 {
-	vscode.env.openExternal(reportUri);
+	openExternalUrl(`${uri.scheme}://${uri.authority}${uri.path}`);
+}
+
+function openExternalUrl(url)
+{
+	open(url);
 }
 
 function openFileInEditor(args)
 {
-    args = (args.command) ? args.command.arguments[0] : args;
+	args = (args.command) ? args.command.arguments[0] : args;
 
-    if (args.testRange && args.testRange !== null)
-    {
-        vscode.window.showTextDocument(args.testUri, { selection: args.testRange });
-    }
-    else
-    {
-        vscode.window.showTextDocument(args.testUri);
-    }
+	if (args.testRange && args.testRange !== null)
+	{
+		vscode.window.showTextDocument(args.testUri, { selection: args.testRange });
+	}
+	else
+	{
+		vscode.window.showTextDocument(args.testUri);
+	}
 }
 
 function openKarateSettings()
 {
-	vscode.commands.executeCommand( 'workbench.action.openSettings', 'Karate Runner' );
+	vscode.commands.executeCommand('workbench.action.openSettings', 'Karate Runner');
+	vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
 }
 
 function toggleResultsInGutter()
@@ -568,11 +591,13 @@ export
 	debugKarateTest,
 	runKarateTest,
 	runAllKarateTests,
+	runTagKarateTests,
 	displayReportsTree,
 	filterReportsTree,
 	displayTestsTree,
 	filterTestsTree,
-	openBuildReport,
+	openExternalUri,
+	openExternalUrl,
 	openFileInEditor,
 	openKarateSettings,
 	toggleResultsInGutter

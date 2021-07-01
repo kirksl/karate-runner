@@ -1,4 +1,6 @@
-import { getTestExecutionDetail, ITestExecutionDetail } from "./helper";
+import { getTestExecutionDetail, ITestExecutionDetail, getIcon } from "./helper";
+import { ENTRY_TYPE, ENTRY_STATE, IEntry } from "./types/entry";
+import { DISPLAY_TYPE } from "./types/display";
 import ProviderFileSystem from "./providerFileSystem";
 import { ProviderResults } from "./providerResults";
 import * as vscode from 'vscode';
@@ -9,37 +11,37 @@ interface IDisposable
 	dispose(): void;
 }
 
-interface IEntry
+class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposable
 {
-	uri: any;
-	type: vscode.FileType;
-	command?: vscode.Command;
-	state: ProviderResults.ENTRY_STATE;
-    fails?: number;
-    ignored: boolean;
-}
-
-export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposable
-{
-    private treeView: vscode.TreeView<any>;
+	private treeView: vscode.TreeView<any>;
 	private providerFileSystem: ProviderFileSystem;
+	private testGlob: string;
+	private testFiles: vscode.Uri[];
+	private hideIgnored: boolean;
+	private displayType: String;
 	private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
 	readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
 
 	constructor()
 	{
 		this.providerFileSystem = new ProviderFileSystem();
-        this.treeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: this });
+		this.treeView = vscode.window.createTreeView('karate-tests', { showCollapseAll: true, treeDataProvider: this });
+		this.treeView.message = null;
 
-        ProviderResults.onTestResults((json) => { this.refresh(); });
-    }
+		ProviderResults.onTestResults(() => { this.refresh(); });
+	}
 
-	public refresh()
+	public async refresh()
 	{
+		this.treeView.message = null;
+		this.testGlob = String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTarget'));
+		this.testFiles = await vscode.workspace.findFiles(this.testGlob).then((value) => { return value; });
+		this.hideIgnored = Boolean(vscode.workspace.getConfiguration('karateRunner.tests').get('hideIgnored'));
+		this.displayType = String(vscode.workspace.getConfiguration('karateRunner.tests').get('activityBarDisplayType'));
 		this._onDidChangeTreeData.fire();
 	}
 
-	public clearResults(): any
+	public clearResults()
 	{
 		ProviderResults.clearTestResults();
 		this.refresh();
@@ -47,300 +49,428 @@ export class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDi
 
 	async getChildren(element?: IEntry): Promise<IEntry[]>
 	{
-		let glob = String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTarget'));
-		let testFiles = await vscode.workspace.findFiles(glob).then((value) => { return value; });
-        let hideIgnored = Boolean(vscode.workspace.getConfiguration('karateRunner.tests').get('hideIgnored'));
-
 		if (element)
 		{
-			if (element.type === vscode.FileType.File)
+			switch (element.type)
 			{
-				let entries: IEntry[] = [];
-				let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(element.uri, vscode.FileType.File);
-
-				tedArray.forEach((ted) =>
-				{
-                    if (ted.testIgnored && hideIgnored)
-                    {
-                        // do nothing
-                    }
-                    else
-                    {
-                        let testCommand: vscode.Command =
-                        {
-                            arguments: [ted],
-                            command: "karateRunner.tests.open",
-                            title: ted.codelensRunTitle
-                        };
-    
-                        entries.push(
-                        {
-                            uri: ted.testTitle,
-                            type: vscode.FileType.Unknown,
-                            command: testCommand,
-                            state: ProviderResults.getTestResult(ted),
-                            ignored: ted.testIgnored
-                        });
-                    }
-				});
-
-				return entries;
-			}
-
-			let displayType = String(vscode.workspace.getConfiguration('karateRunner.tests').get('activityBarDisplayType'));
-
-			if (displayType === "Shallow")
-			{
-				let testFilesFiltered = testFiles.filter((testFile) =>
-				{
-					return testFile.toString().startsWith(element.uri.toString());
-				});
-
-                testFilesFiltered.sort();
-
-                let entries: IEntry[] = [];
-                for (let ndx = 0; ndx < testFilesFiltered.length; ndx++)
-                {
-                    let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(testFilesFiltered[ndx], vscode.FileType.File);
-
-                    if (tedArray[0].testIgnored && hideIgnored)
-                    {
-                        // do nothing
-                    }
-                    else
-                    {
-                        let result = ProviderResults.getFileResult(testFilesFiltered[ndx]);
-
-                        entries.push(
-                        {
-                            uri: testFilesFiltered[ndx],
-                            type: vscode.FileType.File,
-                            command:
-                            {
-                                arguments: [{ testUri: testFilesFiltered[ndx], debugLine: 0 }],
-                                command: "karateRunner.tests.open",
-                                title: "karateRunner.tests.open"
-                            },
-                            state: result.state,
-                            fails: result.fails,
-                            ignored: tedArray[0].testIgnored
-                        });
-                    }
-                }
-
-                return entries;
-			}
-			else
-			{
-				let children = await this.providerFileSystem.readDirectory(element.uri);
-
-				let childrenFiltered = children.filter((child) =>
-				{
-					let childUri = vscode.Uri.file(path.join(element.uri.fsPath, child[0]));
-
-					let found = testFiles.find((file) =>
+				case ENTRY_TYPE.ROOT:
+				case ENTRY_TYPE.FOLDER:
+					switch (this.displayType)
 					{
-						return file.toString().startsWith(childUri.toString());
-					});
+						case DISPLAY_TYPE.LIST: // returns ENTRY_TYPE.FILE array for all files below incoming folder
+						case DISPLAY_TYPE.SHALLOW:
+							return this.getAllFiles(element);
 
-					return found !== undefined;
-				});
+						case DISPLAY_TYPE.TREE: // returns ENTRY_TYPE.FILE|FOLDER array for all files/folders for incoming folder
+						case DISPLAY_TYPE.DEEP:
+							return this.getFilesFolders(element);
 
-                let entries: IEntry[] = [];
-                for (let ndx = 0; ndx < childrenFiltered.length; ndx++)
-                {
-                    let name = childrenFiltered[ndx][0];
-                    let type = childrenFiltered[ndx][1];
-                    let uri = vscode.Uri.file(path.join(element.uri.fsPath, name));
+						case DISPLAY_TYPE.TAG: // returns ENTRY_TYPE.TAG array for all files for incoming tag
+							return this.getTags(element);
 
-                    let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(uri, type);
+						default:
+							return null;
+					}
 
-                    if (tedArray[0].testIgnored && hideIgnored)
-                    {
-                        // do nothing
-                    }
-                    else
-                    {
-                        let cmd = (type === vscode.FileType.File) ? "karateRunner.tests.open" : "karateRunner.tests.runAll";
-                        let result = (type === vscode.FileType.File) ? ProviderResults.getFileResult(uri) : ProviderResults.getFolderResult(uri);
-                        
-                        entries.push(
-                        {
-                            uri: uri,
-                            type: type,
-                            command:
-                            {
-                                arguments: [{ testUri: uri, debugLine: 0 }],
-                                command: cmd,
-                                title: cmd
-                            },
-                            state: result.state,
-                            fails: result.fails,
-                            ignored: tedArray[0].testIgnored
-                        });
-                    }
-                }
+				case ENTRY_TYPE.FILE: // returns ENTRY_TYPE.TEST array for TEDs of incoming file (TAG aware)
+					return this.getTests(element);
 
-                return entries;
+				case ENTRY_TYPE.TAG: // returns ENTRY_TYPE.FILE array for all files per tag accumulated (TAG aware)
+					return this.getAllFiles(element);
+
+				case ENTRY_TYPE.TEST: // null, we're done
+					return null;
 			}
 		}
 
-		let workspaceFolder = vscode.workspace.workspaceFolders.filter(folder => folder.uri.scheme === 'file')[0];
-		if (workspaceFolder)
-		{
-			let children = await this.providerFileSystem.readDirectory(workspaceFolder.uri);
-
-			let childrenFiltered = children.filter((child) =>
-			{
-				let childUri = vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, child[0]));
-
-				let found = testFiles.find((file) =>
-				{
-					return file.toString().startsWith(childUri.toString());
-				});
-
-				return found !== undefined;
-			});
-
-			if (childrenFiltered.length <= 0)
-			{
-				return [{ uri: "No tests found...", type: vscode.FileType.Unknown, state: ProviderResults.ENTRY_STATE.NONE, ignored: false }];
-			}
-
-			childrenFiltered.sort((a, b) =>
-			{
-				if (a[1] === b[1])
-				{
-					return a[0].localeCompare(b[0]);
-				}
-
-				return a[1] === vscode.FileType.Directory ? -1 : 1;
-			});
-
-			return childrenFiltered.map(([name, type]) =>
-            {
-                let uri = vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, name));
-                let result = ProviderResults.getFolderResult(uri);
-
-                return {
-                    uri: uri,
-                    type: type,
-                    state: result.state,
-                    fails: result.fails,
-                    ignored: false
-                }
-            });
-		}
-
-		return [{ uri: "No tests found...", type: vscode.FileType.Unknown, state: ProviderResults.ENTRY_STATE.NONE, ignored: false }];
+		return this.getWorkspaceFolders();
 	}
 
-    getParent(element: IEntry): IEntry | undefined
-    {
-        return undefined;
-    }
+	getParent(element: IEntry): IEntry | undefined
+	{
+		return undefined;
+	}
 
 	getTreeItem(element: IEntry): vscode.TreeItem
 	{
-        let icon: string = '';
+		const treeItem = new vscode.TreeItem(element.uri, vscode.TreeItemCollapsibleState.Collapsed);
 
-        let executionState: string = 'none';
-        switch (element.state)
-        {
-            case ProviderResults.ENTRY_STATE.PASS:
-                executionState = 'pass';
-                break;
-
-            case ProviderResults.ENTRY_STATE.FAIL:
-                executionState = 'fail';
-                break;
-        }
-
-		let collapsibleState: vscode.TreeItemCollapsibleState;
 		switch (element.type)
 		{
-			case vscode.FileType.Directory:
-			{
-				collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+			case ENTRY_TYPE.ROOT:
+				treeItem.iconPath = getIcon(`folder-none.svg`);
+				treeItem.label = element.tag;
 				break;
-			}
-			case vscode.FileType.File:
-			{
-				collapsibleState = vscode.TreeItemCollapsibleState.Collapsed;
+
+			case ENTRY_TYPE.TAG:
+				treeItem.iconPath = getIcon(`tag-${element.state}.svg`);
+				treeItem.label = element.tag;
+				treeItem.tooltip = element.tag;
+
+				if (element.tag == '@ignore')
+				{
+					treeItem.contextValue = 'testTagIgnore'
+					treeItem.description = 'ignored';
+				}
+				else
+				{
+					treeItem.contextValue = 'testTag';
+
+					if (element.fails > 0)
+					{
+						treeItem.description = element.fails + '';
+					}
+				}
+
 				break;
-			}
-			default:
-			{
-				collapsibleState = vscode.TreeItemCollapsibleState.None;
+			
+			case ENTRY_TYPE.FOLDER:
+				treeItem.iconPath = getIcon(`folder-${element.state}.svg`);
+				treeItem.contextValue = 'testDirectory';
+	
+				if (element.fails > 0)
+				{
+					treeItem.description = element.fails + '';
+				}
+
 				break;
-			}
+
+			case ENTRY_TYPE.FILE:
+				treeItem.iconPath = getIcon(`folder-${element.state}.svg`);
+
+				if (element.ignored)
+				{
+					treeItem.contextValue = 'testFileIgnored';
+					treeItem.description = 'ignored';
+				}
+				else
+				{
+					treeItem.contextValue = 'testFile';
+	
+					if (element.fails > 0)
+					{
+						treeItem.description = element.fails + '';
+					}
+				}
+
+				break;
+
+			case ENTRY_TYPE.TEST:
+				treeItem.iconPath = getIcon(`karate-test-${element.state}.svg`);
+				treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
+
+				if (element.ignored)
+				{
+					treeItem.command = element.command;
+					treeItem.contextValue = 'testIgnored';
+					treeItem.description = 'ignored';
+				}
+				else
+				{
+					treeItem.command = element.command;
+					treeItem.contextValue = (element.uri.startsWith('Feature:') ? 'testFeature' : 'testScenario');
+				}
 		}
-
-		const treeItem = new vscode.TreeItem
-		(
-			element.uri,
-			collapsibleState
-		);
-
-		if (collapsibleState === vscode.TreeItemCollapsibleState.None && element.command !== undefined)
-		{
-            icon = `karate-test-${executionState}.svg`;
-
-            if (element.ignored)
-            {
-                treeItem.command = element.command;
-                treeItem.contextValue = 'testIgnored';
-                treeItem.description = 'ignored';
-            }
-            else
-            {
-                treeItem.command = element.command;
-                treeItem.contextValue = (element.uri.startsWith('Feature:') ? 'testFeature' : 'testScenario');
-            }
-		}
-		else if (element.type === vscode.FileType.File)
-		{
-            icon = `folder-${executionState}.svg`;
-
-            if (element.ignored)
-            {
-                treeItem.contextValue = 'testFileIgnored';
-                treeItem.description = 'ignored';
-            }
-            else
-            {
-                treeItem.contextValue = 'testFile';
-
-                if (element.fails > 0)
-                {
-                    treeItem.description = element.fails + '';
-                }
-            }
-		}
-		else if (element.type === vscode.FileType.Directory)
-		{
-            icon = `folder-${executionState}.svg`;
-			treeItem.contextValue = 'testDirectory';
-
-            if (element.fails > 0)
-            {
-                treeItem.description = element.fails + '';
-            }
-		}
-
-        treeItem.iconPath =
-        {
-            light: path.join(__dirname, '..', 'resources', 'light', icon),
-            dark: path.join(__dirname, '..', 'resources', 'dark', icon)
-        };
 
 		return treeItem;
 	}
 
-    public dispose(): void
-    {
-        this.treeView.dispose();
-    }
+	private async getWorkspaceFolders(): Promise<IEntry[]>
+	{
+		if (this.testFiles == null)
+		{
+			this.testGlob = String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTarget'));
+			this.testFiles = await vscode.workspace.findFiles(this.testGlob).then((value) => { return value; });
+		}
+
+		let workspaceFolder = vscode.workspace.workspaceFolders.filter(folder => folder.uri.scheme === 'file')[0];
+
+		let entries: IEntry[] = [];
+		entries.push(
+		{
+			uri: workspaceFolder.uri,
+			type: ENTRY_TYPE.ROOT,
+			state: ENTRY_STATE.NONE,
+			ignored: false
+		});
+
+		if (entries.length > 0)
+		{
+			return entries;
+		}
+
+		this.treeView.message = "No tests found...";
+		return null;
+	}
+
+	private async getTags(directory: IEntry): Promise<IEntry[]>
+	{
+		let testFilesFiltered = this.testFiles.filter((testFile) =>
+		{
+			return testFile.toString().startsWith(directory.uri.toString());
+		});
+
+		testFilesFiltered.sort();
+
+		let tags: string[] = [];
+		for (let ndx = 0; ndx < testFilesFiltered.length; ndx++)
+		{
+			let tedArray = await getTestExecutionDetail(testFilesFiltered[ndx], ENTRY_TYPE.FILE);
+
+			if (tedArray[0].testIgnored && this.hideIgnored)
+			{
+				// do nothing
+			}
+			else
+			{
+				tedArray.forEach((ted) =>
+				{
+					let tedTags = ted.testTag.split(/\s+/);
+					tedTags.forEach((tag) =>
+					{
+						if (tag == "@ignore" && this.hideIgnored)
+						{
+							// do nothing
+						}
+						else
+						{
+							if (!tags.includes(tag))
+							{
+								tags.push(tag);
+							}
+						}
+					});
+				});
+			}
+		}
+
+		let entries: IEntry[] = [];
+		for (let ndx = 0; ndx < tags.length; ndx++)
+		{
+			let tagResult = ProviderResults.getTagResult(tags[ndx]);
+			let tagCommand: vscode.Command =
+			{
+				arguments: [],
+				command: "karateRunner.tests.open",
+				title: "karateRunner.tests.open"
+			};
+
+			entries.push({
+				uri: directory.uri,
+				tag: tags[ndx],
+				type: ENTRY_TYPE.TAG,
+				command: tagCommand,
+				state: tagResult.state,
+				fails: tagResult.fails,
+				ignored: null
+			});
+		}
+
+		return entries;
+	}
+
+	private async getTests(file: IEntry): Promise<IEntry[]>
+	{
+		let entries: IEntry[] = [];
+		let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(file.uri, ENTRY_TYPE.FILE);
+
+		tedArray.forEach((ted) =>
+		{
+			if (ted.testIgnored && this.hideIgnored)
+			{
+				// do nothing
+			}
+			else
+			{
+				let testCommand: vscode.Command =
+				{
+					arguments: [ted],
+					command: "karateRunner.tests.open",
+					title: ted.codelensRunTitle
+				};
+
+				if (file.tag)
+				{
+					let tagArray = ted.testTag.split(/\s+/);
+					if (tagArray.includes(file.tag))
+					{
+						entries.push(
+						{
+							uri: ted.testTitle,
+							type: ENTRY_TYPE.TEST,
+							command: testCommand,
+							state: ProviderResults.getTestResult(ted),
+							ignored: ted.testIgnored
+						});                                
+					}
+				}
+				else
+				{
+					entries.push(
+					{
+						uri: ted.testTitle,
+						type: ENTRY_TYPE.TEST,
+						command: testCommand,
+						state: ProviderResults.getTestResult(ted),
+						ignored: ted.testIgnored
+					});
+				}
+			}
+		});
+
+		return entries;
+	}
+
+	private async getFilesFolders(directory: IEntry): Promise<IEntry[]>
+	{
+		let children = await this.providerFileSystem.readDirectory(directory.uri);
+
+		let childrenFiltered = children.filter((child) =>
+		{
+			let childUri = vscode.Uri.file(path.join(directory.uri.fsPath, child[0]));
+
+			let found = this.testFiles.find((file) =>
+			{
+				return file.toString().startsWith(childUri.toString());
+			});
+
+			return found !== undefined;
+		});
+
+		let entries: IEntry[] = [];
+		for (let ndx = 0; ndx < childrenFiltered.length; ndx++)
+		{
+			let name = childrenFiltered[ndx][0];
+			let type = childrenFiltered[ndx][1];
+			let uri = vscode.Uri.file(path.join(directory.uri.fsPath, name));
+			let entryType: ENTRY_TYPE;
+			let testIgnored: boolean;
+
+			if (type === vscode.FileType.Directory)
+			{
+				entryType = ENTRY_TYPE.FOLDER;
+				testIgnored = false;
+			}
+			else
+			{
+				entryType = ENTRY_TYPE.FILE;
+				let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(uri, entryType);
+				testIgnored = tedArray[0].testIgnored;
+			}
+			
+
+			if (testIgnored && this.hideIgnored)
+			{
+				// do nothing
+			}
+			else
+			{
+				let cmd = (entryType == ENTRY_TYPE.FILE) ? "karateRunner.tests.open" : "karateRunner.tests.runAll";
+				let result = (entryType == ENTRY_TYPE.FILE) ? ProviderResults.getFileResult(uri) : ProviderResults.getFolderResult(uri);
+				
+				entries.push(
+				{
+					uri: uri,
+					type: entryType,
+					command:
+					{
+						arguments: [{ testUri: uri, debugLine: 0 }],
+						command: cmd,
+						title: cmd
+					},
+					state: result.state,
+					fails: result.fails,
+					ignored: testIgnored
+				});
+			}
+		}
+
+		return entries;
+	}
+
+	private async getAllFiles(directory: IEntry): Promise<IEntry[]>
+	{
+		let testFilesFiltered = this.testFiles.filter((testFile) =>
+		{
+			return testFile.toString().startsWith(directory.uri.toString());
+		});
+
+		testFilesFiltered.sort();
+
+		let entries: IEntry[] = [];
+		for (let ndx = 0; ndx < testFilesFiltered.length; ndx++)
+		{
+			let tedArray = await getTestExecutionDetail(testFilesFiltered[ndx], ENTRY_TYPE.FILE);
+
+			if (tedArray[0].testIgnored && this.hideIgnored)
+			{
+				// do nothing
+			}
+			else
+			{
+				if (directory.tag)
+				{
+					let tags: string[] = [];
+					tedArray.forEach((ted) =>
+					{
+						let tedTags = ted.testTag.split(/\s+/);
+						tedTags.forEach((tag) =>
+						{
+							if (!tags.includes(tag))
+							{
+								tags.push(tag);
+							}
+						});
+					});
+
+					if (tags.includes(directory.tag))
+					{
+						let result = ProviderResults.getFileTagResult(testFilesFiltered[ndx], directory.tag);
+						entries.push(
+						{
+							uri: testFilesFiltered[ndx],
+							tag: directory.tag,
+							type: ENTRY_TYPE.FILE,
+							command:
+							{
+								arguments: [{ testUri: testFilesFiltered[ndx], debugLine: 0 }],
+								command: "karateRunner.tests.open",
+								title: "karateRunner.tests.open"
+							},
+							state: result.state,
+							fails: result.fails,
+							ignored: tedArray[0].testIgnored
+						});
+					}
+				}
+				else
+				{
+					let result = ProviderResults.getFileResult(testFilesFiltered[ndx]);
+					entries.push(
+					{
+						uri: testFilesFiltered[ndx],
+						type: ENTRY_TYPE.FILE,
+						command:
+						{
+							arguments: [{ testUri: testFilesFiltered[ndx], debugLine: 0 }],
+							command: "karateRunner.tests.open",
+							title: "karateRunner.tests.open"
+						},
+						state: result.state,
+						fails: result.fails,
+						ignored: tedArray[0].testIgnored
+					});
+				}
+			}
+		}
+
+		return entries;
+	}
+
+	public dispose(): void
+	{
+		this.treeView.dispose();
+	}
 }
 
 export default ProviderKarateTests;

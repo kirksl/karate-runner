@@ -1,8 +1,9 @@
-import { ProviderResults } from "./providerResults";
+import { ServiceLocalStorage } from './serviceLocalStorage';
+import { openExternalUrl } from "./commands";
+import { ENTRY_TYPE } from "./types/entry";
 import path = require("path");
 import fs = require("fs");
 import * as vscode from 'vscode';
-
 
 interface IProjectDetail
 {
@@ -12,13 +13,13 @@ interface IProjectDetail
 
 interface ITestExecutionDetail
 {
-    fileType: vscode.FileType;
-    testUri: vscode.Uri;
+	fileType: ENTRY_TYPE;
+	testUri: vscode.Uri;
 	testTag: string;
 	testTitle: string;
-    testRange: vscode.Range;
+	testRange: vscode.Range;
 	testLine: number;
-    testIgnored: boolean;
+	testIgnored: boolean;
 	debugLine: number;
 	karateOptions: string;
 	karateJarOptions: string;
@@ -81,17 +82,17 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetai
 	return { projectRoot: projectRootPath, runFile: runFilePath };
 }
 
-async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): Promise<ITestExecutionDetail[]>
+async function getTestExecutionDetail(uri: vscode.Uri, type: ENTRY_TYPE): Promise<ITestExecutionDetail[]>
 {
 	let tedArray: ITestExecutionDetail[] = [];
 	
-	if (type === vscode.FileType.File)
+	if (type === ENTRY_TYPE.FILE)
 	{
 		let runTitle = "Karate: Run";
 		let debugTitle = "Karate: Debug";
-        let isIgnored = false;
-        let scenarioCount = 0;
-        let scenarioIgnoredCount = 0;
+		let isIgnored = false;
+		let scenarioCount = 0;
+		let scenarioIgnoredCount = 0;
 		
 		let document = await vscode.workspace.openTextDocument(uri);
 		
@@ -101,13 +102,13 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 		{
 			let ted: ITestExecutionDetail =
 			{
-                fileType: type,
-                testUri: uri,
+				fileType: type,
+				testUri: uri,
 				testTag: "",
 				testTitle: "",
-                testRange: null,
+				testRange: null,
 				testLine: 0,
-                testIgnored: isIgnored,
+				testIgnored: isIgnored,
 				debugLine: 0,
 				karateOptions: "",
 				karateJarOptions: "",
@@ -124,7 +125,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 			if (lineTestMatch !== null && lineTestMatch.index !== undefined)
 			{
 				ted.testTitle = lineText.trim();
-                ted.testRange = new vscode.Range(line, document.lineAt(line).firstNonWhitespaceCharacterIndex, line, lineText.length);
+				ted.testRange = new vscode.Range(line, document.lineAt(line).firstNonWhitespaceCharacterIndex, line, lineText.length);
 				ted.codelensLine = line;
 				
 				if (line > 0)
@@ -141,17 +142,17 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 						ted.testTag = "";
 					}
 				}
-                
+				
 				let lineScenarioRegExp = new RegExp("^\\s*(Scenario|Scenario Outline):(.*)$");
 				let lineScenarioMatch = lineText.match(lineScenarioRegExp);
 				if (lineScenarioMatch !== null && lineScenarioMatch.index !== undefined)
 				{
-                    scenarioCount++;
-                    if (isIgnored || ted.testTag.split(/\s+/).includes("@ignore"))
-                    {
-                        scenarioIgnoredCount++;
-                        ted.testIgnored = true;
-                    }
+					scenarioCount++;
+					if (isIgnored || ted.testTag.split(/\s+/).includes("@ignore"))
+					{
+						scenarioIgnoredCount++;
+						ted.testIgnored = true;
+					}
 
 					ted.testLine = line;
 					ted.debugLine = ted.testLine + 1;
@@ -162,11 +163,11 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 				}
 				else
 				{
-                    if (ted.testTag.split(/\s+/).includes("@ignore"))
-                    {
-                        isIgnored = true;
-                        ted.testIgnored = true;
-                    }
+					if (ted.testTag.split(/\s+/).includes("@ignore"))
+					{
+						isIgnored = true;
+						ted.testIgnored = true;
+					}
 
 					ted.testLine = line;
 					ted.debugLine = 0;
@@ -178,13 +179,13 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 			}
 		}
 
-        if (scenarioCount > 0)
-        {
-            if (scenarioCount == scenarioIgnoredCount)
-            {
-                tedArray[0].testIgnored = true;
-            }
-        }
+		if (scenarioCount > 0)
+		{
+			if (scenarioCount == scenarioIgnoredCount)
+			{
+				tedArray[0].testIgnored = true;
+			}
+		}
 	}
 	else
 	{
@@ -233,13 +234,13 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: vscode.FileType): P
 		
 		let ted: ITestExecutionDetail =
 		{
-            fileType: type,
-            testUri: uri,
+			fileType: type,
+			testUri: uri,
 			testTag: "",
 			testTitle: "",
-            testRange: null,
+			testRange: null,
 			testLine: 0,
-            testIgnored: false,
+			testIgnored: false,
 			debugLine: 0,
 			karateOptions: classPathNormalized,
 			karateJarOptions: classPathNormalized,
@@ -278,9 +279,9 @@ function getChildAbsolutePath(basePath: string, childPath: string): string
 			}
 			
 			if (result !== null)
-            {
-                break;
-            }
+			{
+				break;
+			}
 		}
 		
 		return result;
@@ -351,4 +352,55 @@ function createTreeViewWatcher(watcher, watcherGlob, provider)
 	provider.refresh();
 }
 
-export { getProjectDetail, getTestExecutionDetail, getChildAbsolutePath, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail, createTreeViewWatcher };
+function showWhatsNew(context: vscode.ExtensionContext)
+{
+	const VERSION_KEY = 'karate.runner.version';
+	const EXTENSION_ID = 'kirkslota.karate-runner';
+
+	ServiceLocalStorage.initialize(context.globalState);
+	
+	let extVersionCurrent = vscode.extensions.getExtension(EXTENSION_ID).packageJSON.version;
+	let extVersionLastRecord = ServiceLocalStorage.instance.getValue(VERSION_KEY);
+
+	if (extVersionLastRecord == null || extVersionLastRecord != extVersionCurrent)
+	{
+		ServiceLocalStorage.instance.setValue(VERSION_KEY, extVersionCurrent);
+		openExternalUrl(`https://github.com/kirksl/karate-runner/releases/tag/v${extVersionCurrent}`);
+	}
+}
+
+function getIcon(icon: string)
+{
+	let iconPath =
+	{
+		light: getLightIcon(icon),
+		dark: getDarkIcon(icon)
+	};
+
+	return iconPath;
+}
+
+function getLightIcon(icon: string)
+{
+	return path.join(__dirname, '..', 'resources', 'light', icon);
+}
+
+function getDarkIcon(icon: string)
+{
+	return path.join(__dirname, '..', 'resources', 'dark', icon);
+}
+
+export
+{
+	getProjectDetail,
+	getTestExecutionDetail,
+	getChildAbsolutePath,
+	getActiveFeatureFile,
+	IProjectDetail,
+	ITestExecutionDetail,
+	createTreeViewWatcher,
+	showWhatsNew,
+	getIcon,
+	getLightIcon,
+	getDarkIcon
+};
