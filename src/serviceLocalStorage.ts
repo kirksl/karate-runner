@@ -1,9 +1,16 @@
 import { Memento } from 'vscode';
 
-class ServiceLocalStorage
+export class ServiceLocalStorage
 {
-	constructor(private storage: Memento)
+	public static instance: ServiceLocalStorage;
+
+	private constructor(private storage: Memento)
 	{
+	}
+
+	public static initialize(storage: Memento)
+	{
+		this.instance = new ServiceLocalStorage(storage);
 	}
 
 	public getValue<T>(key: string): T
@@ -21,5 +28,3 @@ class ServiceLocalStorage
 		this.storage.update(key, undefined);
 	}
 }
-
-export default ServiceLocalStorage;

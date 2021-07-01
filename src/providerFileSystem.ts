@@ -12,7 +12,7 @@ namespace _ {
 		{
 			reject(messageError(error));
 		}
-        else
+		else
 		{
 			resolve(result);
 		}
@@ -144,8 +144,8 @@ namespace _ {
 export class FileStat implements vscode.FileStat
 {
 	constructor(private fsStat: fs.Stats)
-    {
-    }
+	{
+	}
 
 	get type(): vscode.FileType
 	{
@@ -185,14 +185,14 @@ export class FileStat implements vscode.FileStat
 
 export class ProviderFileSystem implements vscode.FileSystemProvider
 {
-    private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
+	private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
 
-    constructor()
-    {
-        this._onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
-    }
+	constructor()
+	{
+		this._onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+	}
 
-    get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]>
+	get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]>
 	{
 		return this._onDidChangeFile.event;
 	}

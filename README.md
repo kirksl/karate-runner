@@ -1,5 +1,5 @@
 # Karate Runner
-This extension will enable you to Open/Run/Debug Karate Tests and Build Reports by leveraging Codelens, Activity Bar, Debugger and much more.
+This extension will enable you to Open/Run/Debug Karate Tests and Reports by leveraging Codelens, Activity Bar, Debugger and much more.
 
 
 ## Features
@@ -12,7 +12,7 @@ A `Karate: Debug` `Codelens` will be added above each `Feature:`, `Scenario:` an
 A `Karate: Run | Karate: Debug` `Codelens` will be shown when hovering over any row within a `Scenario Outline:` `Examples:` table to enable running/debugging a single row.
 
 ### Activity Bar
-A `Karate Activity Bar` will be added to VSCode.  Clicking on the Activity Bar will reveal a `Build Reports` and a `Tests` view.  Clicking on a report will open it within the default program defined for its file type.  Clicking on a Feature will run all Scenario and Scenario Outlines within its feature file.  Clicking on a Scenario or Scenario Outline will run only that Scenario or Scenario Outline.
+A `Karate Activity Bar` will be added to VSCode.  Clicking on the Activity Bar will reveal a `Reports` and a `Tests` view.  Clicking on a report will open it within the default program defined for its file type.  Clicking on a Feature will run all Scenario and Scenario Outlines within its feature file.  Clicking on a Scenario or Scenario Outline will run only that Scenario or Scenario Outline.
 
 *Note Karate Features and Scenarios marked with exclusions such as `@KarateOptions(tags = {"~@ignore"})` will not be run.*
 

@@ -1,4 +1,5 @@
 import { getProjectDetail, IProjectDetail, ITestExecutionDetail } from "./helper";
+import { ENTRY_STATE } from "./types/entry";
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 
@@ -11,19 +12,20 @@ interface IResult
 {
 	path: string;
 	line: number;
+	tags: string[];
 	name: string;
 	isOutline: boolean;
 	isFeature: boolean;
-    passes: number;
-    fails: number;
-	state: ProviderResults.ENTRY_STATE;
+	passes: number;
+	fails: number;
+	state: ENTRY_STATE;
 }
 
 interface IAggregateResult
 {
-    passes: number;
-    fails: number;
-    state: ProviderResults.ENTRY_STATE;
+	passes: number;
+	fails: number;
+	state: ENTRY_STATE;
 }
 
 export class ProviderResults implements IDisposable
@@ -79,17 +81,18 @@ export class ProviderResults implements IDisposable
 		
 		let lastIndex = -1;
 		let lastSectionIndex = -1;
-        let result: IResult =
-        {
-            path: null,
-            line: null,
-            name: null,
-            isFeature: null,
-            isOutline: null,
-            passes: null,
-            fails: null,
-            state: null
-        };
+		let result: IResult =
+		{
+			path: null,
+			line: null,
+			tags: null,
+			name: null,
+			isFeature: null,
+			isOutline: null,
+			passes: null,
+			fails: null,
+			state: null
+		};
 
 		for (let ndx = 0; ndx < json.scenarioResults.length; ndx++)
 		{	
@@ -97,46 +100,49 @@ export class ProviderResults implements IDisposable
 			{
 				if (json.scenarioResults[ndx].failed)
 				{
-					ProviderResults.results[lastIndex].state = ProviderResults.ENTRY_STATE.FAIL;
+					ProviderResults.results[lastIndex].state = ENTRY_STATE.FAIL;
 				}
 
-                switch (json.scenarioResults[ndx].failed)
-                {
-                    case false:
-                        ProviderResults.results[lastIndex].passes += 1;
-                        break;
-    
-                    case true:
-                        ProviderResults.results[lastIndex].fails += 1;
-                        break;
-                }
+				switch (json.scenarioResults[ndx].failed)
+				{
+					case false:
+						ProviderResults.results[lastIndex].passes += 1;
+						break;
+	
+					case true:
+						ProviderResults.results[lastIndex].fails += 1;
+						break;
+				}
 			}
 			else
 			{
-                result = 
-                {
-                    path: json.prefixedPath,
-                    line: json.scenarioResults[ndx].line,
-                    name: json.scenarioResults[ndx].name,
-                    isFeature: false,
-                    isOutline: (json.scenarioResults[ndx].exampleIndex === -1) ? false : true,
-                    passes: 0,
-                    fails: 0,
-                    state: ProviderResults.ENTRY_STATE.NONE
-                };
+				let prefixPath: string = json.prefixedPath;
 
-                switch (json.scenarioResults[ndx].failed)
-                {
-                    case false:
-                        result.passes = 1;
-                        result.state = ProviderResults.ENTRY_STATE.PASS;
-                        break;
-    
-                    case true:
-                        result.fails = 1;
-                        result.state = ProviderResults.ENTRY_STATE.FAIL;
-                        break;
-                }
+				result = 
+				{
+					path: prefixPath.replace(/^classpath:/,''),
+					line: json.scenarioResults[ndx].line,
+					tags: json.scenarioResults[ndx].tags,
+					name: json.scenarioResults[ndx].name,
+					isFeature: false,
+					isOutline: (json.scenarioResults[ndx].exampleIndex === -1) ? false : true,
+					passes: 0,
+					fails: 0,
+					state: ENTRY_STATE.NONE
+				};
+
+				switch (json.scenarioResults[ndx].failed)
+				{
+					case false:
+						result.passes = 1;
+						result.state = ENTRY_STATE.PASS;
+						break;
+	
+					case true:
+						result.fails = 1;
+						result.state = ENTRY_STATE.FAIL;
+						break;
+				}
 
 				let targetIndex = ProviderResults.results.findIndex(r => r.name === result.name && r.path === result.path);
 				if (targetIndex === -1)
@@ -162,29 +168,32 @@ export class ProviderResults implements IDisposable
 			}
 		}
 		
+		let prefixPath: string = json.prefixedPath;
+
 		result = 
 		{
-			path: json.prefixedPath,
+			path: prefixPath.replace(/^classpath:/,''),
 			line: 0,
+			tags: null,
 			name: null,
 			isFeature: true,
 			isOutline: false,
-            passes: 0,
-            fails: 0,
-			state: ProviderResults.ENTRY_STATE.NONE
+			passes: 0,
+			fails: 0,
+			state: ENTRY_STATE.NONE
 		};
 		
-        let results = ProviderResults.results.filter(r => r.path === result.path && !r.isFeature);
-        result.passes = results.reduce((n, {passes}) => n + passes, 0);
-        result.fails = results.reduce((n, {fails}) => n + fails, 0);
+		let results = ProviderResults.results.filter(r => r.path === result.path && !r.isFeature);
+		result.passes = results.reduce((n, {passes}) => n + passes, 0);
+		result.fails = results.reduce((n, {fails}) => n + fails, 0);
 		
 		if (json.failedCount > 0 || result.fails > 0)
 		{
-			result.state = ProviderResults.ENTRY_STATE.FAIL;
+			result.state = ENTRY_STATE.FAIL;
 		}
 		else
 		{
-			result.state = ProviderResults.ENTRY_STATE.PASS;
+			result.state = ENTRY_STATE.PASS;
 		}
 		
 		let findIndex = ProviderResults.results.findIndex(r => r.line === result.line && r.path === result.path);
@@ -205,94 +214,150 @@ export class ProviderResults implements IDisposable
 		ProviderResults.results = [];
 	}
 	
-    public static getFolderResult(uri: vscode.Uri): IAggregateResult
-    {
-        let folderResult: IAggregateResult = 
-        {
-            passes: 0,
-            fails: 0,
-            state: ProviderResults.ENTRY_STATE.NONE
-        };
+	public static getFolderResult(uri: vscode.Uri): IAggregateResult
+	{
+		let folderResult: IAggregateResult = 
+		{
+			passes: 0,
+			fails: 0,
+			state: ENTRY_STATE.NONE
+		};
 
-        if (ProviderResults.results.length > 0)
-        {
-            let workspaceFolder = vscode.workspace.workspaceFolders.filter(folder => folder.uri.scheme === 'file')[0];
-            let workspacePath = workspaceFolder.uri.path + '/';
-            let folderPath = uri.path.split(workspacePath)[1];
-        
-            let results = ProviderResults.results.filter(r => r.path.startsWith(folderPath) && r.isFeature);
-            if (results.length > 0)
-            {
-                folderResult.passes = results.reduce((n, {passes}) => n + passes, 0);
-                folderResult.fails = results.reduce((n, {fails}) => n + fails, 0);
-    
-                if (folderResult.fails > 0)
-                {
-                    folderResult.state = ProviderResults.ENTRY_STATE.FAIL;
-                }
-                else if (folderResult.passes > 0)
-                {
-                    folderResult.state = ProviderResults.ENTRY_STATE.PASS;
-                }
-            }
-        }
+		if (ProviderResults.results.length > 0)
+		{
+			let workspaceFolder = vscode.workspace.workspaceFolders.filter(folder => folder.uri.scheme === 'file')[0];
+			let workspacePath = workspaceFolder.uri.path + '/';
+			let folderPath = uri.path.split(workspacePath)[1];
+		
+			let results = ProviderResults.results.filter(r => r.path.startsWith(folderPath) && r.isFeature);
+			if (results.length > 0)
+			{
+				folderResult.passes = results.reduce((n, {passes}) => n + passes, 0);
+				folderResult.fails = results.reduce((n, {fails}) => n + fails, 0);
+	
+				if (folderResult.fails > 0)
+				{
+					folderResult.state = ENTRY_STATE.FAIL;
+				}
+				else if (folderResult.passes > 0)
+				{
+					folderResult.state = ENTRY_STATE.PASS;
+				}
+			}
+		}
 
-        return folderResult;
-    }
+		return folderResult;
+	}
 
-    public static getFileResult(uri: vscode.Uri): IAggregateResult
-    {
-        let fileResult: IAggregateResult = 
-        {
-            passes: 0,
-            fails: 0,
-            state: ProviderResults.ENTRY_STATE.NONE
-        };
+	public static getFileResult(uri: vscode.Uri): IAggregateResult
+	{
+		let fileResult: IAggregateResult = 
+		{
+			passes: 0,
+			fails: 0,
+			state: ENTRY_STATE.NONE
+		};
 
-        let results = ProviderResults.results.filter(r => uri.path.endsWith(r.path) && r.isFeature);
-        if (results.length > 0)
-        {
-            fileResult.passes = results.reduce((n, {passes}) => n + passes, 0);
-            fileResult.fails = results.reduce((n, {fails}) => n + fails, 0);
+		let results = ProviderResults.results.filter(r => uri.path.endsWith(r.path) && r.isFeature);
+		if (results.length > 0)
+		{
+			fileResult.passes = results.reduce((n, {passes}) => n + passes, 0);
+			fileResult.fails = results.reduce((n, {fails}) => n + fails, 0);
 
-            if (fileResult.fails > 0)
-            {
-                fileResult.state = ProviderResults.ENTRY_STATE.FAIL;
-            }
-            else if (fileResult.passes > 0)
-            {
-                fileResult.state = ProviderResults.ENTRY_STATE.PASS;
-            }
-        }
-    
-        return fileResult;
-    }
+			if (fileResult.fails > 0)
+			{
+				fileResult.state = ENTRY_STATE.FAIL;
+			}
+			else if (fileResult.passes > 0)
+			{
+				fileResult.state = ENTRY_STATE.PASS;
+			}
+		}
+	
+		return fileResult;
+	}
 
-    public static getTestResult(ted: ITestExecutionDetail): ProviderResults.ENTRY_STATE
-    {
-        let path = ted.testUri.path;
-        let state = ProviderResults.ENTRY_STATE.NONE;
-        
-        if (ted.testTitle.startsWith("Feature:"))
-        {
-            path = path + ":0";
-            let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path + ":" + e.line));	
-            if (filteredResults.length === 1)
-            {
-                state = filteredResults[0].state;
-            }
-        }
-        else
-        {
-            let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path) && ted.testTitle.endsWith(e.name));
-            if (filteredResults.length === 1)
-            {
-                state = filteredResults[0].state;
-            }
-        }
-    
-        return state;
-    }
+	public static getFileTagResult(uri: vscode.Uri, tag: String)
+	{
+		let fileTagResult: IAggregateResult = 
+		{
+			passes: 0,
+			fails: 0,
+			state: ENTRY_STATE.NONE
+		};
+
+		let results = ProviderResults.results.filter(r => uri.path.endsWith(r.path) && !r.isFeature && r.tags.includes(tag.replace(/^@/, '')));
+		if (results.length > 0)
+		{
+			fileTagResult.passes = results.reduce((n, {passes}) => n + passes, 0);
+			fileTagResult.fails = results.reduce((n, {fails}) => n + fails, 0);
+
+			if (fileTagResult.fails > 0)
+			{
+				fileTagResult.state = ENTRY_STATE.FAIL;
+			}
+			else if (fileTagResult.passes > 0)
+			{
+				fileTagResult.state = ENTRY_STATE.PASS;
+			}
+		}
+	
+		return fileTagResult;
+	}
+
+	public static getTagResult(tag: string): IAggregateResult
+	{
+		let tagResult: IAggregateResult = 
+		{
+			passes: 0,
+			fails: 0,
+			state: ENTRY_STATE.NONE
+		};
+
+		let results = ProviderResults.results.filter(r => !r.isFeature && r.tags.includes(tag.replace(/^@/, '')));
+		if (results.length > 0)
+		{
+			tagResult.passes = results.reduce((n, {passes}) => n + passes, 0);
+			tagResult.fails = results.reduce((n, {fails}) => n + fails, 0);
+
+			if (tagResult.fails > 0)
+			{
+				tagResult.state = ENTRY_STATE.FAIL;
+			}
+			else if (tagResult.passes > 0)
+			{
+				tagResult.state = ENTRY_STATE.PASS;
+			}
+		}
+	
+		return tagResult;
+	}
+
+	public static getTestResult(ted: ITestExecutionDetail): ENTRY_STATE
+	{
+		let path = ted.testUri.path;
+		let state = ENTRY_STATE.NONE;
+		
+		if (ted.testTitle.startsWith("Feature:"))
+		{
+			path = path + ":0";
+			let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path + ":" + e.line));	
+			if (filteredResults.length === 1)
+			{
+				state = filteredResults[0].state;
+			}
+		}
+		else
+		{
+			let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path) && ted.testTitle.endsWith(e.name));
+			if (filteredResults.length === 1)
+			{
+				state = filteredResults[0].state;
+			}
+		}
+	
+		return state;
+	}
 
 	public static get onSummaryResults(): vscode.Event<any>
 	{
@@ -310,15 +375,5 @@ export class ProviderResults implements IDisposable
 		ProviderResults.summaryResultsWatcher.dispose();
 		ProviderResults._onTestResults.dispose();
 		ProviderResults.testResultsWatcher.dispose();
-	}
-}
-
-export namespace ProviderResults
-{
-	export enum ENTRY_STATE
-	{
-		NONE,
-		PASS,
-		FAIL
 	}
 }

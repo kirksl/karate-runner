@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { ENTRY_TYPE } from "./types/entry";
 
 class ProviderHoverRunDebug implements vscode.HoverProvider
 {
@@ -26,13 +27,17 @@ class ProviderHoverRunDebug implements vscode.HoverProvider
 						if (lineText.trim().startsWith('Examples:'))
 						{
 							const feature = `${document.uri.fsPath}:${position.line + 1}`;
-							let contents: vscode.MarkdownString = new vscode.MarkdownString();
+							const runArgs = encodeURIComponent(JSON.stringify([[{ karateOptions: feature, karateJarOptions: feature, testUri: document.uri, fileType: ENTRY_TYPE.TEST }]]));
+							const debugArgs = encodeURIComponent(JSON.stringify([[{ testUri: document.uri, debugLine: position.line + 1}]]));
+							const runCmd = `command:karateRunner.tests.run?${runArgs}`;
+							const debugCmd = `command:karateRunner.tests.debug?${debugArgs}`;
+
+							let contents = new vscode.MarkdownString();
 							contents.isTrusted = true;
-							const runArgs = encodeURIComponent(JSON.stringify([[feature, feature, document.uri, vscode.FileType.File]]));
-							const debugArgs = encodeURIComponent(JSON.stringify([[position.line + 1]]));
-							contents.appendMarkdown(`[Karate: Run](command:karateRunner.tests.run?${runArgs} "Karate: Run")`);
+
+							contents.appendMarkdown(`[Karate: Run](${runCmd} "Karate: Run")`);
 							contents.appendMarkdown(' | ');
-							contents.appendMarkdown(`[Karate: Debug](command:karateRunner.tests.debug?${debugArgs} "Karate: Debug")`);
+							contents.appendMarkdown(`[Karate: Debug](${debugCmd} "Karate: Debug")`);
 			
 							return new vscode.Hover(contents);
 						}

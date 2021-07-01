@@ -1,13 +1,13 @@
 {
 	"name": "karate-runner",
 	"displayName": "Karate Runner",
-	"description": "Open/Run/Debug Karate Tests and Build Reports by leveraging Codelens, Activity Bar, Debugger and much more.",
+	"description": "Open/Run/Debug Karate Tests and Reports by leveraging Codelens, Activity Bar, Debugger and much more.",
 	"icon": "resources/karate.png",
 	"repository": {
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"license": "MIT",
 	"author": {
 		"name": "Kirk Slota"
@@ -27,7 +27,10 @@
 		"gatling"
 	],
 	"activationEvents": [
-		"*"
+		"onLanguage:karate",
+		"onLanguage:javascript",
+		"onView:karate-reports",
+		"onView:karate-tests"
 	],
 	"main": "./out/extension",
 	"contributes": {
@@ -44,7 +47,7 @@
 			"karate-runner": [
 				{
 					"id": "karate-reports",
-					"name": "Build Reports"
+					"name": "Reports"
 				},
 				{
 					"id": "karate-tests",
@@ -66,11 +69,11 @@
 				"title": "Get Build File To Debug"
 			},
 			{
-				"command": "karateRunner.buildReports.open",
+				"command": "karateRunner.reports.open",
 				"title": "Open Build Report"
 			},
 			{
-				"command": "karateRunner.buildReports.refreshTree",
+				"command": "karateRunner.reports.refreshTree",
 				"title": "Refresh",
 				"icon": {
 					"light": "resources/light/refresh.svg",
@@ -78,23 +81,23 @@
 				}
 			},
 			{
-				"command": "karateRunner.buildReports.displayShallow",
-				"title": "Display Shallow",
+				"command": "karateRunner.reports.displayList",
+				"title": "Display List",
 				"icon": {
-					"light": "resources/light/display-deep.svg",
-					"dark": "resources/dark/display-deep.svg"
+					"light": "resources/light/display-tree.svg",
+					"dark": "resources/dark/display-tree.svg"
 				}
 			},
 			{
-				"command": "karateRunner.buildReports.displayDeep",
-				"title": "Display Deep",
+				"command": "karateRunner.reports.displayTree",
+				"title": "Display Tree",
 				"icon": {
-					"light": "resources/light/display-shallow.svg",
-					"dark": "resources/dark/display-shallow.svg"
+					"light": "resources/light/display-list.svg",
+					"dark": "resources/dark/display-list.svg"
 				}
 			},
 			{
-				"command": "karateRunner.buildReports.filterTree",
+				"command": "karateRunner.reports.filterTree",
 				"title": "Filter",
 				"icon": {
 					"light": "resources/light/filter.svg",
@@ -118,19 +121,27 @@
 				}
 			},
 			{
-				"command": "karateRunner.tests.displayShallow",
-				"title": "Display Shallow",
+				"command": "karateRunner.tests.displayList",
+				"title": "Display List",
 				"icon": {
-					"light": "resources/light/display-deep.svg",
-					"dark": "resources/dark/display-deep.svg"
+					"light": "resources/light/display-tag.svg",
+					"dark": "resources/dark/display-tag.svg"
 				}
 			},
 			{
-				"command": "karateRunner.tests.displayDeep",
-				"title": "Display Deep",
+				"command": "karateRunner.tests.displayTree",
+				"title": "Display Tree",
 				"icon": {
-					"light": "resources/light/display-shallow.svg",
-					"dark": "resources/dark/display-shallow.svg"
+					"light": "resources/light/display-list.svg",
+					"dark": "resources/dark/display-list.svg"
+				}
+			},
+			{
+				"command": "karateRunner.tests.displayTag",
+				"title": "Display Tags",
+				"icon": {
+					"light": "resources/light/display-tree.svg",
+					"dark": "resources/dark/display-tree.svg"
 				}
 			},
 			{
@@ -166,6 +177,14 @@
 				}
 			},
 			{
+				"command": "karateRunner.tests.runTag",
+				"title": "Run All Tests",
+				"icon": {
+					"light": "resources/light/run-all.svg",
+					"dark": "resources/dark/run-all.svg"
+				}
+			},
+			{
 				"command": "karateRunner.tests.runAll",
 				"title": "Run All Tests",
 				"icon": {
@@ -197,22 +216,22 @@
 		"menus": {
 			"view/title": [
 				{
-					"command": "karateRunner.buildReports.refreshTree",
+					"command": "karateRunner.reports.refreshTree",
 					"when": "view == karate-reports",
 					"group": "navigation@1"
 				},
 				{
-					"command": "karateRunner.buildReports.displayShallow",
-					"when": "view == karate-reports && config.karateRunner.buildReports.activityBarDisplayType == Deep",
+					"command": "karateRunner.reports.displayList",
+					"when": "view == karate-reports && config.karateRunner.reports.activityBarDisplayType =~ /^Tree$|^Deep$/",
 					"group": "navigation@2"
 				},
 				{
-					"command": "karateRunner.buildReports.displayDeep",
-					"when": "view == karate-reports && config.karateRunner.buildReports.activityBarDisplayType == Shallow",
+					"command": "karateRunner.reports.displayTree",
+					"when": "view == karate-reports && config.karateRunner.reports.activityBarDisplayType =~ /^List$|^Shallow$/",
 					"group": "navigation@2"
 				},
 				{
-					"command": "karateRunner.buildReports.filterTree",
+					"command": "karateRunner.reports.filterTree",
 					"when": "view == karate-reports",
 					"group": "navigation@3"
 				},
@@ -227,13 +246,18 @@
 					"group": "navigation@2"
 				},
 				{
-					"command": "karateRunner.tests.displayShallow",
-					"when": "view == karate-tests && config.karateRunner.tests.activityBarDisplayType == Deep",
+					"command": "karateRunner.tests.displayList",
+					"when": "view == karate-tests && config.karateRunner.tests.activityBarDisplayType == Tag",
 					"group": "navigation@3"
 				},
 				{
-					"command": "karateRunner.tests.displayDeep",
-					"when": "view == karate-tests && config.karateRunner.tests.activityBarDisplayType == Shallow",
+					"command": "karateRunner.tests.displayTree",
+					"when": "view == karate-tests && config.karateRunner.tests.activityBarDisplayType =~ /^List$|^Shallow$/",
+					"group": "navigation@3"
+				},
+				{
+					"command": "karateRunner.tests.displayTag",
+					"when": "view == karate-tests && config.karateRunner.tests.activityBarDisplayType =~ /^Tree$|^Deep$/",
 					"group": "navigation@3"
 				},
 				{
@@ -248,6 +272,11 @@
 				}
 			],
 			"view/item/context": [
+				{
+					"command": "karateRunner.tests.runTag",
+					"when": "view == karate-tests && viewItem == testTag",
+					"group": "inline"
+				},
 				{
 					"command": "karateRunner.tests.runAll",
 					"when": "view == karate-tests && viewItem == testDirectory",
@@ -381,26 +410,26 @@
 					"description": "Use build system wrapper.  Only applies when using Maven or Gradle.",
 					"scope": "resource"
 				},
-				"karateRunner.buildReports.openAfterEachRun": {
+				"karateRunner.reports.openAfterEachRun": {
 					"type": "boolean",
 					"default": false,
 					"description": "Open reports in default program after running Karate tests.",
 					"scope": "resource"
 				},
-				"karateRunner.buildReports.toTarget": {
+				"karateRunner.reports.toTarget": {
 					"type": "string",
 					"default": "**/{karate-reports/karate-*,**/gatling/*/index,lcov-report/index,jacoco/test/html/index,jacoco/index,cucumber-html-reports/overview-features,surefire-reports/timeline}.htm*",
 					"description": "Display reports targeted by glob pattern within Activity Bar.",
 					"scope": "resource"
 				},
-				"karateRunner.buildReports.activityBarDisplayType": {
+				"karateRunner.reports.activityBarDisplayType": {
 					"type": "string",
-					"default": "Shallow",
+					"default": "List",
 					"enum": [
-						"Shallow",
-						"Deep"
+						"List",
+						"Tree"
 					],
-					"description": "Display reports as a flat list (Shallow) or natural directory structure (Deep) within Activity Bar.",
+					"description": "Display reports as a list (List) or natural directory structure (Tree) within Activity Bar.",
 					"scope": "resource"
 				},
 				"karateRunner.debugger.serverPortTimeout": {
@@ -429,12 +458,13 @@
 				},
 				"karateRunner.tests.activityBarDisplayType": {
 					"type": "string",
-					"default": "Shallow",
+					"default": "List",
 					"enum": [
-						"Shallow",
-						"Deep"
+						"List",
+						"Tree",
+						"Tag"
 					],
-					"description": "Display Karate tests as a flat list (Shallow) or natural directory structure (Deep) within Activity Bar.",
+					"description": "Display Karate tests as a list (List), natural directory structure (Tree) or as a tag list (Tag) within Activity Bar.",
 					"scope": "resource"
 				},
 				"karateRunner.editor.toggleResultsInGutter": {
@@ -609,6 +639,7 @@
 	"dependencies": {
 		"fs-extra": "^8.1.0",
 		"mkdirp": "^1.0.4",
+		"open": "^8.2.0",
 		"parse-curl": "0.2.6",
 		"rimraf": "^2.6.3"
 	}

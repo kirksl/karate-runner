@@ -3,7 +3,6 @@ import * as vscode from 'vscode';
 import path = require("path");
 import fs = require("fs");
 
-
 class ProviderCompletionItem implements vscode.CompletionItemProvider
 {
 	provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList>
