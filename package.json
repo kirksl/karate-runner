@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "1.0.4",
+	"version": "1.0.5",
 	"license": "MIT",
 	"author": {
 		"name": "Kirk Slota"
@@ -548,7 +548,7 @@
 				"key": "Ctrl+V",
 				"linux": "Ctrl+Shift+V",
 				"mac": "Cmd+V",
-				"when": "editorTextFocus"
+				"when": "editorTextFocus && editorLangId == karate"
 			},
 			{
 				"command": "karateRunner.tests.run",
