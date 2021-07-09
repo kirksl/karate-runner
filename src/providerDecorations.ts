@@ -50,9 +50,9 @@ class ProviderDecorations
 				return;
 			}
 
-			let rangeNone = [];
-			let rangePass = [];
-			let rangeFail = [];
+			let decorationNone: vscode.DecorationOptions[] = [];
+			let decorationPass: vscode.DecorationOptions[] = [];
+			let decorationFail: vscode.DecorationOptions[] = [];
 	
 			if (Boolean(vscode.workspace.getConfiguration('karateRunner.editor').get('toggleResultsInGutter')))
 			{
@@ -61,42 +61,69 @@ class ProviderDecorations
 				tedArray.forEach((ted) =>
 				{
 					let state = ProviderResults.getTestResult(ted);
-					let range = new vscode.Range(ted.testLine, 0, ted.testLine, 0);
+					let range = ted.testRange;
+					let positionEnd: vscode.Position = new vscode.Position(range.start.line, range.start.character + 2);
+					let rangeNew = new vscode.Range(range.start, positionEnd);
+					let markdownResults: vscode.MarkdownString[] = [];
+
+					if (state === ENTRY_STATE.FAIL)
+					{
+						markdownResults = ProviderResults.getFullSummary(ted);
+					}
+
+					let decorationOptions: vscode.DecorationOptions =
+					{
+						hoverMessage: markdownResults,
+						range: rangeNew
+					}
 		
 					switch (state)
 					{
 						case ENTRY_STATE.NONE:
-							rangeNone.push({ range });
+							decorationNone.push(decorationOptions);
 							break;
 						
 						case ENTRY_STATE.PASS:
-							rangePass.push({ range });
+							decorationPass.push(decorationOptions);
 							break;
 		
 						case ENTRY_STATE.FAIL:
-							rangeFail.push({ range });
+							decorationFail.push(decorationOptions);
 							break;
 					}
 				});
 			}
 	
-			editor.setDecorations(this.decorationPass, rangePass);
-			editor.setDecorations(this.decorationFail, rangeFail);
-			editor.setDecorations(this.decorationNone, rangeNone);
+			editor.setDecorations(this.decorationPass, decorationPass);
+			editor.setDecorations(this.decorationFail, decorationFail);
+			editor.setDecorations(this.decorationNone, decorationNone);
 		});
 	}
 
 	private getDecorationType(state: ENTRY_STATE): vscode.TextEditorDecorationType
 	{
+		let textDecorationLight = '';
+		let textDecorationDark = '';
+
+		if (state === ENTRY_STATE.FAIL)
+		{
+			textDecorationLight = 'dotted underline 2px #424242';
+			textDecorationDark = 'dotted underline 2px #C5C5C5';
+		}
+
 		const decorationType = vscode.window.createTextEditorDecorationType(
 		{
+			overviewRulerColor: 'rgba(255, 255, 255, 0.5)',
+			overviewRulerLane: vscode.OverviewRulerLane.Right,
 			light:
 			{
+				textDecoration: textDecorationLight,
 				gutterIconPath: getLightIcon(`karate-test-${state}.svg`),
-				gutterIconSize: '85%',
+				gutterIconSize: '85%'
 			},
 			dark:
 			{
+				textDecoration: textDecorationDark,
 				gutterIconPath: getDarkIcon(`karate-test-${state}.svg`),
 				gutterIconSize: '85%'
 			}

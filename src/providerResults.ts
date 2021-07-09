@@ -18,6 +18,7 @@ interface IResult
 	isFeature: boolean;
 	passes: number;
 	fails: number;
+	error: string[];
 	state: ENTRY_STATE;
 }
 
@@ -91,6 +92,7 @@ export class ProviderResults implements IDisposable
 			isOutline: null,
 			passes: null,
 			fails: null,
+			error: [],
 			state: null
 		};
 
@@ -111,12 +113,23 @@ export class ProviderResults implements IDisposable
 	
 					case true:
 						ProviderResults.results[lastIndex].fails += 1;
+						ProviderResults.results[lastIndex].error.push("Line " + json.scenarioResults[ndx].line + ": " + json.scenarioResults[ndx].error);
 						break;
 				}
 			}
 			else
 			{
 				let prefixPath: string = json.prefixedPath;
+				let error = json.scenarioResults[ndx].error;
+
+				if (error)
+				{
+					error = ["Line " + json.scenarioResults[ndx].line + ": " + error];
+				}
+				else
+				{
+					error = [];
+				}
 
 				result = 
 				{
@@ -128,6 +141,7 @@ export class ProviderResults implements IDisposable
 					isOutline: (json.scenarioResults[ndx].exampleIndex === -1) ? false : true,
 					passes: 0,
 					fails: 0,
+					error: error,
 					state: ENTRY_STATE.NONE
 				};
 
@@ -180,12 +194,22 @@ export class ProviderResults implements IDisposable
 			isOutline: false,
 			passes: 0,
 			fails: 0,
+			error: [],
 			state: ENTRY_STATE.NONE
 		};
 		
 		let results = ProviderResults.results.filter(r => r.path === result.path && !r.isFeature);
 		result.passes = results.reduce((n, {passes}) => n + passes, 0);
 		result.fails = results.reduce((n, {fails}) => n + fails, 0);
+
+		results.forEach((res) =>
+		{
+			res.error.forEach((e) =>
+			{
+				result.error.push(e);
+			});
+		});
+
 		
 		if (json.failedCount > 0 || result.fails > 0)
 		{
@@ -357,6 +381,106 @@ export class ProviderResults implements IDisposable
 		}
 	
 		return state;
+	}
+
+	public static getResult(ted: ITestExecutionDetail): IResult
+	{
+		let path = ted.testUri.path;
+		let result: IResult = null;
+		
+		if (ted.testTitle.startsWith("Feature:"))
+		{
+			path = path + ":0";
+			let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path + ":" + e.line));	
+			if (filteredResults.length === 1)
+			{
+				result = filteredResults[0];
+			}
+		}
+		else
+		{
+			let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path) && ted.testTitle.endsWith(e.name));
+			if (filteredResults.length === 1)
+			{
+				result = filteredResults[0];
+			}
+		}
+	
+		return result;
+	}
+
+	public static getFullSummary(ted: ITestExecutionDetail): vscode.MarkdownString[]
+	{
+		let summary: vscode.MarkdownString[] = [];
+
+		let results = ProviderResults.getResult(ted);
+		if (results)
+		{
+			let summaryHeader = new vscode.MarkdownString();
+			let summaryFooter = new vscode.MarkdownString(undefined, true);
+
+			summaryHeader.appendCodeblock(ted.testTitle, 'karate');
+			summary.push(summaryHeader);
+
+			if (results.error)
+			{
+				results.error.forEach((error) =>
+				{
+					let summaryBody = new vscode.MarkdownString();
+					summaryBody.appendMarkdown(error);
+					summary.push(summaryBody);
+				});
+
+				summaryFooter.appendMarkdown(`$(error) ${results.error.length} error(s)`);
+			}
+			else
+			{
+				summaryFooter.appendMarkdown(`$(error) 0 error(s)`);
+			}
+
+			summary.push(summaryFooter);
+		}
+
+		return summary;
+	}
+
+	public static getPartialSummary(ted: ITestExecutionDetail): vscode.MarkdownString
+	{
+		let summary = new vscode.MarkdownString(undefined, true);
+
+		let results = ProviderResults.getResult(ted);
+		if (results)
+		{
+			summary.appendCodeblock(ted.testTitle, 'karate');
+
+			if (results.error)
+			{
+				if (results.error.length > 0)
+				{
+					summary.appendMarkdown(`${results.error[0]}`);
+					summary.appendText('\n');
+
+					if (results.error.length > 1)
+					{
+						summary.appendMarkdown(`$(error) ${results.error.length - 1} more error(s)...`);
+					}
+					else
+					{
+						summary.appendMarkdown(`$(error) 1 error(s)`);
+					}
+				}
+				else
+				{
+					summary.appendMarkdown(`$(error) 0 error(s)`);
+				}
+			}
+			else
+			{
+				summary.appendMarkdown(`$(error) 0 error(s)`);
+			}
+		}
+
+		return summary;
 	}
 
 	public static get onSummaryResults(): vscode.Event<any>

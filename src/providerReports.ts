@@ -18,7 +18,7 @@ class ProviderReports implements vscode.TreeDataProvider<IEntry>, IDisposable
 	private reportGlob: string;
 	private reportFiles: vscode.Uri[];
 	private displayType: String;
-	private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
+	private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
 
 	constructor()

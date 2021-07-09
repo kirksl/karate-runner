@@ -21,6 +21,7 @@ interface IEntry
 	uri: any;
 	type: ENTRY_TYPE;
 	tag?: string;
+	tooltip?: vscode.MarkdownString;
 	command?: vscode.Command;
 	state?: ENTRY_STATE;
 	fails?: number;

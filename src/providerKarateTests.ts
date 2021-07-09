@@ -19,7 +19,7 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 	private testFiles: vscode.Uri[];
 	private hideIgnored: boolean;
 	private displayType: String;
-	private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
+	private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
 
 	constructor()
@@ -159,6 +159,11 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 				treeItem.iconPath = getIcon(`karate-test-${element.state}.svg`);
 				treeItem.collapsibleState = vscode.TreeItemCollapsibleState.None;
 
+				if (element.state === ENTRY_STATE.FAIL)
+				{
+					treeItem.tooltip = element.tooltip;
+				}
+
 				if (element.ignored)
 				{
 					treeItem.command = element.command;
@@ -289,6 +294,8 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 					title: ted.codelensRunTitle
 				};
 
+				let tooltip = ProviderResults.getPartialSummary(ted);
+
 				if (file.tag)
 				{
 					let tagArray = ted.testTag.split(/\s+/);
@@ -298,6 +305,7 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 						{
 							uri: ted.testTitle,
 							type: ENTRY_TYPE.TEST,
+							tooltip: tooltip,
 							command: testCommand,
 							state: ProviderResults.getTestResult(ted),
 							ignored: ted.testIgnored
@@ -310,6 +318,7 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 					{
 						uri: ted.testTitle,
 						type: ENTRY_TYPE.TEST,
+						tooltip: tooltip,
 						command: testCommand,
 						state: ProviderResults.getTestResult(ted),
 						ignored: ted.testIgnored
