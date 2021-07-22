@@ -20,23 +20,37 @@ class ProviderReports implements vscode.TreeDataProvider<IEntry>, IDisposable
 	private displayType: String;
 	private _onDidChangeTreeData: vscode.EventEmitter<void> = new vscode.EventEmitter<void>();
 	readonly onDidChangeTreeData: vscode.Event<any> = this._onDidChangeTreeData.event;
+	private static _onRefreshStart: vscode.EventEmitter<any>;
+	private static _onRefreshEnd: vscode.EventEmitter<any>;
 
 	constructor()
 	{
 		this.providerFileSystem = new ProviderFileSystem();
 		this.treeView = vscode.window.createTreeView('karate-reports', { showCollapseAll: true, treeDataProvider: this });
-		this.treeView.message = null;
 
+		ProviderReports._onRefreshStart = new vscode.EventEmitter<any>();
+		ProviderReports._onRefreshEnd = new vscode.EventEmitter<any>();
 		ProviderResults.onTestResults(() => { this.refresh(); });
+	}
+
+	public static get onRefreshStart(): vscode.Event<any>
+	{
+		return ProviderReports._onRefreshStart.event;
+	}
+
+	public static get onRefreshEnd(): vscode.Event<any>
+	{
+		return ProviderReports._onRefreshEnd.event;
 	}
 
 	public async refresh()
 	{
-		this.treeView.message = null;
-		this.reportGlob = String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTarget'));
+		ProviderReports._onRefreshStart.fire(null);
+		this.reportGlob = String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTargetByGlob'));
 		this.reportFiles = await vscode.workspace.findFiles(this.reportGlob).then((value) => { return value; });
 		this.displayType = String(vscode.workspace.getConfiguration('karateRunner.reports').get('activityBarDisplayType'));
 		this._onDidChangeTreeData.fire();
+		ProviderReports._onRefreshEnd.fire(null);
 	}
 
 	async getChildren(element?: IEntry): Promise<IEntry[]>
@@ -86,14 +100,7 @@ class ProviderReports implements vscode.TreeDataProvider<IEntry>, IDisposable
 			}
 		}
 
-		let workspace = this.getWorkspace();
-		if (workspace)
-		{
-			return workspace;
-		}
-
-		this.treeView.message = "No reports found...";
-		return null;
+		return this.getWorkspaceFolders();
 	}
 
 	getTreeItem(element: IEntry): vscode.TreeItem
@@ -117,31 +124,35 @@ class ProviderReports implements vscode.TreeDataProvider<IEntry>, IDisposable
 		return treeItem;
 	}
 
-	private async getWorkspace(): Promise<IEntry[] | undefined>
+	private async getWorkspaceFolders(): Promise<IEntry[] | null>
 	{
 		if (this.reportFiles == null)
 		{
-			this.reportGlob = String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTarget'));
+			this.reportGlob = String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTargetByGlob'));
 			this.reportFiles = await vscode.workspace.findFiles(this.reportGlob).then((value) => { return value; });
 		}
 
-		let workspaceFolder = vscode.workspace.workspaceFolders.filter(folder => folder.uri.scheme === 'file')[0];
-
-		let entries: IEntry[] = [];
-		entries.push(
+		let workspaceFolders = vscode.workspace.workspaceFolders;
+		if (workspaceFolders)
 		{
-			uri: workspaceFolder.uri,
-			type: ENTRY_TYPE.ROOT,
-			state: ENTRY_STATE.NONE,
-			ignored: false
-		});
+			let workspaceFolder = workspaceFolders.filter(folder => folder.uri.scheme === 'file')[0];
 
-		if (entries.length > 0)
-		{
-			return entries;
+			let entries: IEntry[] = [];
+			entries.push(
+			{
+				uri: workspaceFolder.uri,
+				type: ENTRY_TYPE.ROOT,
+				state: ENTRY_STATE.NONE,
+				ignored: false
+			});
+	
+			if (entries.length > 0)
+			{
+				return entries;
+			}
 		}
 
-		return undefined;
+		return null;
 	}
 
 	public dispose(): void

@@ -56,8 +56,8 @@ export function activate(context: vscode.ExtensionContext)
 	let openReportCommand = vscode.commands.registerCommand("karateRunner.reports.open", openExternalUri);
 	let refreshReportsTreeCommand = vscode.commands.registerCommand("karateRunner.reports.refreshTree", () => reportsProvider.refresh());
 	let refreshTestsTreeCommand = vscode.commands.registerCommand("karateRunner.tests.refreshTree", () => karateTestsProvider.refresh());
-	let filterReportsTreeCommand = vscode.commands.registerCommand("karateRunner.reports.filterTree", filterReportsTree);
-	let filterTestsTreeCommand = vscode.commands.registerCommand("karateRunner.tests.filterTree", filterTestsTree);
+	let filterReportsTreeCommand = vscode.commands.registerCommand("karateRunner.reports.filterTree", () => filterReportsTree(context));
+	let filterTestsTreeCommand = vscode.commands.registerCommand("karateRunner.tests.filterTree", () => filterTestsTree(context));
 	let clearResultsCommand = vscode.commands.registerCommand("karateRunner.tests.clearResults", () => { karateTestsProvider.clearResults(); decorationsProvider.triggerUpdateDecorations(); ProviderStatusBar.reset(); });
 	let openSettingsCommand = vscode.commands.registerCommand("karateRunner.tests.openSettings", openKarateSettings);
 	let toggleResultsInGutterCommand = vscode.commands.registerCommand("karateRunner.editor.toggleResultsInGutter", toggleResultsInGutter);
@@ -73,13 +73,13 @@ export function activate(context: vscode.ExtensionContext)
 
 	createTreeViewWatcher(
 		reportsWatcher,
-		String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTarget')),
+		String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTargetByGlob')),
 		reportsProvider
 	);
 
 	createTreeViewWatcher(
 		karateTestsWatcher,
-		String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTarget')),
+		String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTargetByGlob')),
 		karateTestsProvider
 	);
 
@@ -93,7 +93,7 @@ export function activate(context: vscode.ExtensionContext)
 		}
 
 		let reportsDisplayType = e.affectsConfiguration("karateRunner.reports.activityBarDisplayType");
-		let reportsToTarget = e.affectsConfiguration("karateRunner.reports.toTarget");
+		let reportsToTarget = e.affectsConfiguration("karateRunner.reports.toTargetByGlob");
 
 		if (reportsDisplayType)
 		{
@@ -113,21 +113,22 @@ export function activate(context: vscode.ExtensionContext)
 
 			createTreeViewWatcher(
 				reportsWatcher,
-				String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTarget')),
+				String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTargetByGlob')),
 				reportsProvider
 			);
 		}
 
 		let karateTestsDisplayType = e.affectsConfiguration("karateRunner.tests.activityBarDisplayType");
 		let karateTestsHideIgnored = e.affectsConfiguration("karateRunner.tests.hideIgnored");
-		let karateTestsToTarget = e.affectsConfiguration("karateRunner.tests.toTarget");
+		let karateTestsToTargetByGlob = e.affectsConfiguration("karateRunner.tests.toTargetByGlob");
+		let karateTestsToTargetByTag = e.affectsConfiguration("karateRunner.tests.toTargetByTag");
 
-		if (karateTestsDisplayType || karateTestsHideIgnored)
+		if (karateTestsDisplayType || karateTestsHideIgnored || karateTestsToTargetByTag)
 		{
 			karateTestsProvider.refresh();
 		}
 
-		if (karateTestsToTarget)
+		if (karateTestsToTargetByGlob)
 		{
 			try
 			{
@@ -140,7 +141,7 @@ export function activate(context: vscode.ExtensionContext)
 
 			createTreeViewWatcher(
 				karateTestsWatcher,
-				String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTarget')),
+				String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTargetByGlob')),
 				karateTestsProvider
 			);
 		}
