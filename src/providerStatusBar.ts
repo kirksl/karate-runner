@@ -8,11 +8,12 @@ class ProviderStatusBar
 	private static statusBarCommand: vscode.Disposable;
 	private static statusBarCommandId: string = "karateRunner.tests.showExecutionHistory";
 	
-	constructor(context)
+	constructor(context: vscode.ExtensionContext)
 	{
 		ProviderStatusBar.statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 50);
 		ProviderStatusBar.statusBarCommand = vscode.commands.registerCommand(ProviderStatusBar.statusBarCommandId, ProviderExecutions.showExecutionHistory);
 		ProviderStatusBar.statusBarItem.command = ProviderStatusBar.statusBarCommandId;
+		ProviderStatusBar.statusBarItem.name = "Karate Runner";
 		ProviderStatusBar.reset();
 		
 		context.subscriptions.push(ProviderStatusBar.statusBarItem);
@@ -25,6 +26,19 @@ class ProviderStatusBar
 	{
 		ProviderStatusBar.statusBarItem.text = `Karate $(pass) ${passed} $(error) ${failed}`;
 		ProviderStatusBar.statusBarItem.tooltip = tooltip;
+
+		let failureActual = (passed + failed == 0) ? 0 : failed / (passed + failed);
+		let failureThreshold = parseFloat(vscode.workspace.getConfiguration('karateRunner.statusBar').get('colorOnFailureThreshold')) / 100;
+
+		if (failureActual >= failureThreshold)
+		{
+			ProviderStatusBar.statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.errorBackground');
+		}
+		else
+		{
+			ProviderStatusBar.statusBarItem.backgroundColor = undefined;
+		}
+
 		ProviderStatusBar.statusBarItem.show();
 	}
 	

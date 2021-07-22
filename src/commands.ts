@@ -1,4 +1,4 @@
-import { getProjectDetail, getTestExecutionDetail, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail } from "./helper";
+import { getProjectDetail, getTestExecutionDetail, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail, getLightIcon, getDarkIcon } from "./helper";
 import { Feature, ISection } from "./feature";
 import { ENTRY_TYPE } from "./types/entry";
 import ProviderStatusBar from "./providerStatusBar";
@@ -7,6 +7,8 @@ import parse = require('parse-curl');
 import * as vscode from 'vscode';
 import os = require('os');
 import open = require('open');
+import ProviderKarateTests from "./providerKarateTests";
+import ProviderReports from "./providerReports";
 
 let debugLineNumber: number = 0;
 let debugFeatureFile: string = '';
@@ -383,7 +385,7 @@ async function runKarateTest(args = null)
 		runCommand = `${karateJarArgs} "${karateJarOptions}"`;
 	}
 		
-	let relativePattern = new vscode.RelativePattern(projectRootPath, String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTarget')));
+	let relativePattern = new vscode.RelativePattern(projectRootPath, String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTargetByGlob')));
 	let watcher = vscode.workspace.createFileSystemWatcher(relativePattern);
 	let reportUrisFound: vscode.Uri[] = [];
 		
@@ -506,22 +508,85 @@ function displayReportsTree(displayType)
 	vscode.workspace.getConfiguration().update('karateRunner.reports.activityBarDisplayType', displayType);
 }
 
-async function filterReportsTree()
+async function filterReportsTree(context: vscode.ExtensionContext)
 {
-	let filter = null;
-	
-	filter = await vscode.window.showInputBox
-	(
-		{
-			prompt: "Reports Filter (e.g. text, **/*.html)",
-			value: String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTarget'))
-		}
-	);
-		
-	if (filter !== undefined && filter !== "")
+	class InputButton implements vscode.QuickInputButton
 	{
-		await vscode.workspace.getConfiguration().update('karateRunner.reports.toTarget', filter);
+		constructor(public iconPath: { light: vscode.Uri; dark: vscode.Uri; }, public tooltip: string)
+		{
+		}
 	}
+
+	const resetButton = new InputButton(
+	{
+		dark: vscode.Uri.file(getDarkIcon('refresh.svg')),
+		light: vscode.Uri.file(getLightIcon('refresh.svg')),
+	}, 'Reset Filter');
+
+	let filterByGlob = async () =>
+	{
+		let disposables: vscode.Disposable[] = [];
+		try
+		{
+			await new Promise<string>((resolve) =>
+			{
+				let inputBox = vscode.window.createInputBox();
+				inputBox.title = "Reports Filter"
+				inputBox.step = 1;
+				inputBox.totalSteps = 1;
+				inputBox.value = String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTargetByGlob'));
+				inputBox.prompt = "Filter By Glob (e.g. text, **/*.html)";
+				inputBox.buttons = [
+					...([resetButton])
+				];
+				disposables.push(
+					inputBox.onDidTriggerButton((item) =>
+					{
+						if (item === resetButton)
+						{
+							inputBox.value = context.extension.packageJSON.contributes.configuration.properties['karateRunner.reports.toTargetByGlob'].default;
+						}
+					}),
+					inputBox.onDidAccept(async () =>
+					{
+						if (initialValue.trim() != inputBox.value.trim())
+						{
+							inputBox.busy = true;
+							inputBox.enabled = false;
+	
+							await new Promise(resolve =>
+							{
+								ProviderReports.onRefreshEnd(() =>
+								{
+									resolve(null);
+								});
+	
+								vscode.workspace.getConfiguration().update('karateRunner.reports.toTargetByGlob', inputBox.value);
+							});
+						}
+
+						inputBox.enabled = true;
+						inputBox.busy = false;
+						inputBox.hide();
+						resolve(null);			
+					}),
+					inputBox.onDidHide(() =>
+					{
+						resolve(null);
+					})
+				);
+
+				let initialValue = inputBox.value;
+				inputBox.show();
+			});
+		}
+		finally
+		{
+			disposables.forEach(d => d.dispose());
+		}
+	}
+
+	await filterByGlob();
 }
 
 function displayTestsTree(displayType)
@@ -529,22 +594,161 @@ function displayTestsTree(displayType)
 	vscode.workspace.getConfiguration().update('karateRunner.tests.activityBarDisplayType', displayType);
 }
 
-async function filterTestsTree()
+async function filterTestsTree(context: vscode.ExtensionContext)
 {
-	let filter = null;
-	
-	filter = await vscode.window.showInputBox
-	(
-		{
-			prompt: "Tests Filter (e.g. text, **/*.feature)",
-			value: String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTarget'))
-		}
-	);
-		
-	if (filter !== undefined && filter !== "")
+	class InputButton implements vscode.QuickInputButton
 	{
-		await vscode.workspace.getConfiguration().update('karateRunner.tests.toTarget', filter);
+		constructor(public iconPath: { light: vscode.Uri; dark: vscode.Uri; }, public tooltip: string)
+		{
+		}
 	}
+
+	const resetButton = new InputButton(
+	{
+		dark: vscode.Uri.file(getDarkIcon('refresh.svg')),
+		light: vscode.Uri.file(getLightIcon('refresh.svg')),
+	}, 'Reset Filter');
+
+	let filterByGlob = async () =>
+	{
+		let disposables: vscode.Disposable[] = [];
+		let accepted = false;
+		try
+		{
+			await new Promise<string>((resolve) =>
+			{
+				let inputBox = vscode.window.createInputBox();
+				inputBox.title = "Tests Filter"
+				inputBox.step = 1;
+				inputBox.totalSteps = 2;
+				inputBox.value = String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTargetByGlob'));
+				inputBox.prompt = "Filter By Glob (e.g. text, **/*.feature)";
+				inputBox.buttons = [
+					...([resetButton])
+				];
+				disposables.push(
+					inputBox.onDidTriggerButton((item) =>
+					{
+						if (item === resetButton)
+						{
+							inputBox.value = context.extension.packageJSON.contributes.configuration.properties['karateRunner.tests.toTargetByGlob'].default;
+						}
+					}),
+					inputBox.onDidAccept(async () =>
+					{
+						if (initialValue.trim() != inputBox.value.trim())
+						{
+							inputBox.busy = true;
+							inputBox.enabled = false;
+	
+							await new Promise(resolve =>
+							{
+								ProviderKarateTests.onRefreshEnd(() =>
+								{
+									resolve(null);
+								});
+	
+								vscode.workspace.getConfiguration().update('karateRunner.tests.toTargetByGlob', inputBox.value);
+							});
+						}
+
+						inputBox.enabled = true;
+						inputBox.busy = false;
+						accepted = true;
+						resolve(null);			
+					}),
+					inputBox.onDidHide(() =>
+					{
+						resolve(null);
+					})
+				);
+
+				let initialValue = inputBox.value;
+				inputBox.show();
+			});
+		}
+		finally
+		{
+			disposables.forEach(d => d.dispose());
+
+			if (accepted)
+			{
+				filterByTag();
+			}
+		}
+	}
+
+	let filterByTag = async () =>
+	{
+		let disposables: vscode.Disposable[] = [];
+		try
+		{			
+			await new Promise<string>((resolve) =>
+			{
+				let inputBox = vscode.window.createInputBox();
+				inputBox.title = "Tests Filter"
+				inputBox.step = 2;
+				inputBox.totalSteps = 2;
+				inputBox.value = String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTargetByTag'));
+				inputBox.prompt = "Filter By Tags (e.g. @abc, @def=.+, @.+=.+)";
+				inputBox.buttons = [
+					...([vscode.QuickInputButtons.Back]),
+					...([resetButton])
+				];
+				disposables.push(
+					inputBox.onDidTriggerButton((item) =>
+					{
+						if (item === vscode.QuickInputButtons.Back)
+						{
+							filterByGlob();
+							resolve(null);
+						}
+	
+						if (item === resetButton)
+						{
+							inputBox.value = context.extension.packageJSON.contributes.configuration.properties['karateRunner.tests.toTargetByTag'].default;
+						}
+					}),
+					inputBox.onDidAccept(async () =>
+					{
+						if (initialValue.trim() != inputBox.value.trim())
+						{
+							inputBox.busy = true;
+							inputBox.enabled = false;
+	
+							await new Promise(resolve =>
+							{
+								ProviderKarateTests.onRefreshEnd(() =>
+								{
+									resolve(null);
+								});
+	
+								vscode.workspace.getConfiguration().update('karateRunner.tests.toTargetByTag', inputBox.value);
+							});
+						}
+
+						inputBox.enabled = true;
+						inputBox.busy = false;
+						inputBox.hide();
+						resolve(null);
+					}),
+					inputBox.onDidHide(() =>
+					{
+						resolve(null);
+					})
+				);
+		
+				let initialValue = inputBox.value;
+				inputBox.show();
+			});
+		}
+		finally
+		{
+			disposables.forEach(d => d.dispose());
+		}
+	}
+
+	await filterByGlob();
 }
 
 function openExternalUri(uri)

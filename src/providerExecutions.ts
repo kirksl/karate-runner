@@ -83,6 +83,8 @@ class ProviderExecutions
 		{
 			canPickMany: false,
 			ignoreFocusOut: false,
+			matchOnDescription: true,
+			matchOnDetail: true,
 			placeHolder: `Select execution to run from history...`
 		};
   

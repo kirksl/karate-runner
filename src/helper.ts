@@ -189,7 +189,7 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: ENTRY_TYPE): Promis
 	}
 	else
 	{
-		let glob = String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTarget'));
+		let glob = String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTargetByGlob'));
 		let karateTestFiles = await vscode.workspace.findFiles(glob).then((value) => { return value; });
 		
 		let karateTestFilesFiltered = karateTestFiles.filter((karateTestFile) =>
@@ -253,6 +253,39 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: ENTRY_TYPE): Promis
 	}
 	
 	return tedArray;
+}
+
+function getTestExecutionDetailTags(tedArray: ITestExecutionDetail[]): string[]
+{
+	let tags: string[] = [];
+		
+	tedArray.forEach((ted) =>
+	{
+		let tedTags = ted.testTag.split(/\s+/);
+		tedTags.forEach((tag) =>
+		{
+			if (!tags.includes(tag))
+			{
+				tags.push(tag);
+			}
+		});
+	});
+
+	return tags;
+}
+
+function oneElementsExist(elementsToFind: string[], elementsToSearch: string[]): boolean
+{
+	if (elementsToFind.length > 0 && elementsToFind[0].length > 0)
+	{
+		let foundOne = elementsToFind.some((etf) => 
+		{
+			let re = new RegExp(`^${etf.trim()}$`);
+			return elementsToSearch.some(ets => re.test(ets.trim()));
+		});
+
+		return foundOne;
+	}
 }
 
 function getChildAbsolutePath(basePath: string, childPath: string): string
@@ -394,6 +427,8 @@ export
 {
 	getProjectDetail,
 	getTestExecutionDetail,
+	getTestExecutionDetailTags,
+	oneElementsExist,
 	getChildAbsolutePath,
 	getActiveFeatureFile,
 	IProjectDetail,
