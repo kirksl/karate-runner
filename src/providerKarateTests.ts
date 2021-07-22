@@ -272,26 +272,6 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 					}
 				}
 			}
-/*
-			tedArray.forEach((ted) =>
-			{
-				let tedTags = ted.testTag.split(/\s+/);
-				tedTags.forEach((tag) =>
-				{
-					if (tag == "@ignore" && this.hideIgnored)
-					{
-						// do nothing
-					}
-					else
-					{
-						if (!tags.includes(tag))
-						{
-							tags.push(tag);
-						}
-					}
-				});
-			});
-*/
 		}
 
 		let entries: IEntry[] = [];
