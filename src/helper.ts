@@ -286,6 +286,10 @@ function oneElementsExist(elementsToFind: string[], elementsToSearch: string[]):
 
 		return foundOne;
 	}
+	else
+	{
+		return true;
+	}
 }
 
 function getChildAbsolutePath(basePath: string, childPath: string): string
