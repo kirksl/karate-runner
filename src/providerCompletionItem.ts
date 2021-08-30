@@ -7,8 +7,11 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 {
 	provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList>
 	{
+		let lineText = document.lineAt(position).text;
 		let linePrefix = document.lineAt(position).text.substr(0, position.character);
-		if (!linePrefix.endsWith('read(\'') && !linePrefix.endsWith('read(\"'))
+		let lineRegExp = new RegExp("^.*read\\([\'\"]{1}[^\'\"\)]*$");
+		let lineMatch = linePrefix.match(lineRegExp);
+		if (lineMatch === null || lineMatch.index === undefined)
 		{
 			return undefined;
 		}
@@ -27,6 +30,7 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 				{
 					let ci = new vscode.CompletionItem(file, vscode.CompletionItemKind.Text);
 					ci.sortText = 'a';
+					ci.additionalTextEdits = [vscode.TextEdit.delete(new vscode.Range(position.line, lineText.indexOf("(") + 2, position.line, lineText.indexOf(")") - 1))];
 					completionItems.push(ci);
 				}                
 			});
@@ -55,6 +59,7 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 						f = f.substring(baseDir.length);
 						f = f.replace(/\\/g, "/");
 						let ci = new vscode.CompletionItem(includeClassPath ? `classpath:${f}` : `${f}`, vscode.CompletionItemKind.Text);
+						ci.additionalTextEdits = [vscode.TextEdit.delete(new vscode.Range(position.line, lineText.indexOf("(") + 2, position.line, lineText.indexOf(")") - 1))];
 						completionItems.push(ci);
 					}
 				}

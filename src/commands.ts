@@ -436,6 +436,7 @@ async function runKarateTest(args = null)
 	{
 		if (e.execution.task.name == 'Karate Runner')
 		{
+			ProviderStatusBar.setExecutionState(false);
 			isTaskExecuting = false;
 			watcher.dispose();
 					
@@ -481,6 +482,7 @@ async function runKarateTest(args = null)
 	};
 				
 	let isTaskExecuting = true;
+	ProviderStatusBar.setExecutionState(true);
 				
 	vscode.tasks.executeTask(task).then(task => showProgress(task));
 }
