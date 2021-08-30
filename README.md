@@ -88,7 +88,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 ## Setup
 
 ### Versions
-- `VSCode Version 1.58.0` or greater. (Required)
+- `VSCode Version 1.59.0` or greater. (Required)
 - `Karate Version 0.9.3` or greater in your Karate projects. (Required)
 - `Karate Version 0.9.5` or greater in your Karate projects. (Required for Debugger or Karate Cli)
 - `Karate Version 1.0.0` or greater in your Karate projects. (Required for Tests View results)
@@ -154,3 +154,10 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
         main = System.getProperty("mainClass")
     }
     ```
+
+### Sample Projects
+[Karate Sample Projects](https://github.com/intuit/karate/tree/master/examples)
+[Karate Runner Sample Project](https://github.com/kirksl/karate-maven-gradle)
+
+### License
+Licensed under the [MIT](LICENSE) license.

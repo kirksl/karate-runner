@@ -427,6 +427,23 @@ function getDarkIcon(icon: string)
 	return path.join(__dirname, '..', 'resources', 'dark', icon);
 }
 
+function truncateMiddle(input: string, length: number): string
+{
+	if (input.length > length)
+	{
+		length = length - 3;
+		
+		let lIndex = Math.ceil(length / 2);
+		let rIndex = Math.floor(length / 2);
+		let lInput = input.substr(0, lIndex);
+		let rInput = input.substr(input.length - rIndex);
+
+		return lInput + '...' + rInput;
+	}
+
+	return input;
+}
+
 export
 {
 	getProjectDetail,
@@ -441,5 +458,6 @@ export
 	showWhatsNew,
 	getIcon,
 	getLightIcon,
-	getDarkIcon
+	getDarkIcon,
+	truncateMiddle
 };

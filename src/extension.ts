@@ -40,7 +40,7 @@ export function activate(context: vscode.ExtensionContext)
 
 	let karateFile = { language: "karate", scheme: "file" };
 
-	let smartPasteCommand = vscode.commands.registerCommand('karateRunner.paste', smartPaste);
+	let smartPasteCommand = vscode.commands.registerCommand("karateRunner.paste", smartPaste);
 	let getDebugFileCommand = vscode.commands.registerCommand("karateRunner.getDebugFile", getDebugFile);
 	let getDebugBuildFileCommand = vscode.commands.registerCommand("karateRunner.getDebugBuildFile", getDebugBuildFile);
 	let debugTestCommand = vscode.commands.registerCommand("karateRunner.tests.debug", debugKarateTest);
@@ -68,7 +68,7 @@ export function activate(context: vscode.ExtensionContext)
 	let registerCodeLensProvider = vscode.languages.registerCodeLensProvider(karateFile, codeLensProvider);
 	let registerDefinitionProvider = vscode.languages.registerDefinitionProvider(karateFile, definitionProvider);
 	let registerProviderHoverRunDebug = vscode.languages.registerHoverProvider(karateFile, hoverRunDebugProvider);
-	let registerCompletionItemProvider = vscode.languages.registerCompletionItemProvider(karateFile, completionItemProvider, ...['\'', '\"']);
+	let registerCompletionItemProvider = vscode.languages.registerCompletionItemProvider(karateFile, completionItemProvider, ...['\'', '\"', ' ']);
 	//let registerFoldingRangeProvider = vscode.languages.registerFoldingRangeProvider(karateFile, foldingRangeProvider);
 
 	createTreeViewWatcher(

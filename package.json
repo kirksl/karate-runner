@@ -7,14 +7,14 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "1.0.9",
+	"version": "1.1.0",
 	"license": "MIT",
 	"author": {
 		"name": "Kirk Slota"
 	},
 	"publisher": "kirkslota",
 	"engines": {
-		"vscode": "^1.58.0"
+		"vscode": "^1.59.0"
 	},
 	"categories": [
 		"Other"
@@ -70,7 +70,7 @@
 		"viewsWelcome": [
 			{
 				"view": "karate-welcome",
-				"contents": "Karate Runner\nIn order to use this extension you must open a folder containing a Karate project or clone from a URL.\n[Open Folder](command:vscode.openFolder)\n[Clone Repository](command:git.clone)\n\nLearn more about [this extension](https://marketplace.visualstudio.com/items?itemName=kirkslota.karate-runner) and [Karate](https://github.com/intuit/karate)."
+				"contents": "Karate Runner\nIn order to use this extension you must open a folder containing a Karate project or clone from a URL.\n[Open Folder](command:vscode.openFolder)\n[Clone Repository](command:git.clone)\nAdditionally consider leveraging an existing sample project.\n[Karate Sample Projects](https://github.com/intuit/karate/tree/master/examples)\n[Karate Runner Sample Project](https://github.com/kirksl/karate-maven-gradle)\nLearn more about [this extension](https://marketplace.visualstudio.com/items?itemName=kirkslota.karate-runner) and [Karate](https://github.com/intuit/karate)."
 			}
 		],
 		"commands": [
@@ -670,7 +670,7 @@
 		"@types/glob": "^7.1.1",
 		"@types/mocha": "^5.2.7",
 		"@types/node": "^14.16.0",
-		"@types/vscode": "^1.58.0",
+		"@types/vscode": "^1.59.0",
 		"glob": "^7.1.4",
 		"js-yaml": "^3.13.1",
 		"mocha": "^7.1.2",
