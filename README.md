@@ -14,6 +14,9 @@ This project is proudly sponsored by [Karate](https://github.com/intuit/karate).
 [Sponsor Karate](https://github.com/sponsors/ptrthomas)<br />
 [Sponsor Karate Runner](https://github.com/sponsors/kirksl)
 
+## Contributing
+First and foremost thank you to all [Contributors](https://github.com/kirksl/karate-runner/graphs/contributors).  We highly appreciate your time and help to improve this project.  For first time contributions our rules are uber simple.  Clone this project, create your own branch and submit a PR.  Optionally you can also fork this project.  Thank you for considering us and happy coding!
+
 ## Features
 
 ### Codelens
