@@ -2,7 +2,7 @@
 
 #### [Repository](https://github.com/kirksl/karate-runner)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/kirksl/karate-runner/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Milestones](https://github.com/kirksl/karate-runner/milestones)&nbsp;&nbsp;|&nbsp;&nbsp;[Karate](https://github.com/intuit/karate)
 
-![Badge](https://img.shields.io/visual-studio-marketplace/v/kirkslota.karate-runner) ![Badge](https://img.shields.io/visual-studio-marketplace/last-updated/kirkslota.karate-runner) ![Badge](https://img.shields.io/github/issues/kirksl/karate-runner) ![Badge](https://img.shields.io/github/hacktoberfest/2021/kirksl/karate-runner)
+![Badge](https://img.shields.io/visual-studio-marketplace/v/kirkslota.karate-runner) ![Badge](https://img.shields.io/visual-studio-marketplace/last-updated/kirkslota.karate-runner) ![Badge](https://img.shields.io/github/issues/kirksl/karate-runner)
 
 Open/Run/Debug Karate Tests and Reports by leveraging Codelens, Activity Bar, Debugger and much more.
 
