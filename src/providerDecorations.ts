@@ -11,6 +11,7 @@ class ProviderDecorations
 	private readonly decorationNone: vscode.TextEditorDecorationType;
 	private readonly decorationPass: vscode.TextEditorDecorationType;
 	private readonly decorationFail: vscode.TextEditorDecorationType;
+	private readonly decorationTables: vscode.TextEditorDecorationType;
 
 	constructor(context: vscode.ExtensionContext)
 	{
@@ -19,6 +20,7 @@ class ProviderDecorations
 		this.decorationNone = this.getDecorationType(ENTRY_STATE.NONE);
 		this.decorationPass = this.getDecorationType(ENTRY_STATE.PASS);
 		this.decorationFail = this.getDecorationType(ENTRY_STATE.FAIL);
+		this.decorationTables = this.getTablesDecorationType();
 
 		vscode.window.onDidChangeActiveTextEditor(editor =>
 		{
@@ -97,6 +99,69 @@ class ProviderDecorations
 			editor.setDecorations(this.decorationPass, decorationPass);
 			editor.setDecorations(this.decorationFail, decorationFail);
 			editor.setDecorations(this.decorationNone, decorationNone);
+
+
+			let foundTables = false;
+			let foundTableHeaders = false;
+			let tableDataRow = 1;
+			let decorationTables: vscode.DecorationOptions[] = [];
+
+			for (let line = 0; line < editor.document.lineCount; line++)
+			{
+				let lineText = editor.document.lineAt(line).text.trim();
+				if (foundTables)
+				{
+					if (lineText.length > 1 && lineText.startsWith('|') && lineText.endsWith('|'))
+					{
+						if (foundTableHeaders)
+						{
+							let decorationOptions: vscode.DecorationOptions =
+							{
+								renderOptions:
+								{
+									after:
+									{
+										contentText: `${tableDataRow.toString()}`
+									}
+								},
+								range: new vscode.Range(line, 0, line, lineText.length)
+							}
+
+							decorationTables.push(decorationOptions);
+							tableDataRow++;
+						}
+						else
+						{
+							foundTableHeaders = true;
+						}
+					}
+					else
+					{
+						if (tableDataRow == 2)
+						{
+							decorationTables.pop();
+						}
+
+						tableDataRow = 1;
+						foundTableHeaders = false;
+						foundTables = false;
+					}
+				}
+				else
+				{
+					if (lineText.startsWith('Examples:') || lineText.startsWith('* table'))
+					{
+						foundTables = true;
+					}
+				}
+			}
+
+			if (tableDataRow == 2)
+			{
+				decorationTables.pop();
+			}
+
+			editor.setDecorations(this.decorationTables, decorationTables);
 		});
 	}
 
@@ -132,6 +197,27 @@ class ProviderDecorations
 		return decorationType;
 	}
 
+	private getTablesDecorationType(): vscode.TextEditorDecorationType
+	{
+		const workspaceConfig = vscode.workspace.getConfiguration("editor");
+		const fontSize = parseInt(workspaceConfig.get("fontSize")) - 1;
+
+		const decorationType = vscode.window.createTextEditorDecorationType(
+		{
+			isWholeLine: true,
+			after:
+			{
+				backgroundColor: new vscode.ThemeColor('karateRunner.trailingLineBackgroundColor'),
+				color: new vscode.ThemeColor('karateRunner.trailingLineForegroundColor'),
+				fontWeight: '100',
+				fontStyle: 'normal',
+				textDecoration: `none;position: relative;border-style: solid;font-size: ${fontSize}px; border-color: transparent;border-width: 0px 10px 0px 5px;`
+			}
+		});
+
+		return decorationType;
+	}
+
 	public triggerUpdateDecorations()
 	{
 		if (this.timeout)
@@ -143,7 +229,7 @@ class ProviderDecorations
 		this.timeout = setTimeout(() =>
 		{
 			this.updateDecorations();
-		}, 250);
+		}, 10);
 	}
 }
 

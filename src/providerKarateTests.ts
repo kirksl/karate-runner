@@ -116,8 +116,15 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 		switch (element.type)
 		{
 			case ENTRY_TYPE.ROOT:
-				treeItem.iconPath = getIcon(`folder-none.svg`);
+				treeItem.iconPath = getIcon(`folder-${element.state}.svg`);
+				treeItem.contextValue = 'testDirectory';
 				treeItem.label = element.tag;
+
+				if (element.fails > 0)
+				{
+					treeItem.description = element.fails + '';
+				}
+
 				break;
 
 			case ENTRY_TYPE.TAG:
@@ -209,21 +216,56 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 		let workspaceFolders = vscode.workspace.workspaceFolders;
 		if (workspaceFolders)
 		{
-			let workspaceFolder = workspaceFolders.filter(folder => folder.uri.scheme === 'file')[0];
+			let workspaceFoldersFiltered = workspaceFolders.filter(folder => folder.uri.scheme === 'file');
+			if (workspaceFoldersFiltered.length == 0)
+			{
+				return null;
+			}
+
+			let workspaceFolder = workspaceFoldersFiltered[0];
 
 			let entries: IEntry[] = [];
 			entries.push(
 			{
 				uri: workspaceFolder.uri,
 				type: ENTRY_TYPE.ROOT,
+				command:
+				{
+					arguments: [{ testUri: workspaceFolder.uri, debugLine: 0 }],
+					command: "karateRunner.tests.runAll",
+					title: "karateRunner.tests.runAll"
+				},
 				state: ENTRY_STATE.NONE,
+				fails: 0,
 				ignored: false
 			});
-	
-			if (entries.length > 0)
+
+			let aggregateState = ENTRY_STATE.NONE;
+			let aggregateFails = 0;
+
+			let childEntries = await this.getFilesFolders(entries[0]);
+			childEntries.forEach(entry => 
 			{
-				return entries;
-			}
+				aggregateFails += entry.fails;
+
+				if (entry.state === ENTRY_STATE.PASS)
+				{
+					if (aggregateState !== ENTRY_STATE.FAIL)
+					{
+						aggregateState = ENTRY_STATE.PASS;
+					}
+				}
+
+				if (entry.state === ENTRY_STATE.FAIL)
+				{
+					aggregateState = ENTRY_STATE.FAIL;
+				}
+			});
+
+			entries[0].fails = aggregateFails;
+			entries[0].state = aggregateState;
+
+			return entries;
 		}
 
 		return null;
@@ -262,6 +304,11 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 				{
 					let tag = tedTags[ndx3];
 					if (tag == "@ignore" && this.hideIgnored)
+					{
+						continue;
+					}
+
+					if (tag.trim() == "")
 					{
 						continue;
 					}
