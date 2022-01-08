@@ -777,6 +777,38 @@ function openFileInEditor(args)
 	}
 }
 
+function gotoLineNumber(line)
+{
+	let editor = vscode.window.activeTextEditor;
+	let range = editor.document.lineAt(line).range;
+	editor.selection =  new vscode.Selection(range.start, range.end);
+	editor.revealRange(range);
+}
+
+function moveLineUp(args)
+{
+	gotoLineNumber(args[0]);
+	vscode.commands.executeCommand('editor.action.moveLinesUpAction');
+}
+
+function moveLineDown(args)
+{
+	gotoLineNumber(args[0]);
+	vscode.commands.executeCommand('editor.action.moveLinesDownAction');
+}
+
+function cloneLine(args)
+{
+	gotoLineNumber(args[0]);
+	vscode.commands.executeCommand('editor.action.copyLinesDownAction');
+}
+
+function deleteLine(args)
+{
+	gotoLineNumber(args[0]);
+	vscode.commands.executeCommand('editor.action.deleteLines');
+}
+
 function openKarateSettings()
 {
 	vscode.commands.executeCommand('workbench.action.openSettings', 'Karate Runner');
@@ -805,6 +837,11 @@ export
 	openExternalUri,
 	openExternalUrl,
 	openFileInEditor,
+	gotoLineNumber,
+	moveLineUp,
+	moveLineDown,
+	cloneLine,
+	deleteLine,
 	openKarateSettings,
 	toggleResultsInGutter
 };

@@ -12,7 +12,7 @@ import ProviderCompletionItem from './providerCompletionItem';
 import ProviderDecorations from './providerDecorations';
 //import ProviderFoldingRange from "./providerFoldingRange";
 
-import { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, runTagKarateTests, displayReportsTree, filterReportsTree, displayTestsTree, filterTestsTree, openExternalUri, openFileInEditor, openKarateSettings, toggleResultsInGutter } from "./commands";
+import { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, runTagKarateTests, displayReportsTree, filterReportsTree, displayTestsTree, filterTestsTree, openExternalUri, openFileInEditor, moveLineUp, moveLineDown, cloneLine, deleteLine, openKarateSettings, toggleResultsInGutter } from "./commands";
 import { createTreeViewWatcher, showWhatsNew } from "./helper";
 import * as vscode from 'vscode';
 
@@ -62,6 +62,10 @@ export function activate(context: vscode.ExtensionContext)
 	let openSettingsCommand = vscode.commands.registerCommand("karateRunner.tests.openSettings", openKarateSettings);
 	let toggleResultsInGutterCommand = vscode.commands.registerCommand("karateRunner.editor.toggleResultsInGutter", toggleResultsInGutter);
 	let openFileCommand = vscode.commands.registerCommand("karateRunner.tests.open", openFileInEditor);
+	let moveLineUpCommand = vscode.commands.registerCommand("karateRunner.file.moveLineUp", moveLineUp);
+	let moveLineDownCommand = vscode.commands.registerCommand("karateRunner.file.moveLineDown", moveLineDown);
+	let cloneLineCommand = vscode.commands.registerCommand("karateRunner.file.cloneLine", cloneLine);
+	let deleteLineCommand = vscode.commands.registerCommand("karateRunner.file.deleteLine", deleteLine);
 
 	let registerDebugAdapterProvider = vscode.debug.registerDebugAdapterDescriptorFactory('karate', debugAdapterProvider);
 	let registerDebugConfigurationProvider = vscode.debug.registerDebugConfigurationProvider('karate', debugConfigurationProvider);
@@ -169,6 +173,10 @@ export function activate(context: vscode.ExtensionContext)
 	context.subscriptions.push(openSettingsCommand);
 	context.subscriptions.push(toggleResultsInGutterCommand);
 	context.subscriptions.push(openFileCommand);
+	context.subscriptions.push(moveLineUpCommand);
+	context.subscriptions.push(moveLineDownCommand);
+	context.subscriptions.push(cloneLineCommand);
+	context.subscriptions.push(deleteLineCommand);
 	context.subscriptions.push(registerDebugAdapterProvider);
 	context.subscriptions.push(registerDebugConfigurationProvider);
 	context.subscriptions.push(registerCodeLensProvider);
