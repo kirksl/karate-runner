@@ -41,7 +41,7 @@ class ProviderStatusBar
 
 		footer += `[$(clear-all)](${clearResults} "Clear Results")`;
 		footer += `&nbsp;&nbsp;[$(gear)](${openSettings} "Open Settings")`;
-		footer += `&nbsp;&nbsp;&nbsp;&nbsp;[$(github)](https://github.com/intuit/karate "Karate")`;
+		footer += `&nbsp;&nbsp;&nbsp;&nbsp;[$(github)](https://github.com/karatelabs/karate "Karate")`;
 		footer += `&nbsp;&nbsp;[$(extensions)](https://marketplace.visualstudio.com/items?itemName=kirkslota.karate-runner "Karate Runner")`;
 
 		return footer;

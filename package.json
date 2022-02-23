@@ -7,7 +7,8 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "1.1.2",
+	"version": "1.1.3",
+	"appInsightsId": "a285938d-a115-44ea-be2a-588a243d5f2c",
 	"license": "MIT",
 	"author": {
 		"name": "Kirk Slota"
@@ -20,6 +21,7 @@
 		"Other"
 	],
 	"keywords": [
+		"karatelabs",
 		"karate",
 		"intuit",
 		"rest",
@@ -90,13 +92,14 @@
 		"viewsWelcome": [
 			{
 				"view": "karate-welcome",
-				"contents": "Karate Runner\nIn order to use this extension you must open a folder containing a Karate project or clone from a URL.\n[Open Folder](command:vscode.openFolder)\n[Clone Repository](command:git.clone)\nAdditionally consider leveraging an existing sample project.\n[Karate Sample Projects](https://github.com/intuit/karate/tree/master/examples)\n[Karate Runner Sample Project](https://github.com/kirksl/karate-maven-gradle)\nLearn more about [this extension](https://marketplace.visualstudio.com/items?itemName=kirkslota.karate-runner) and [Karate](https://github.com/intuit/karate)."
+				"contents": "Karate Runner\nIn order to use this extension you must open a folder containing a Karate project or clone from a URL.\n[Open Folder](command:vscode.openFolder)\n[Clone Repository](command:git.clone)\nAdditionally consider leveraging an existing sample project.\n[Karate Sample Projects](https://github.com/karatelabs/karate/tree/master/examples)\n[Karate Runner Sample Project](https://github.com/kirksl/karate-maven-gradle)\nLearn more about [this extension](https://marketplace.visualstudio.com/items?itemName=kirkslota.karate-runner) and [Karate](https://github.com/karatelabs/karate)."
 			}
 		],
 		"commands": [
 			{
 				"command": "karateRunner.paste",
-				"title": "Karate Smart Paste"
+				"title": "Karate Smart Paste",
+				"enablement": "editorTextFocus && editorLangId == karate"
 			},
 			{
 				"command": "karateRunner.getDebugFile",
@@ -252,6 +255,12 @@
 			}
 		],
 		"menus": {
+			"commandPalette": [
+				{
+					"command": "karateRunner.paste",
+					"when": "false"
+				}
+			],
 			"view/title": [
 				{
 					"command": "karateRunner.reports.refreshTree",
@@ -415,7 +424,7 @@
 				"karateRunner.karateCli.commandLineArgs": {
 					"type": "string",
 					"default": "",
-					"description": "Karate Cli command line.  Karate Cli specific arguments are specified here as defined at https://github.com/intuit/karate/wiki/Debug-Server#karate-options.  Only applies when using Maven or Gradle.",
+					"description": "Karate Cli command line.  Karate Cli specific arguments are specified here as defined at https://github.com/karatelabs/karate/wiki/Debug-Server#karate-options.  Only applies when using Maven or Gradle.",
 					"scope": "resource"
 				},
 				"karateRunner.karateRunner.commandLineArgs": {
@@ -693,12 +702,13 @@
 		"@types/vscode": "^1.63.0",
 		"glob": "^7.1.4",
 		"js-yaml": "^3.13.1",
-		"mocha": "^9.1.3",
+		"mocha": "^9.2.0",
 		"tslint": "^6.1.2",
 		"typescript": "^4.3.5",
 		"vscode-test": "^1.1.0"
 	},
 	"dependencies": {
+		"@vscode/extension-telemetry": "^0.4.9",
 		"fs-extra": "^8.1.0",
 		"mkdirp": "^1.0.4",
 		"open": "^8.2.0",

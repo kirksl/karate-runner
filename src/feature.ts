@@ -58,14 +58,14 @@ class Feature
 		let lParens: number = 0;
 		let rParens: number = 0;
 		let scope: number = 0;
-		let readScope: boolean = false;
+		let fileScope: boolean = false;
 		let match;
 
 		while ((match = regexp.exec(line.text)) !== null)
 		{
-			if (match[0].toLowerCase() === 'read')
+			if (match[0].toLowerCase() === 'read' || match[0].toLowerCase() === 'karate.call')
 			{
-				readScope = true;
+				fileScope = true;
 				scope++;
 			}
 
@@ -78,15 +78,15 @@ class Feature
 				scope: scope
 			};
 
-			if (match[0] === '(') { lParens++; }
-			if (match[0] === ')') { rParens++; }
+			if (fileScope === true && match[0] === '(') { lParens++; }
+			if (fileScope === true && match[0] === ')') { rParens++; }
 
-			if (lParens > 0 && lParens === rParens && readScope === true)
+			if (lParens > 0 && lParens === rParens && fileScope === true)
 			{
 				lParens = 0;
 				rParens = 0;
 				scope++;
-				readScope = false;
+				fileScope = false;
 			}
 
 			tokens.push(token);
@@ -154,6 +154,11 @@ class Feature
 						continue;
 					}
 
+					if (scopedTokens[ndx].text.toLowerCase() === 'karate.call')
+					{
+						continue;
+					}
+
 					if (this.isKeyword(scopedTokens[ndx].text.toLowerCase()))
 					{
 						break;
@@ -204,10 +209,6 @@ class Feature
 					{
 						positionalTokens.push(scopedTokens[ndx]);
 						canConcat = false;
-					}
-					else
-					{
-						break;
 					}
 				}
 			}

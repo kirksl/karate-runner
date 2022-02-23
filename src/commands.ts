@@ -811,8 +811,8 @@ function deleteLine(args)
 
 function openKarateSettings()
 {
-	vscode.commands.executeCommand('workbench.action.openSettings', 'Karate Runner');
 	vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
+	vscode.commands.executeCommand('workbench.action.openSettings', 'Karate Runner');
 }
 
 function toggleResultsInGutter()
