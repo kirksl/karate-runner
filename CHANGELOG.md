@@ -2,6 +2,9 @@
 Notable changes to this project will be documented in this file.
 
 
+## 1.1.3
+https://github.com/kirksl/karate-runner/milestone/9
+
 ## 1.1.2
 https://github.com/kirksl/karate-runner/milestone/8
 

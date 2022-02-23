@@ -1,6 +1,6 @@
 # Karate Runner
 
-#### [Repository](https://github.com/kirksl/karate-runner)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/kirksl/karate-runner/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Milestones](https://github.com/kirksl/karate-runner/milestones)&nbsp;&nbsp;|&nbsp;&nbsp;[Karate](https://github.com/intuit/karate)
+#### [Repository](https://github.com/kirksl/karate-runner)&nbsp;&nbsp;|&nbsp;&nbsp;[Issues](https://github.com/kirksl/karate-runner/issues)&nbsp;&nbsp;|&nbsp;&nbsp;[Milestones](https://github.com/kirksl/karate-runner/milestones)&nbsp;&nbsp;|&nbsp;&nbsp;[Karate](https://github.com/karatelabs/karate)
 
 ![Badge](https://img.shields.io/visual-studio-marketplace/v/kirkslota.karate-runner) ![Badge](https://img.shields.io/visual-studio-marketplace/last-updated/kirkslota.karate-runner) ![Badge](https://img.shields.io/github/issues/kirksl/karate-runner)
 
@@ -8,8 +8,8 @@ Open/Run/Debug Karate Tests and Reports by leveraging Codelens, Activity Bar, De
 
 
 ## Sponsors
-[![Karate](https://raw.githubusercontent.com/kirksl/karate-runner/master/resources/karate.png)](https://github.com/intuit/karate)<br />
-This project is proudly sponsored by [Karate](https://github.com/intuit/karate).  The only open-source tool to combine API test-automation, mocks, performance-testing and even UI automation into a single, unified framework.
+[![Karate](https://raw.githubusercontent.com/kirksl/karate-runner/master/resources/karate.png)](https://github.com/karatelabs/karate)<br />
+This project is proudly sponsored by [Karate](https://github.com/karatelabs/karate).  The only open-source tool to combine API test-automation, mocks, performance-testing and even UI automation into a single, unified framework.
 
 [Sponsor Karate](https://github.com/sponsors/ptrthomas)<br />
 [Sponsor Karate Runner](https://github.com/sponsors/kirksl)
@@ -96,7 +96,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 ## Setup
 
 ### Versions
-- `VSCode Version 1.59.0` or greater. (Required)
+- `VSCode Version 1.63.0` or greater. (Required)
 - `Karate Version 0.9.3` or greater in your Karate projects. (Required)
 - `Karate Version 0.9.5` or greater in your Karate projects. (Required for Debugger or Karate Cli)
 - `Karate Version 1.0.0` or greater in your Karate projects. (Required for Tests View results)
@@ -131,16 +131,16 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 - Follow same steps above for setting up from a feature file except for first Codelens step.
 
 ### Karate Cli
-- Note [Karate Cli](https://github.com/intuit/karate/wiki/Debug-Server#karate-cli) is a work in progress feature to eliminate the need for Java files as runners.
+- Note [Karate Cli](https://github.com/karatelabs/karate/wiki/Debug-Server#karate-cli) is a work in progress feature to eliminate the need for Java files as runners.
 - Open `Preferences > Settings > Search for Karate Runner`.
 - Enable by adding check mark to `Karate Runner > Karate Cli: Override Karate Runner`.
-- [Configure](https://github.com/intuit/karate/wiki/Debug-Server#karate-options) by setting `Karate Runner > Karate Cli: Command Line Args`.
+- [Configure](https://github.com/karatelabs/karate/wiki/Debug-Server#karate-options) by setting `Karate Runner > Karate Cli: Command Line Args`.
 - Note this extension will handle all Maven and Gradle commands and specifying the feature file(and line number if needed).
 - See `### Gradle` section at the bottom if applicable.
 
 ### Karate Jar
 - Open `Preferences > Settings > Search for Karate Runner`.
-- [Configure](https://github.com/intuit/karate/tree/master/karate-netty#standalone-jar) the Karate Standalone Jar by setting `Karate Runner > Karate Jar: Command Line Args`.
+- [Configure](https://github.com/karatelabs/karate/tree/master/karate-netty#standalone-jar) the Karate Standalone Jar by setting `Karate Runner > Karate Jar: Command Line Args`.
 
 ### Gradle (If Applicable)
 - Required for Debugger and Karate Cli.
@@ -164,7 +164,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
     ```
 
 ### Sample Projects
-[Karate Sample Projects](https://github.com/intuit/karate/tree/master/examples)<br />
+[Karate Sample Projects](https://github.com/karatelabs/karate/tree/master/examples)<br />
 [Karate Runner Sample Project](https://github.com/kirksl/karate-maven-gradle)
 
 ### License

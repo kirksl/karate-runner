@@ -5,6 +5,9 @@ import path = require("path");
 import fs = require("fs");
 import * as vscode from 'vscode';
 
+let os = require('os');
+let dns = require('dns').promises;
+
 interface IProjectDetail
 {
 	projectRoot: string;
@@ -392,14 +395,11 @@ function createTreeViewWatcher(watcher, watcherGlob, provider)
 function showWhatsNew(context: vscode.ExtensionContext)
 {
 	const VERSION_KEY = 'karate.runner.version';
-	const EXTENSION_ID = 'kirkslota.karate-runner';
-
-	ServiceLocalStorage.initialize(context.globalState);
 	
-	let extVersionCurrent = vscode.extensions.getExtension(EXTENSION_ID).packageJSON.version;
-	let extVersionLastRecord = ServiceLocalStorage.instance.getValue(VERSION_KEY);
+	let extVersionCurrent = context.extension.packageJSON.version;
+	let extVersionLast = ServiceLocalStorage.instance.getValue(VERSION_KEY);
 
-	if (extVersionLastRecord == null || extVersionLastRecord != extVersionCurrent)
+	if (extVersionLast == null || extVersionLast != extVersionCurrent)
 	{
 		ServiceLocalStorage.instance.setValue(VERSION_KEY, extVersionCurrent);
 		openExternalUrl(`https://github.com/kirksl/karate-runner/releases/tag/v${extVersionCurrent}`);
@@ -444,6 +444,23 @@ function truncateMiddle(input: string, length: number): string
 	return input;
 }
 
+async function getFqdns()
+{
+	let fqdns = [];
+	let addresses = await dns.lookup(os.hostname(), { family: 4, hints: dns.ADDRCONFIG, all: true });
+
+	for (let ndx = 0; ndx < addresses.length; ndx++)
+	{
+		let fqdn = await dns.lookupService(addresses[ndx].address, 0);
+		if (fqdn.hostname.indexOf('.') !== -1)
+		{
+			fqdns.push(fqdn.hostname);
+		}
+	}
+
+	return fqdns;
+}
+
 export
 {
 	getProjectDetail,
@@ -459,5 +476,6 @@ export
 	getIcon,
 	getLightIcon,
 	getDarkIcon,
-	truncateMiddle
+	truncateMiddle,
+	getFqdns
 };
