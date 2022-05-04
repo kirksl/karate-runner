@@ -435,8 +435,8 @@ function truncateMiddle(input: string, length: number): string
 		
 		let lIndex = Math.ceil(length / 2);
 		let rIndex = Math.floor(length / 2);
-		let lInput = input.substr(0, lIndex);
-		let rInput = input.substr(input.length - rIndex);
+		let lInput = input.substring(0, lIndex);
+		let rInput = input.substring(input.length - rIndex);
 
 		return lInput + '...' + rInput;
 	}

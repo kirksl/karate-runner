@@ -78,7 +78,7 @@ export function activate(context: vscode.ExtensionContext)
 	let registerCodeLensProvider = vscode.languages.registerCodeLensProvider(karateFile, codeLensProvider);
 	let registerDefinitionProvider = vscode.languages.registerDefinitionProvider(karateFile, definitionProvider);
 	let registerProviderHoverRunDebug = vscode.languages.registerHoverProvider(karateFile, hoverRunDebugProvider);
-	let registerCompletionItemProvider = vscode.languages.registerCompletionItemProvider(karateFile, completionItemProvider, ...['\'', '\"', ' ']);
+	let registerCompletionItemProvider = vscode.languages.registerCompletionItemProvider(karateFile, completionItemProvider, ...['\'', '\"', '@', ' ']);
 	let registerDocumentSymbolProvider = vscode.languages.registerDocumentSymbolProvider(karateFile, documentSymbolProvider);
 	//let registerFoldingRangeProvider = vscode.languages.registerFoldingRangeProvider(karateFile, foldingRangeProvider);
 

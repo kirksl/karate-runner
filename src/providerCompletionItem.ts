@@ -1,21 +1,69 @@
-import { getProjectDetail, IProjectDetail } from "./helper";
+import { getProjectDetail, IProjectDetail, getTestExecutionDetail, getTestExecutionDetailTags, ITestExecutionDetail } from "./helper";
 import * as vscode from 'vscode';
 import path = require("path");
 import fs = require("fs");
+import { ENTRY_TYPE } from "./types/entry";
 
 class ProviderCompletionItem implements vscode.CompletionItemProvider
 {
-	provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): vscode.ProviderResult<vscode.CompletionItem[] | vscode.CompletionList>
+	async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[]>
 	{
 		let lineText = document.lineAt(position).text;
-		let linePrefix = document.lineAt(position).text.substr(0, position.character);
-		let lineRegExp = new RegExp("^.*read\\([\'\"]{1}[^\'\"\)]*$");
-		let lineMatch = linePrefix.match(lineRegExp);
-		if (lineMatch === null || lineMatch.index === undefined)
+		let linePrefix = document.lineAt(position).text.substring(0, position.character);
+
+		console.debug(lineText);
+		console.debug(linePrefix);
+
+		let lineRegExp1 = new RegExp("^.*read\\([\'\"]{1}$");
+		let lineRegExp2 = new RegExp("^.*read\\([\'\"]{1}([^@\'\"]+)@[^@\'\"]*$");
+		let lineMatch1 = linePrefix.match(lineRegExp1);
+		let lineMatch2 = linePrefix.match(lineRegExp2);
+
+		if (lineMatch1 !== null && lineMatch1.index !== undefined)
 		{
-			return undefined;
+			return this.getFileCompletionItems(lineText, document, position);
 		}
 
+		if (lineMatch2 !== null && lineMatch2.index !== undefined)
+		{
+			if (lineMatch2.length === 2)
+			{
+				let completionItems = this.getFileCompletionItems(lineText, document, position);
+				let completionItem = completionItems.find(item => item.label === lineMatch2[1]);
+				
+				if (completionItem !== undefined)
+				{
+					let testIgnored: boolean;
+					let entryType: ENTRY_TYPE;
+					let uri = vscode.Uri.file(completionItem.detail);
+					
+					entryType = ENTRY_TYPE.FILE;
+					let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(uri, entryType);
+					testIgnored = tedArray[0].testIgnored;
+
+					let tags = getTestExecutionDetailTags(tedArray);
+					tags = tags.filter(v => v !== '@ignore');
+
+					for (let ndx = 0; ndx < tags.length; ndx++)
+					{
+						if (tags[ndx].startsWith('@'))
+						{
+							tags[ndx] = tags[ndx].substring(1);
+						}
+					}
+
+					return this.getTagCompletionItems(lineText, tags, document, position);
+				}
+
+				return undefined;
+			}
+		}
+
+		return undefined;
+	}
+
+	getFileCompletionItems(lineText: string, document: vscode.TextDocument, position: vscode.Position): vscode.CompletionItem[]
+	{
 		let parsedPath = path.parse(document.fileName); 
 		let callerDir = parsedPath.dir;
 		let callerFile = parsedPath.base;
@@ -26,9 +74,11 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 
 			localFiles.forEach((file) =>
 			{
-				if (fs.statSync(callerDir + path.sep + file).isFile() && file !== callerFile)
+				let filePath = path.join(callerDir, file);
+				if (fs.statSync(filePath).isFile() && file !== callerFile)
 				{
 					let ci = new vscode.CompletionItem(file, vscode.CompletionItemKind.Text);
+					ci.detail = filePath;
 					ci.sortText = 'a';
 					ci.additionalTextEdits = [vscode.TextEdit.delete(new vscode.Range(position.line, lineText.indexOf("(") + 2, position.line, lineText.indexOf(")") - 1))];
 					completionItems.push(ci);
@@ -47,18 +97,19 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 
 			globalFiles.forEach((file) =>
 			{
-				if (fs.statSync(searchDir + path.sep + file).isDirectory())
+				let filePath = path.join(searchDir, file);
+				if (fs.statSync(filePath).isDirectory())
 				{
-					completionItems = getGlobals(baseDir, subDir + path.sep + file, completionItems, includeClassPath)
+					completionItems = getGlobals(baseDir, path.join(subDir, file), completionItems, includeClassPath)
 				}
 				else
 				{
-					let f = path.join(searchDir, path.sep, file);
-					if (path.parse(f).dir !== callerDir)
+					if (path.parse(filePath).dir !== callerDir)
 					{
-						f = f.substring(baseDir.length);
-						f = f.replace(/\\/g, "/");
-						let ci = new vscode.CompletionItem(includeClassPath ? `classpath:${f}` : `${f}`, vscode.CompletionItemKind.Text);
+						let fNormalized = filePath.substring(baseDir.length);
+						fNormalized = fNormalized.replace(/\\/g, "/");
+						let ci = new vscode.CompletionItem(includeClassPath ? `classpath:${fNormalized}` : `${fNormalized}`, vscode.CompletionItemKind.Text);
+						ci.detail = filePath;
 						ci.additionalTextEdits = [vscode.TextEdit.delete(new vscode.Range(position.line, lineText.indexOf("(") + 2, position.line, lineText.indexOf(")") - 1))];
 						completionItems.push(ci);
 					}
@@ -105,6 +156,25 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 				completionItems.push(getGlobals(paths[i], null, completionItems, false));
 			}
 		}
+
+		if (completionItems.length === 0)
+		{
+			return undefined;
+		}
+
+		return completionItems;
+	}
+
+	getTagCompletionItems(lineText: string, tags: string[], document: vscode.TextDocument, position: vscode.Position): vscode.CompletionItem[]
+	{
+		let completionItems: vscode.CompletionItem[] = [];
+
+		tags.forEach(tag =>
+		{
+			let ci = new vscode.CompletionItem(tag, vscode.CompletionItemKind.Text);
+			ci.additionalTextEdits = [vscode.TextEdit.delete(new vscode.Range(position.line, lineText.indexOf("@") + 1, position.line, lineText.indexOf(")") - 1))];
+			completionItems.push(ci);
+		});
 
 		if (completionItems.length === 0)
 		{
