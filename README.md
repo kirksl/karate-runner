@@ -90,13 +90,15 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 *Note this is a work in progress as the Karate Language and VSCode Themes evolve.*
 
 ### Intellisense
-`Intellisense` will be added to the Karate `read()` command to enumerate all files in the same directory.  Additionally if `<project root>/src/test/java`,  `<project root>/src/test/resources` exist, all files within those directories will be enumerated.
+`Intellisense` will be added to the Karate `read()` command to enumerate all files in the same directory.  Additionally if `<project root>/src/test/java`,  `<project root>/src/test/resources` exist, all files within those directories will be enumerated.  Finally entering `@` after the selected file will enumerate all tags within the file.
+
+*Note suggested auto completion text from extensions like `Github Copilot` can interfere with this feature.  This can typically be resolved by pressing the Escape key to clear the suggested text.*
 
 
 ## Setup
 
 ### Versions
-- `VSCode Version 1.63.0` or greater. (Required)
+- `VSCode Version 1.64.0` or greater. (Required)
 - `Karate Version 0.9.3` or greater in your Karate projects. (Required)
 - `Karate Version 0.9.5` or greater in your Karate projects. (Required for Debugger or Karate Cli)
 - `Karate Version 1.0.0` or greater in your Karate projects. (Required for Tests View results)
