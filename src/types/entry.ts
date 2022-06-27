@@ -26,6 +26,7 @@ interface IEntry
 	state?: ENTRY_STATE;
 	fails?: number;
 	ignored?: boolean;
+	time?: number;
 }
 
 export { ENTRY_TYPE, ENTRY_STATE, IEntry };

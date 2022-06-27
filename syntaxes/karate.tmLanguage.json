@@ -713,7 +713,7 @@
     "read": {
       "patterns": [
         {
-          "match": "\\b(read(?:once)?)\\b\\s*([^\\s]+)\\s*(.*)?",
+          "match": "\\b(read(?:once)?)\\b\\s*([^)]+)\\s*(.*)?",
           "captures": {
             "1": {
               "name": "keyword.other.read.karate"
@@ -722,8 +722,8 @@
               "name": "meta.statement.read.karate",
               "patterns": [
                 {
-                  "include": "#strings"
-                }
+					"include": "source.js"
+				}
               ]
             },
             "3": {

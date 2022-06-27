@@ -7,32 +7,55 @@ class ProviderDecorations
 {
 	private timeout: NodeJS.Timeout;
 	private context: vscode.ExtensionContext;
+	private activeEditor: vscode.TextEditor;
 
-	private readonly decorationNone: vscode.TextEditorDecorationType;
-	private readonly decorationPass: vscode.TextEditorDecorationType;
-	private readonly decorationFail: vscode.TextEditorDecorationType;
-	private readonly decorationTables: vscode.TextEditorDecorationType;
+	private readonly decorTestResultNone: vscode.TextEditorDecorationType;
+	private readonly decorTestResultPass: vscode.TextEditorDecorationType;
+	private readonly decorTestResultFail: vscode.TextEditorDecorationType;
+	private readonly decorTestResultGutterNone: vscode.TextEditorDecorationType;
+	private readonly decorTestResultGutterPass: vscode.TextEditorDecorationType;
+	private readonly decorTestResultGutterFail: vscode.TextEditorDecorationType;
+	private readonly decorTableResultPass: vscode.TextEditorDecorationType;
+	private readonly decorTableResultFail: vscode.TextEditorDecorationType;
+	private readonly decorTableResultGutterPass: vscode.TextEditorDecorationType;
+	private readonly decorTableResultGutterFail: vscode.TextEditorDecorationType;
+	private readonly decorTableRowNumber: vscode.TextEditorDecorationType;
 
 	constructor(context: vscode.ExtensionContext)
 	{
 		this.context = context;
+		this.activeEditor = vscode.window.activeTextEditor;
 
-		this.decorationNone = this.getDecorationType(ENTRY_STATE.NONE);
-		this.decorationPass = this.getDecorationType(ENTRY_STATE.PASS);
-		this.decorationFail = this.getDecorationType(ENTRY_STATE.FAIL);
-		this.decorationTables = this.getTablesDecorationType();
+		this.decorTestResultNone = this.getTestResultDecorType(ENTRY_STATE.NONE, false);
+		this.decorTestResultPass = this.getTestResultDecorType(ENTRY_STATE.PASS, false);
+		this.decorTestResultFail = this.getTestResultDecorType(ENTRY_STATE.FAIL, false);
+		this.decorTestResultGutterNone = this.getTestResultDecorType(ENTRY_STATE.NONE, true);
+		this.decorTestResultGutterPass = this.getTestResultDecorType(ENTRY_STATE.PASS, true);
+		this.decorTestResultGutterFail = this.getTestResultDecorType(ENTRY_STATE.FAIL, true);
+		this.decorTableResultPass = this.getTableResultDecorType(ENTRY_STATE.PASS, false);
+		this.decorTableResultFail = this.getTableResultDecorType(ENTRY_STATE.FAIL, false);
+		this.decorTableResultGutterPass = this.getTableResultDecorType(ENTRY_STATE.PASS, true);
+		this.decorTableResultGutterFail = this.getTableResultDecorType(ENTRY_STATE.FAIL, true);
+		this.decorTableRowNumber = this.getTableRowNumberDecorType();
 
-		vscode.window.onDidChangeActiveTextEditor(editor =>
+		vscode.window.onDidChangeActiveTextEditor((editor) =>
 		{
+			this.activeEditor = editor;
+
 			if (editor)
 			{
 				this.triggerUpdateDecorations();
 			}
 		}, null, this.context.subscriptions);
 	  
-		vscode.workspace.onDidChangeTextDocument(event =>
+		vscode.workspace.onDidChangeTextDocument((event) =>
 		{
-			this.triggerUpdateDecorations();
+			if (this.activeEditor &&
+				event.document === this.activeEditor.document &&
+				event.document.languageId === 'karate')
+			{
+				this.triggerUpdateDecorations();
+			}
 		}, null, this.context.subscriptions);
 
 		ProviderResults.onTestResults((json) => 
@@ -52,157 +75,277 @@ class ProviderDecorations
 				return;
 			}
 
-			let decorationNone: vscode.DecorationOptions[] = [];
-			let decorationPass: vscode.DecorationOptions[] = [];
-			let decorationFail: vscode.DecorationOptions[] = [];
-	
-			if (Boolean(vscode.workspace.getConfiguration('karateRunner.editor').get('toggleResultsInGutter')))
+			await this.updateResultDecorations(editor);
+			this.updateTableRowNumberDecorations(editor);
+		});
+	}
+
+	public async updateResultDecorations(editor: vscode.TextEditor)
+	{
+		let decorTestResultNone: vscode.DecorationOptions[] = [];
+		let decorTestResultPass: vscode.DecorationOptions[] = [];
+		let decorTestResultFail: vscode.DecorationOptions[] = [];
+		let decorTestResultGutterNone: vscode.DecorationOptions[] = [];
+		let decorTestResultGutterPass: vscode.DecorationOptions[] = [];
+		let decorTestResultGutterFail: vscode.DecorationOptions[] = [];
+		let decorTableResultPass: vscode.DecorationOptions[] = [];
+		let decorTableResultFail: vscode.DecorationOptions[] = [];
+		let decorTableResultGutterPass: vscode.DecorationOptions[] = [];
+		let decorTableResultGutterFail: vscode.DecorationOptions[] = [];
+
+		let showResultsInGutter = Boolean(vscode.workspace.getConfiguration('karateRunner.editor').get('toggleResultsInGutter'));
+
+		let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(editor.document.uri, ENTRY_TYPE.FILE);
+		tedArray.forEach((ted) =>
+		{
+			let state = ProviderResults.getTestResult(ted);
+			let range = ted.testRange;
+			let positionEnd: vscode.Position = new vscode.Position(range.start.line, range.start.character + 2);
+			let rangeNew = new vscode.Range(range.start, positionEnd);
+			let markdownResults: vscode.MarkdownString[] = [];
+
+			if (state === ENTRY_STATE.FAIL)
 			{
-				let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(editor.document.uri, ENTRY_TYPE.FILE);
-	
-				tedArray.forEach((ted) =>
-				{
-					let state = ProviderResults.getTestResult(ted);
-					let range = ted.testRange;
-					let positionEnd: vscode.Position = new vscode.Position(range.start.line, range.start.character + 2);
-					let rangeNew = new vscode.Range(range.start, positionEnd);
-					let markdownResults: vscode.MarkdownString[] = [];
-
-					if (state === ENTRY_STATE.FAIL)
-					{
-						markdownResults = ProviderResults.getFullSummary(ted);
-					}
-
-					let decorationOptions: vscode.DecorationOptions =
-					{
-						hoverMessage: markdownResults,
-						range: rangeNew
-					}
-		
-					switch (state)
-					{
-						case ENTRY_STATE.NONE:
-							decorationNone.push(decorationOptions);
-							break;
-						
-						case ENTRY_STATE.PASS:
-							decorationPass.push(decorationOptions);
-							break;
-		
-						case ENTRY_STATE.FAIL:
-							decorationFail.push(decorationOptions);
-							break;
-					}
-				});
+				markdownResults = ProviderResults.getFullSummary(ted);
 			}
-	
-			editor.setDecorations(this.decorationPass, decorationPass);
-			editor.setDecorations(this.decorationFail, decorationFail);
-			editor.setDecorations(this.decorationNone, decorationNone);
 
-
-			let foundTables = false;
-			let foundTableHeaders = false;
-			let tableDataRow = 1;
-			let decorationTables: vscode.DecorationOptions[] = [];
-
-			for (let line = 0; line < editor.document.lineCount; line++)
+			let decorOptions: vscode.DecorationOptions =
 			{
-				let lineText = editor.document.lineAt(line).text.trim();
-				if (foundTables)
-				{
-					if (lineText.length > 1 && lineText.startsWith('|') && lineText.endsWith('|'))
-					{
-						if (foundTableHeaders)
-						{
-							let decorationOptions: vscode.DecorationOptions =
-							{
-								renderOptions:
-								{
-									after:
-									{
-										contentText: `${tableDataRow.toString()}`
-									}
-								},
-								range: new vscode.Range(line, 0, line, lineText.length)
-							}
+				hoverMessage: markdownResults,
+				range: rangeNew
+			}
 
-							decorationTables.push(decorationOptions);
-							tableDataRow++;
-						}
-						else
-						{
-							foundTableHeaders = true;
-						}
+			switch (state)
+			{
+				case ENTRY_STATE.NONE:
+					if (showResultsInGutter)
+					{
+						decorTestResultGutterNone.push(decorOptions);
 					}
 					else
 					{
-						if (tableDataRow == 2)
+						decorTestResultNone.push(decorOptions);
+					}
+
+					break;
+				
+				case ENTRY_STATE.PASS:
+					if (showResultsInGutter)
+					{
+						decorTestResultGutterPass.push(decorOptions);
+					}
+					else
+					{
+						decorTestResultPass.push(decorOptions);
+					}
+
+					break;
+
+				case ENTRY_STATE.FAIL:
+					if (showResultsInGutter)
+					{
+						decorTestResultGutterFail.push(decorOptions);
+					}
+					else
+					{
+						decorTestResultFail.push(decorOptions);
+					}
+
+					break;
+			}
+
+			if (ted.testTitle.startsWith("Feature:"))
+			{
+				return;
+			}
+
+			let result = ProviderResults.getResult(ted);
+			if (result && result.isOutline)
+			{
+				let processedLines = [];
+
+				result.fails.forEach((fail) =>
+				{
+					if (!processedLines.includes(fail.line - 1))
+					{
+						processedLines.push(fail.line - 1);
+						let range = new vscode.Range(fail.line - 1, 0, fail.line - 1, 0);
+						let decorOptions: vscode.DecorationOptions = { range: range };
+
+						if (showResultsInGutter)
 						{
-							decorationTables.pop();
+							decorTableResultGutterFail.push(decorOptions);
+						}
+						else
+						{
+							decorTableResultFail.push(decorOptions);
+						}
+					}
+				});
+
+				result.passes.forEach((pass) =>
+				{
+					if (!processedLines.includes(pass.line - 1))
+					{
+						processedLines.push(pass.line - 1);
+						let range = new vscode.Range(pass.line - 1, 0, pass.line - 1, 0);
+						let decorOptions: vscode.DecorationOptions = { range: range };
+
+						if (showResultsInGutter)
+						{
+							decorTableResultGutterPass.push(decorOptions);
+						}
+						else
+						{
+							decorTableResultPass.push(decorOptions);
+						}
+					}
+				});
+			}
+		});
+
+		editor.setDecorations(this.decorTestResultPass, decorTestResultPass);
+		editor.setDecorations(this.decorTestResultFail, decorTestResultFail);
+		editor.setDecorations(this.decorTestResultNone, decorTestResultNone);
+		editor.setDecorations(this.decorTestResultGutterPass, decorTestResultGutterPass);
+		editor.setDecorations(this.decorTestResultGutterFail, decorTestResultGutterFail);
+		editor.setDecorations(this.decorTestResultGutterNone, decorTestResultGutterNone);
+		editor.setDecorations(this.decorTableResultPass, decorTableResultPass);
+		editor.setDecorations(this.decorTableResultFail, decorTableResultFail);
+		editor.setDecorations(this.decorTableResultGutterPass, decorTableResultGutterPass);
+		editor.setDecorations(this.decorTableResultGutterFail, decorTableResultGutterFail);
+	}
+
+	public updateTableRowNumberDecorations(editor: vscode.TextEditor)
+	{
+		let foundTables = false;
+		let foundTableHeaders = false;
+		let tableDataRow = 1;
+		let decorTableRowNumber: vscode.DecorationOptions[] = [];
+
+		for (let line = 0; line < editor.document.lineCount; line++)
+		{
+			let lineText = editor.document.lineAt(line).text.trim();
+			if (foundTables)
+			{
+				if (lineText.length > 1 && lineText.startsWith('|') && lineText.endsWith('|'))
+				{
+					if (foundTableHeaders)
+					{
+						let decorOptions: vscode.DecorationOptions =
+						{
+							renderOptions:
+							{
+								after:
+								{
+									contentText: `${tableDataRow.toString()}`
+								}
+							},
+							range: new vscode.Range(line, 0, line, lineText.length)
 						}
 
-						tableDataRow = 1;
-						foundTableHeaders = false;
-						foundTables = false;
+						decorTableRowNumber.push(decorOptions);
+						tableDataRow++;
+					}
+					else
+					{
+						foundTableHeaders = true;
 					}
 				}
 				else
 				{
-					if (lineText.startsWith('Examples:') || lineText.startsWith('* table'))
+					if (tableDataRow == 2)
 					{
-						foundTables = true;
+						decorTableRowNumber.pop();
 					}
+
+					tableDataRow = 1;
+					foundTableHeaders = false;
+					foundTables = false;
 				}
 			}
-
-			if (tableDataRow == 2)
+			else
 			{
-				decorationTables.pop();
+				if (lineText.startsWith('Examples:') || lineText.startsWith('* table'))
+				{
+					foundTables = true;
+				}
 			}
+		}
 
-			editor.setDecorations(this.decorationTables, decorationTables);
-		});
+		if (tableDataRow == 2)
+		{
+			decorTableRowNumber.pop();
+		}
+
+		editor.setDecorations(this.decorTableRowNumber, decorTableRowNumber);
 	}
 
-	private getDecorationType(state: ENTRY_STATE): vscode.TextEditorDecorationType
+	private getTestResultDecorType(state: ENTRY_STATE, gutterIcon: Boolean): vscode.TextEditorDecorationType
 	{
 		let textDecorationLight = '';
 		let textDecorationDark = '';
 
 		if (state === ENTRY_STATE.FAIL)
 		{
-			textDecorationLight = 'dotted underline 2px #424242';
-			textDecorationDark = 'dotted underline 2px #C5C5C5';
+			textDecorationLight = 'wavy underline #EA3713';
+			textDecorationDark = 'wavy underline #BA2B0E';
 		}
 
-		const decorationType = vscode.window.createTextEditorDecorationType(
+		let options: vscode.DecorationRenderOptions = 
 		{
-			overviewRulerColor: 'rgba(255, 255, 255, 0.5)',
-			overviewRulerLane: vscode.OverviewRulerLane.Right,
+			overviewRulerColor: this.getRGBAByState(state),
+			overviewRulerLane: vscode.OverviewRulerLane.Center,
 			light:
 			{
-				textDecoration: textDecorationLight,
-				gutterIconPath: getLightIcon(`karate-test-${state}.svg`),
-				gutterIconSize: '85%'
+				textDecoration: textDecorationLight
 			},
 			dark:
 			{
-				textDecoration: textDecorationDark,
-				gutterIconPath: getDarkIcon(`karate-test-${state}.svg`),
-				gutterIconSize: '85%'
+				textDecoration: textDecorationDark
 			}
-		});
+		};
 
-		return decorationType;
+		if (gutterIcon)
+		{
+			options.light.gutterIconPath = getLightIcon(`karate-test-${state}.svg`);
+			options.light.gutterIconSize = '85%';
+			options.dark.gutterIconPath = getDarkIcon(`karate-test-${state}.svg`);
+			options.dark.gutterIconSize = '85%';
+		}
+
+		let decorType = vscode.window.createTextEditorDecorationType(options);
+		return decorType;
 	}
 
-	private getTablesDecorationType(): vscode.TextEditorDecorationType
+	private getTableResultDecorType(state: ENTRY_STATE, gutterIcon: Boolean): vscode.TextEditorDecorationType
+	{
+		let options: vscode.DecorationRenderOptions = 
+		{
+			overviewRulerColor: this.getRGBAByState(state),
+			overviewRulerLane: vscode.OverviewRulerLane.Right,
+			light: {},
+			dark: {}
+		};
+
+		if (gutterIcon)
+		{
+			options.light.gutterIconPath = getLightIcon(`karate-test-${state}.svg`);
+			options.light.gutterIconSize = '70%';
+			options.dark.gutterIconPath = getDarkIcon(`karate-test-${state}.svg`);
+			options.dark.gutterIconSize = '70%';
+		}
+
+		let decorType = vscode.window.createTextEditorDecorationType(options);
+		return decorType;
+	}
+
+	private getTableRowNumberDecorType(): vscode.TextEditorDecorationType
 	{
 		const workspaceConfig = vscode.workspace.getConfiguration("editor");
 		const fontSize = parseInt(workspaceConfig.get("fontSize")) - 1;
 
-		const decorationType = vscode.window.createTextEditorDecorationType(
+		const decorType = vscode.window.createTextEditorDecorationType(
 		{
 			isWholeLine: true,
 			after:
@@ -215,7 +358,25 @@ class ProviderDecorations
 			}
 		});
 
-		return decorationType;
+		return decorType;
+	}
+
+	private getRGBAByState(state: ENTRY_STATE): string
+	{
+		let rgba = 'rgba(255, 255, 255, 0.5)';
+
+		switch (state)
+		{
+			case ENTRY_STATE.PASS:
+				rgba = 'rgb(67, 163, 61, 0.5)';
+				break;
+
+			case ENTRY_STATE.FAIL:
+				rgba = 'rgba(186, 43, 14, 0.5)';
+				break;
+		}
+
+		return rgba;
 	}
 
 	public triggerUpdateDecorations()

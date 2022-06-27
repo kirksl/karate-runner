@@ -113,8 +113,8 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
 		);
   
 		return vscode.tasks.executeTask(task)
-			.then(task => getDebugPort(task))
-			.then(port => new vscode.DebugAdapterServer(port));
+			.then((task) => getDebugPort(task))
+			.then((port) => new vscode.DebugAdapterServer(port));
 	}
 }
 

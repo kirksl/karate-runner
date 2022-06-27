@@ -10,10 +10,6 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 	{
 		let lineText = document.lineAt(position).text;
 		let linePrefix = document.lineAt(position).text.substring(0, position.character);
-
-		console.debug(lineText);
-		console.debug(linePrefix);
-
 		let lineRegExp1 = new RegExp("^.*read\\([\'\"]{1}$");
 		let lineRegExp2 = new RegExp("^.*read\\([\'\"]{1}([^@\'\"]+)@[^@\'\"]*$");
 		let lineMatch1 = linePrefix.match(lineRegExp1);
@@ -29,7 +25,7 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 			if (lineMatch2.length === 2)
 			{
 				let completionItems = this.getFileCompletionItems(lineText, document, position);
-				let completionItem = completionItems.find(item => item.label === lineMatch2[1]);
+				let completionItem = completionItems.find((item) => item.label === lineMatch2[1]);
 				
 				if (completionItem !== undefined)
 				{
@@ -42,7 +38,7 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 					testIgnored = tedArray[0].testIgnored;
 
 					let tags = getTestExecutionDetailTags(tedArray);
-					tags = tags.filter(v => v !== '@ignore');
+					tags = tags.filter((v) => v !== '@ignore');
 
 					for (let ndx = 0; ndx < tags.length; ndx++)
 					{
@@ -77,7 +73,7 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 				let filePath = path.join(callerDir, file);
 				if (fs.statSync(filePath).isFile() && file !== callerFile)
 				{
-					let ci = new vscode.CompletionItem(file, vscode.CompletionItemKind.Text);
+					let ci = new vscode.CompletionItem(file, vscode.CompletionItemKind.File);
 					ci.detail = filePath;
 					ci.sortText = 'a';
 					ci.additionalTextEdits = [vscode.TextEdit.delete(new vscode.Range(position.line, lineText.indexOf("(") + 2, position.line, lineText.indexOf(")") - 1))];
@@ -92,7 +88,7 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 		{
 			subDir = subDir || '';
 
-			let searchDir = path.join(...[baseDir, subDir], path.sep);
+			let searchDir = path.join(baseDir, subDir);
 			let globalFiles = fs.readdirSync(searchDir);
 
 			globalFiles.forEach((file) =>
@@ -106,12 +102,20 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 				{
 					if (path.parse(filePath).dir !== callerDir)
 					{
-						let fNormalized = filePath.substring(baseDir.length);
-						fNormalized = fNormalized.replace(/\\/g, "/");
-						let ci = new vscode.CompletionItem(includeClassPath ? `classpath:${fNormalized}` : `${fNormalized}`, vscode.CompletionItemKind.Text);
-						ci.detail = filePath;
-						ci.additionalTextEdits = [vscode.TextEdit.delete(new vscode.Range(position.line, lineText.indexOf("(") + 2, position.line, lineText.indexOf(")") - 1))];
-						completionItems.push(ci);
+						let fNormalized = filePath.substring(baseDir.length + 1);
+
+						if (!fNormalized.startsWith(`build${path.sep}`) &&
+						    !fNormalized.startsWith(`target${path.sep}`) &&
+							!fNormalized.startsWith(`node_modules${path.sep}`) &&
+							fNormalized.match(/^\./) === null
+						   )
+						{
+							fNormalized = fNormalized.replace(/\\/g, "/");
+							let ci = new vscode.CompletionItem(includeClassPath ? `classpath:${fNormalized}` : `${fNormalized}`, vscode.CompletionItemKind.File);
+							ci.detail = filePath;
+							ci.additionalTextEdits = [vscode.TextEdit.delete(new vscode.Range(position.line, lineText.indexOf("(") + 2, position.line, lineText.indexOf(")") - 1))];
+							completionItems.push(ci);
+						}
 					}
 				}
 			});
@@ -127,35 +131,15 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 		completionItems = getLocals(completionItems);
 
 		let paths: string[] = [];
-		paths[0] = path.join(...[projectRootPath, 'src', 'test', 'java'], path.sep);
-		paths[1] = path.join(...[projectRootPath, 'src', 'test', 'resources'], path.sep);
+		paths.push(projectRootPath);
 
-		let workspaceFolders = vscode.workspace.workspaceFolders;
-		for (var i = 0; i < workspaceFolders.length; i ++)
+		paths.forEach((path) =>
 		{
-			paths.push(path.join(...[projectRootPath, workspaceFolders[i].uri.fsPath], path.sep));
-		}
-
-		let pathFound : boolean = false;
-		if (fs.existsSync(paths[0]))
-		{
-			completionItems = getGlobals(paths[0], null, completionItems, true);
-			pathFound = true;
-		}
-
-		if (fs.existsSync(paths[1]))
-		{
-			completionItems = getGlobals(paths[1], null, completionItems, true);
-			pathFound = true;
-		}
-		
-		if (!pathFound)
-		{
-			for (var i = 2; i < paths.length; i ++)
+			if (fs.existsSync(path))
 			{
-				completionItems.push(getGlobals(paths[i], null, completionItems, false));
+				completionItems = getGlobals(path, null, completionItems, true);
 			}
-		}
+		});
 
 		if (completionItems.length === 0)
 		{
@@ -169,9 +153,9 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 	{
 		let completionItems: vscode.CompletionItem[] = [];
 
-		tags.forEach(tag =>
+		tags.forEach((tag) =>
 		{
-			let ci = new vscode.CompletionItem(tag, vscode.CompletionItemKind.Text);
+			let ci = new vscode.CompletionItem(tag, vscode.CompletionItemKind.File);
 			ci.additionalTextEdits = [vscode.TextEdit.delete(new vscode.Range(position.line, lineText.indexOf("@") + 1, position.line, lineText.indexOf(")") - 1))];
 			completionItems.push(ci);
 		});

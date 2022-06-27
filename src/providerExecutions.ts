@@ -38,7 +38,7 @@ class ProviderExecutions
 
 		if ("featuresPassed" in json)
 		{
-			executionStats = `Features: ${json.featuresPassed + json.featuresFailed} | Scenarios: ${json.scenariosPassed + json.scenariosfailed} | Passed: ${json.scenariosPassed} | Failed: ${json.scenariosfailed} | Elapsed: ${(json.elapsedTime/1000).toFixed(2)}`;
+			executionStats = `Features: ${json.featuresPassed + json.featuresFailed} | Scenarios: ${json.scenariosPassed + json.scenariosfailed} | Passed: ${json.scenariosPassed} | Failed: ${json.scenariosfailed} | Elapsed: ${(json.elapsedTime/1000).toFixed(2)}ms`;
 			executionIcon = ((json.featuresFailed + json.scenariosfailed) > 0) ? `$(error)` : `$(pass)`;
 		}
 		else
@@ -78,7 +78,7 @@ class ProviderExecutions
 			return;
 		}
   
-		let quickPickItems = ProviderExecutions.executionHistory.map(item => item.quickPickItem);
+		let quickPickItems = ProviderExecutions.executionHistory.map((item) => item.quickPickItem);
 		let quickPickOptions = <vscode.QuickPickOptions>
 		{
 			canPickMany: false,

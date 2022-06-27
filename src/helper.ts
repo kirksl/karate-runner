@@ -44,10 +44,11 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetai
 	
 	for (let ndx = filePathArray.length; ndx > 0; ndx--)
 	{
+		let karateJarFile = "karate.jar";
 		let mavenBuildFile = "pom.xml";
 		let gradleBuildGroovyFile = "build.gradle";
 		let gradleBuildKotlinFile = "build.gradle.kts";
-		let karateJarFile = "karate.jar";
+		let javaScriptBuildFile = "package.json";
 		
 		let runFileTestPath = filePathArray.join(path.sep);
 		
@@ -78,7 +79,14 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetai
 			runFilePath = runFileTestPath + path.sep + gradleBuildKotlinFile;
 			break;
 		}
-		
+
+		if (fs.existsSync(runFileTestPath + path.sep + javaScriptBuildFile))
+		{
+			projectRootPath = runFileTestPath;
+			runFilePath = runFileTestPath + path.sep + javaScriptBuildFile;
+			break;
+		}
+
 		filePathArray.pop();
 	}
 	
@@ -231,7 +239,6 @@ async function getTestExecutionDetail(uri: vscode.Uri, type: ENTRY_TYPE): Promis
 				let commonPath = (input, sep = path.sep) => rotate(splitStrings(input, sep)).filter(allElementsEqual).map(elAt(0)).join(sep);
 				
 				classPathNormalized = commonPath(karateTestFoldersFiltered);
-				
 			}
 		}
 		
@@ -284,7 +291,7 @@ function oneElementsExist(elementsToFind: string[], elementsToSearch: string[]):
 		let foundOne = elementsToFind.some((etf) => 
 		{
 			let re = new RegExp(`^${etf.trim()}$`);
-			return elementsToSearch.some(ets => re.test(ets.trim()));
+			return elementsToSearch.some((ets) => re.test(ets.trim()));
 		});
 
 		return foundOne;
@@ -348,7 +355,7 @@ async function getActiveFeatureFile(): Promise<string>
 		else
 		{
 			let activeFiles: readonly vscode.TextDocument[] = vscode.workspace.textDocuments;
-			let activeFeatureFiles = activeFiles.filter(e => e.fileName.toLowerCase().endsWith(".feature"));
+			let activeFeatureFiles = activeFiles.filter((e) => e.fileName.toLowerCase().endsWith(".feature"));
 			
 			if (activeFeatureFiles.length === 1)
 			{
@@ -358,7 +365,7 @@ async function getActiveFeatureFile(): Promise<string>
 			{
 				if (activeFeatureFiles.length > 1)
 				{
-					let quickPickItems: string[] = activeFeatureFiles.map(e => e.fileName);
+					let quickPickItems: string[] = activeFeatureFiles.map((e) => e.fileName);
 					
 					let quickPickOptions = <vscode.QuickPickOptions>
 					{
@@ -461,6 +468,18 @@ async function getFqdns()
 	return fqdns;
 }
 
+function escapeHtml(html: string): string
+{
+	return html
+		.replace(/&/g, "&amp;")
+		.replace(/</g, "&lt;")
+		.replace(/>/g, "&gt;")
+		.replace(/"/g, "&quot;")
+		.replace(/'/g, "&#39;")
+		.replace(/\n/g, "\\n");
+}
+
+
 export
 {
 	getProjectDetail,
@@ -477,5 +496,6 @@ export
 	getLightIcon,
 	getDarkIcon,
 	truncateMiddle,
-	getFqdns
+	getFqdns,
+	escapeHtml
 };

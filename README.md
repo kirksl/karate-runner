@@ -49,6 +49,8 @@ Test Results will be shown for each `Feature:`, `Scenario:`, `Scenario Outline:`
 
 Test Results will be represented in three ways.  By a Karate icon with a green dot (pass) or red dot (fail), with failure details on hover and finally a failure count showing how many failures are below each folder or file in the `Tests` view.
 
+Failure details shown on hover will consist of a stack trace showing line-by-line execution.  Each line will consist of an arrow showing execution direction and depth, the Karate code executed and a link to the file with the code that can be hovered over to show the error message and any arguments or clicked on to open the file.  Finally a red dot will be shown on each line if it is the last line in the call chain to show the likely root cause of the failure.
+
 Test Results are rolling results meaning they will accumulate and reset only when you click `Clear Results`.
 
 *Note this feature is dependent on Karate Version >= 1.0 and Karate providing result files under the root of your project within a /karate-reports directory.  Each file must end with a format of `.karate-json.txt`.*
@@ -107,9 +109,11 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 - Goto the following path to configure all workspace settings for this extension `Preferences > Settings > Search for Karate Runner` or click the gear icon in the header of the Tests View.
 
 ### Execution
-- Ensure an `execution option` (`karate.jar`, `pom.xml (Maven)`, `build.gradle (Gradle Groovy)`, `build.gradle.kts (Gradle Kotlin)`) exists at the root of your project.
+- Ensure an `execution option` (`karate.jar`, `pom.xml (Maven)`, `build.gradle (Gradle Groovy)`, `build.gradle.kts (Gradle Kotlin)`, `package.json (NPM, Yarn, etc)`) exists at the root of your project.
 - This extension will detect which `execution option` exists at your project root and execute the appropriate command.
-- Note if multiple `execution options` exist `karate.jar` will be favored and used first, followed by `pom.xml (Maven)`, then `build.gradle (Gradle Groovy)` and lastly `build.gradle.kts (Gradle Kotlin)`.
+- Note if multiple `execution options` exist `karate.jar` will be favored and used first, followed by `pom.xml (Maven)`, then `build.gradle (Gradle Groovy)`, then `build.gradle.kts (Gradle Kotlin)` and lastly `package.json (NPM, Yarn, etc)`.
+
+*Note Javascript package managers such as NPM, Yarn, etc are only supported on Mac and Linux at this time as there is currently an outstanding bug in Karate wherein Windows file paths are not supported.*
 
 ### Debugger
 *To setup from a feature file's Codelens*

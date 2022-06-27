@@ -199,6 +199,11 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 				{
 					treeItem.command = element.command;
 					treeItem.contextValue = (element.uri.startsWith('Feature:') ? 'testFeature' : 'testScenario');
+
+					if (element.time !== null)
+					{
+						treeItem.description = `${element.time.toFixed(2)}ms`;
+					}
 				}
 		}
 
@@ -216,7 +221,7 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 		let workspaceFolders = vscode.workspace.workspaceFolders;
 		if (workspaceFolders)
 		{
-			let workspaceFoldersFiltered = workspaceFolders.filter(folder => folder.uri.scheme === 'file');
+			let workspaceFoldersFiltered = workspaceFolders.filter((folder) => folder.uri.scheme === 'file');
 			if (workspaceFoldersFiltered.length == 0)
 			{
 				return null;
@@ -244,7 +249,7 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 			let aggregateFails = 0;
 
 			let childEntries = await this.getFilesFolders(entries[0]);
-			childEntries.forEach(entry => 
+			childEntries.forEach((entry) => 
 			{
 				aggregateFails += entry.fails;
 
@@ -338,7 +343,7 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 				type: ENTRY_TYPE.TAG,
 				command: tagCommand,
 				state: tagResult.state,
-				fails: tagResult.fails,
+				fails: tagResult.fails.length,
 				ignored: null
 			});
 		}
@@ -385,7 +390,8 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 						tooltip: tooltip,
 						command: testCommand,
 						state: ProviderResults.getTestResult(ted),
-						ignored: ted.testIgnored
+						ignored: ted.testIgnored,
+						time: ProviderResults.getTestTime(ted)
 					});                                
 				}
 			}
@@ -398,7 +404,8 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 					tooltip: tooltip,
 					command: testCommand,
 					state: ProviderResults.getTestResult(ted),
-					ignored: ted.testIgnored
+					ignored: ted.testIgnored,
+					time: ProviderResults.getTestTime(ted)
 				});
 			}
 		}
@@ -468,7 +475,7 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 					title: cmd
 				},
 				state: result.state,
-				fails: result.fails,
+				fails: result.fails.length,
 				ignored: testIgnored
 			});
 		}
@@ -517,7 +524,7 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 							title: "karateRunner.tests.open"
 						},
 						state: result.state,
-						fails: result.fails,
+						fails: result.fails.length,
 						ignored: tedArray[0].testIgnored
 					});
 				}
@@ -536,7 +543,7 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 						title: "karateRunner.tests.open"
 					},
 					state: result.state,
-					fails: result.fails,
+					fails: result.fails.length,
 					ignored: tedArray[0].testIgnored
 				});
 			}

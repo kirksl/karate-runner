@@ -33,7 +33,7 @@
     ],
     // words to increase/decrease indent for
     "indentationRules": {
-        "increaseIndentPattern": "(Background|Scenario|Scenario Outline):",
-        "decreaseIndentPattern": "(Feature|Background|Scenario|Scenario Outline):"
+        "increaseIndentPattern": "(Background|Scenario|Scenario Outline):|@",
+        "decreaseIndentPattern": "(Feature|Background|Scenario|Scenario Outline):|@"
     }
 }
