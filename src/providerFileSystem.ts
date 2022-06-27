@@ -62,7 +62,7 @@ namespace _ {
 
 		if (Array.isArray(items))
 		{
-			return items.map(item => item.normalize('NFC'));
+			return items.map((item) => item.normalize('NFC'));
 		}
 
 		return items.normalize('NFC');
@@ -96,7 +96,7 @@ namespace _ {
 	{
 		return new Promise<void>((resolve, reject) =>
 		{
-			fs.writeFile(path, content, error => handleResult(resolve, reject, error, void 0));
+			fs.writeFile(path, content, (error) => handleResult(resolve, reject, error, void 0));
 		});
 	}
 
@@ -104,7 +104,7 @@ namespace _ {
 	{
 		return new Promise<boolean>((resolve, reject) =>
 		{
-			fs.access(path, fs.constants.F_OK, error => handleResult(resolve, reject, error, void 0));
+			fs.access(path, fs.constants.F_OK, (error) => handleResult(resolve, reject, error, void 0));
 		});
 	}
 
@@ -112,7 +112,7 @@ namespace _ {
 	{
 		return new Promise<void>((resolve, reject) =>
 		{
-			rimraf(path, error => handleResult(resolve, reject, error, void 0));
+			rimraf(path, (error) => handleResult(resolve, reject, error, void 0));
 		});
 	}
 
@@ -120,7 +120,7 @@ namespace _ {
 	{
 		return new Promise<void>((resolve, reject) =>
 		{
-			mkdirp(path, error => handleResult(resolve, reject, error, void 0));
+			mkdirp(path, (error) => handleResult(resolve, reject, error, void 0));
 		});
 	}
 
@@ -128,7 +128,7 @@ namespace _ {
 	{
 		return new Promise<void>((resolve, reject) =>
 		{
-			fs.rename(oldPath, newPath, error => handleResult(resolve, reject, error, void 0));
+			fs.rename(oldPath, newPath, (error) => handleResult(resolve, reject, error, void 0));
 		});
 	}
 
@@ -136,7 +136,7 @@ namespace _ {
 	{
 		return new Promise<void>((resolve, reject) =>
 		{
-			fs.unlink(path, error => handleResult(resolve, reject, error, void 0));
+			fs.unlink(path, (error) => handleResult(resolve, reject, error, void 0));
 		});
 	}
 }

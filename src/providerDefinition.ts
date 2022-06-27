@@ -45,7 +45,6 @@ class ProviderDefinition implements vscode.DefinitionProvider
 
 	private getDefinitionPath(document: vscode.TextDocument, uriToken: IUriToken): string
 	{
-		let cwd: string = path.parse(document.uri.fsPath).dir;
 		let normalizedPath: string = (path.sep === '/') ? uriToken.path.replace(/\\/g, '/') : uriToken.path.replace(/\//g, '\\');
 
 		if (fs.existsSync(normalizedPath) && fs.lstatSync(normalizedPath).isFile())
@@ -58,49 +57,30 @@ class ProviderDefinition implements vscode.DefinitionProvider
 			let projectDetail: IProjectDetail = getProjectDetail(document.uri, vscode.FileType.File);
 			let projectRootPath = projectDetail.projectRoot;
 
-			let projectRootPathSrcTest = path.join(projectRootPath, 'src', 'test');
-			if (fs.existsSync(projectRootPathSrcTest))
+			let paths: string[] = [];
+			paths.push(path.join(projectRootPath, 'src', 'test'));
+			paths.push(path.join(projectRootPath, 'src'));
+			paths.push(projectRootPath);
+
+			for (let ndx = 0; ndx < paths.length; ndx++)
 			{
-				let uriPath = getChildAbsolutePath(projectRootPathSrcTest, normalizedPath);
-
-				if (uriPath !== null)
+				if (fs.existsSync(paths[ndx]) && fs.lstatSync(paths[ndx]).isDirectory())
 				{
-					if (fs.existsSync(uriPath) && fs.lstatSync(uriPath).isFile())
-					{
-						return uriPath;
-					}
-				}
-			}
-			
-			let projectRootPathSrc = path.join(projectRootPath, 'src');
-			if (fs.existsSync(projectRootPathSrc))
-			{
-				let uriPath = getChildAbsolutePath(projectRootPathSrc, normalizedPath);
+					let uriPath = getChildAbsolutePath(paths[ndx], normalizedPath);
 
-				if (uriPath !== null)
-				{
-					if (fs.existsSync(uriPath) && fs.lstatSync(uriPath).isFile())
+					if (uriPath !== null)
 					{
-						return uriPath;
-					}
-				}
-			}
-
-			if (fs.existsSync(projectRootPath))
-			{
-				let uriPath = getChildAbsolutePath(projectRootPath, normalizedPath);
-
-				if (uriPath !== null)
-				{
-					if (fs.existsSync(uriPath) && fs.lstatSync(uriPath).isFile())
-					{
-						return uriPath;
+						if (fs.existsSync(uriPath) && fs.lstatSync(uriPath).isFile())
+						{
+							return uriPath;
+						}
 					}
 				}
 			}
 		}
 		else
 		{
+			let cwd: string = path.parse(document.uri.fsPath).dir;
 			let uriPath = path.join(cwd, normalizedPath);
 			
 			if (fs.existsSync(uriPath) && fs.lstatSync(uriPath).isFile())
@@ -109,8 +89,9 @@ class ProviderDefinition implements vscode.DefinitionProvider
 			}
 			
 			let workspaceFolders = vscode.workspace.workspaceFolders;
-			for (var i = 0; i < workspaceFolders.length; i ++) {
-				let workspaceUriPath = path.join(workspaceFolders[i].uri.fsPath, normalizedPath);
+			for (var ndx = 0; ndx < workspaceFolders.length; ndx++)
+			{
+				let workspaceUriPath = path.join(workspaceFolders[ndx].uri.fsPath, normalizedPath);
 				if (fs.existsSync(workspaceUriPath) && fs.lstatSync(workspaceUriPath).isFile())
 				{
 					return workspaceUriPath;

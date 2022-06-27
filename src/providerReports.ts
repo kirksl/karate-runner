@@ -135,7 +135,7 @@ class ProviderReports implements vscode.TreeDataProvider<IEntry>, IDisposable
 		let workspaceFolders = vscode.workspace.workspaceFolders;
 		if (workspaceFolders)
 		{
-			let workspaceFolder = workspaceFolders.filter(folder => folder.uri.scheme === 'file')[0];
+			let workspaceFolder = workspaceFolders.filter((folder) => folder.uri.scheme === 'file')[0];
 
 			let entries: IEntry[] = [];
 			entries.push(

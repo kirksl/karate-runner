@@ -238,6 +238,7 @@ async function runKarateTest(args = null)
 	let mavenBuildFile = "pom.xml";
 	let gradleGroovyBuildFile = "build.gradle";
 	let gradleKotlinBuildFile = "build.gradle.kts";
+	let javaScriptBuildFile = "package.json";
 	let standaloneBuildFile = "karate.jar";
 	let mavenBuildFileSwitch = "-f";
 	let gradleBuildFileSwitch = "-b";
@@ -257,120 +258,134 @@ async function runKarateTest(args = null)
 	
 	if (!runFilePath.toLowerCase().endsWith(standaloneBuildFile))
 	{
-		if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildSystem').get('useWrapper')))
+		if (!runFilePath.toLowerCase().endsWith(javaScriptBuildFile))
 		{
-			if (os.platform() == 'win32')
+			if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildSystem').get('useWrapper')))
 			{
-				mavenCmd = "mvnw";
-				gradleCmd = "gradlew";
-			}
-			else
-			{
-				mavenCmd = "./mvnw";
-				gradleCmd = "./gradlew";
-			}
-		}
-		
-		if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildDirectory').get('cleanBeforeEachRun')))
-		{
-			runPhases = "clean test";
-		}
-		else
-		{
-			runPhases = "test";
-		}
-		
-		let karateRunnerArgs = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('commandLineArgs'));
-		
-		if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateCli').get('overrideKarateRunner')))
-		{
-			let karateCliArgs = String(vscode.workspace.getConfiguration('karateRunner.karateCli').get('commandLineArgs'));
-			
-			if (karateCliArgs !== undefined && karateCliArgs !== "")
-			{
-				karateOptions = `${karateCliArgs} ${karateOptions}`
-			}
-			
-			if (runFilePath.toLowerCase().endsWith(mavenBuildFile))
-			{
-				if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildDirectory').get('cleanBeforeEachRun')))
+				if (os.platform() == 'win32')
 				{
-					runPhases = "clean test-compile";
+					mavenCmd = "mvnw";
+					gradleCmd = "gradlew";
 				}
 				else
 				{
-					runPhases = "";
+					mavenCmd = "./mvnw";
+					gradleCmd = "./gradlew";
+				}
+			}
+			
+			if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildDirectory').get('cleanBeforeEachRun')))
+			{
+				runPhases = "clean test";
+			}
+			else
+			{
+				runPhases = "test";
+			}
+			
+			let karateRunnerArgs = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('commandLineArgs'));
+			
+			if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateCli').get('overrideKarateRunner')))
+			{
+				let karateCliArgs = String(vscode.workspace.getConfiguration('karateRunner.karateCli').get('commandLineArgs'));
+				
+				if (karateCliArgs !== undefined && karateCliArgs !== "")
+				{
+					karateOptions = `${karateCliArgs} ${karateOptions}`
 				}
 				
-				// mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='file.feature' -Dexec.classpathScope='test'
-				runCommand = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch} "${runFilePath}"`;
-				runCommand += ` exec:java -Dexec.mainClass="com.intuit.karate.cli.Main" -Dexec.args="${karateOptions}"`;
-				runCommand += ` -Dexec.classpathScope="test" ${karateRunnerArgs}`;
-			}
-			
-			if (runFilePath.toLowerCase().endsWith(gradleGroovyBuildFile)|| runFilePath.toLowerCase().endsWith(gradleKotlinBuildFile))
-			{
-				// gradle clean test -b build.gradle karateExecute -DmainClass='com.intuit.karate.cli.Main' --args='file.feature'
-				runCommand = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch} "${runFilePath}"`;
-				runCommand += ` karateExecute -DmainClass="com.intuit.karate.cli.Main" --args="${karateOptions}"`;
-				runCommand += ` ${karateRunnerArgs}`;
-			}
-			
-			if (runCommand === null)
-			{
-				return;
-			}
-		}
-		else
-		{
-			if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('promptToSpecify')))
-			{
-				karateRunner = await vscode.window.showInputBox
-				(
-					{
-						prompt: "Karate Runner",
-						value: String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'))
-					}
-				);
-
-				if (karateRunner !== undefined && karateRunner !== "")
+				if (runFilePath.toLowerCase().endsWith(mavenBuildFile))
 				{
-					await vscode.workspace.getConfiguration().update('karateRunner.karateRunner.default', karateRunner)
+					if (Boolean(vscode.workspace.getConfiguration('karateRunner.buildDirectory').get('cleanBeforeEachRun')))
+					{
+						runPhases = "clean test-compile";
+					}
+					else
+					{
+						runPhases = "";
+					}
+					
+					// mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='file.feature' -Dexec.classpathScope='test'
+					runCommand = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch} "${runFilePath}"`;
+					runCommand += ` exec:java -Dexec.mainClass="com.intuit.karate.cli.Main" -Dexec.args="${karateOptions}"`;
+					runCommand += ` -Dexec.classpathScope="test" ${karateRunnerArgs}`;
+				}
+				
+				if (runFilePath.toLowerCase().endsWith(gradleGroovyBuildFile)|| runFilePath.toLowerCase().endsWith(gradleKotlinBuildFile))
+				{
+					// gradle clean test -b build.gradle karateExecute -DmainClass='com.intuit.karate.cli.Main' --args='file.feature'
+					runCommand = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch} "${runFilePath}"`;
+					runCommand += ` karateExecute -DmainClass="com.intuit.karate.cli.Main" --args="${karateOptions}"`;
+					runCommand += ` ${karateRunnerArgs}`;
+				}
+				
+				if (runCommand === null)
+				{
+					return;
 				}
 			}
 			else
 			{
-				karateRunner = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'));
+				if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('promptToSpecify')))
+				{
+					karateRunner = await vscode.window.showInputBox
+					(
+						{
+							prompt: "Karate Runner",
+							value: String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'))
+						}
+					);
+	
+					if (karateRunner !== undefined && karateRunner !== "")
+					{
+						await vscode.workspace.getConfiguration().update('karateRunner.karateRunner.default', karateRunner)
+					}
+				}
+				else
+				{
+					karateRunner = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('default'));
+				}
+					
+				if (karateRunner === undefined || karateRunner === "")
+				{
+					return;
+				}
+					
+				if (runFilePath.toLowerCase().endsWith(mavenBuildFile))
+				{
+					runCommandPrefix = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch}`;
+						
+					if (runCommandPrefix === null)
+					{
+						return;
+					}
+						
+					runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} "-Dkarate.options=${karateOptions}" ${karateRunnerArgs}`;
+				}
+					
+				if (runFilePath.toLowerCase().endsWith(gradleGroovyBuildFile)|| runFilePath.toLowerCase().endsWith(gradleKotlinBuildFile))
+				{
+					runCommandPrefix = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch}`;
+						
+					if (runCommandPrefix === null)
+					{
+						return;
+					}
+						
+					runCommand = `${runCommandPrefix} "${runFilePath}" --tests ${karateRunner} -Dkarate.options="${karateOptions}" ${karateRunnerArgs}`;
+				}
 			}
-				
-			if (karateRunner === undefined || karateRunner === "")
+		}
+		else
+		{
+			let karateJSArgs = String(vscode.workspace.getConfiguration('karateRunner.karateJS').get('commandLineArgs'));
+
+			if (karateJSArgs === undefined || karateJSArgs === "")
 			{
 				return;
 			}
-				
-			if (runFilePath.toLowerCase().endsWith(mavenBuildFile))
-			{
-				runCommandPrefix = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch}`;
-					
-				if (runCommandPrefix === null)
-				{
-					return;
-				}
-					
-				runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} "-Dkarate.options=${karateOptions}" ${karateRunnerArgs}`;
-			}
-				
-			if (runFilePath.toLowerCase().endsWith(gradleGroovyBuildFile)|| runFilePath.toLowerCase().endsWith(gradleKotlinBuildFile))
-			{
-				runCommandPrefix = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch}`;
-					
-				if (runCommandPrefix === null)
-				{
-					return;
-				}
-					
-				runCommand = `${runCommandPrefix} "${runFilePath}" --tests ${karateRunner} -Dkarate.options="${karateOptions}" ${karateRunnerArgs}`;
-			}
+
+			runCommand = `${karateJSArgs} "${karateOptions}"`;
 		}
 	}
 	else
@@ -484,7 +499,7 @@ async function runKarateTest(args = null)
 	let isTaskExecuting = true;
 	ProviderStatusBar.setExecutionState(true);
 				
-	vscode.tasks.executeTask(task).then(task => showProgress(task));
+	vscode.tasks.executeTask(task).then((task) => showProgress(task));
 }
 
 async function debugKarateTest(args = null)
@@ -556,7 +571,7 @@ async function filterReportsTree(context: vscode.ExtensionContext)
 							inputBox.busy = true;
 							inputBox.enabled = false;
 	
-							await new Promise(resolve =>
+							await new Promise((resolve) =>
 							{
 								ProviderReports.onRefreshEnd(() =>
 								{
@@ -584,7 +599,7 @@ async function filterReportsTree(context: vscode.ExtensionContext)
 		}
 		finally
 		{
-			disposables.forEach(d => d.dispose());
+			disposables.forEach((d) => d.dispose());
 		}
 	}
 
@@ -643,7 +658,7 @@ async function filterTestsTree(context: vscode.ExtensionContext)
 							inputBox.busy = true;
 							inputBox.enabled = false;
 	
-							await new Promise(resolve =>
+							await new Promise((resolve) =>
 							{
 								ProviderKarateTests.onRefreshEnd(() =>
 								{
@@ -671,7 +686,7 @@ async function filterTestsTree(context: vscode.ExtensionContext)
 		}
 		finally
 		{
-			disposables.forEach(d => d.dispose());
+			disposables.forEach((d) => d.dispose());
 
 			if (accepted)
 			{
@@ -718,7 +733,7 @@ async function filterTestsTree(context: vscode.ExtensionContext)
 							inputBox.busy = true;
 							inputBox.enabled = false;
 	
-							await new Promise(resolve =>
+							await new Promise((resolve) =>
 							{
 								ProviderKarateTests.onRefreshEnd(() =>
 								{
@@ -746,7 +761,7 @@ async function filterTestsTree(context: vscode.ExtensionContext)
 		}
 		finally
 		{
-			disposables.forEach(d => d.dispose());
+			disposables.forEach((d) => d.dispose());
 		}
 	}
 
@@ -763,7 +778,7 @@ function openExternalUrl(url)
 	open(url);
 }
 
-function openFileInEditor(args)
+async function openFileInEditor(args)
 {
 	args = (args.command) ? args.command.arguments[0] : args;
 
@@ -773,39 +788,57 @@ function openFileInEditor(args)
 	}
 	else
 	{
-		vscode.window.showTextDocument(args.testUri);
+		if (args.testLine && args.testLine !== null)
+		{
+
+			let editor: vscode.TextEditor = await vscode.window.showTextDocument(args.testUri);
+			let line: vscode.TextLine = editor.document.lineAt(args.testLine);
+			let range: vscode.Range = new vscode.Range(args.testLine, line.firstNonWhitespaceCharacterIndex, args.testLine, line.text.length);
+			editor.selection =  new vscode.Selection(range.start, range.end);
+			editor.revealRange(range);
+		}
+		else
+		{
+			vscode.window.showTextDocument(args.testUri);
+		}
 	}
 }
 
-function gotoLineNumber(line)
+function gotoLineNumber(args)
 {
 	let editor = vscode.window.activeTextEditor;
-	let range = editor.document.lineAt(line).range;
-	editor.selection =  new vscode.Selection(range.start, range.end);
-	editor.revealRange(range);
+
+	if (editor !== undefined)
+	{
+		let line = args[0];
+		let lineText = editor.document.lineAt(line).text;
+		let range = new vscode.Range(line, editor.document.lineAt(line).firstNonWhitespaceCharacterIndex, line, lineText.length);
+		editor.selection =  new vscode.Selection(range.start, range.end);
+		editor.revealRange(range);
+	}
 }
 
 function moveLineUp(args)
 {
-	gotoLineNumber(args[0]);
+	gotoLineNumber(args);
 	vscode.commands.executeCommand('editor.action.moveLinesUpAction');
 }
 
 function moveLineDown(args)
 {
-	gotoLineNumber(args[0]);
+	gotoLineNumber(args);
 	vscode.commands.executeCommand('editor.action.moveLinesDownAction');
 }
 
 function cloneLine(args)
 {
-	gotoLineNumber(args[0]);
+	gotoLineNumber(args);
 	vscode.commands.executeCommand('editor.action.copyLinesDownAction');
 }
 
 function deleteLine(args)
 {
-	gotoLineNumber(args[0]);
+	gotoLineNumber(args);
 	vscode.commands.executeCommand('editor.action.deleteLines');
 }
 

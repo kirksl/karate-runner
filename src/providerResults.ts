@@ -1,6 +1,7 @@
-import { getProjectDetail, IProjectDetail, ITestExecutionDetail } from "./helper";
+import { getProjectDetail, getChildAbsolutePath, IProjectDetail, ITestExecutionDetail, escapeHtml } from "./helper";
 import { ENTRY_STATE } from "./types/entry";
 import * as fs from 'fs';
+import path = require("path");
 import * as vscode from 'vscode';
 
 interface IDisposable
@@ -8,24 +9,66 @@ interface IDisposable
 	dispose(): void;
 }
 
+interface IStackFrame
+{
+	uri: vscode.Uri;
+	line: number;
+	code: string;
+	args: string;
+	message: string;
+	time: number;
+	depth: number;
+	last: boolean;
+}
+
+interface IStackTrace
+{
+	error: string;
+	overflow: number;
+	frames: IStackFrame[];
+}
+
+interface IStepFail
+{
+	line: number;
+	text: string;
+	time: number;
+	message: string;
+	call: IResult[][];
+}
+
+interface IPass
+{
+	line: number;
+}
+
+interface IFail
+{
+	line: number;
+	message: string;
+	stepfails: IStepFail[];
+}
+
 interface IResult
 {
+	uri: vscode.Uri;
 	path: string;
 	line: number;
+	callArgs: string;
 	tags: string[];
 	name: string;
 	isOutline: boolean;
 	isFeature: boolean;
-	passes: number;
-	fails: number;
-	error: string[];
+	passes: IPass[];
+	fails: IFail[];
 	state: ENTRY_STATE;
+	time: number;
 }
 
 interface IAggregateResult
 {
-	passes: number;
-	fails: number;
+	passes: IPass[];
+	fails: IFail[];
 	state: ENTRY_STATE;
 }
 
@@ -77,141 +120,225 @@ export class ProviderResults implements IDisposable
 	
 	private static publishTestResults(e: vscode.Uri)
 	{
+		let projectDetail: IProjectDetail = getProjectDetail(e, vscode.FileType.File);
+		let projectRootPath = projectDetail.projectRoot;
+
 		let data: string = fs.readFileSync(e.fsPath, "utf8");
 		let json: any = JSON.parse(data);
-		
-		let lastIndex = -1;
-		let lastSectionIndex = -1;
-		let result: IResult =
+
+		json.projectRoot = projectRootPath;
+
+		let getFileResults = (json: any, depth: number = 0): IResult[] =>
 		{
-			path: null,
-			line: null,
-			tags: null,
-			name: null,
-			isFeature: null,
-			isOutline: null,
-			passes: null,
-			fails: null,
-			error: [],
-			state: null
-		};
+			let results: IResult[] = [];
 
-		for (let ndx = 0; ndx < json.scenarioResults.length; ndx++)
-		{	
-			if (lastIndex !== -1 && lastSectionIndex === json.scenarioResults[ndx].sectionIndex)
+			let prefixedPath: string = json.prefixedPath.replace(/^classpath:/,'');
+			let normalizedPrefixedPath: string = (path.sep === '/') ? prefixedPath.replace(/\\/g, '/') : prefixedPath.replace(/\//g, '\\');
+			let normalizedRootPath: string = (path.sep === '/') ? projectRootPath.replace(/\\/g, '/') : projectRootPath.replace(/\//g, '\\');
+			let resultFile: string = getChildAbsolutePath(normalizedRootPath, normalizedPrefixedPath);
+			let resultUri: vscode.Uri = vscode.Uri.file(resultFile);
+			
+			let lastIndex = -1;
+			let lastSectionIndex = -1;
+
+			let result: IResult =
 			{
-				if (json.scenarioResults[ndx].failed)
-				{
-					ProviderResults.results[lastIndex].state = ENTRY_STATE.FAIL;
-				}
-
-				switch (json.scenarioResults[ndx].failed)
-				{
-					case false:
-						ProviderResults.results[lastIndex].passes += 1;
-						break;
+				uri: null,
+				path: null,
+				line: null,
+				callArgs: null,
+				tags: null,
+				name: null,
+				isFeature: null,
+				isOutline: null,
+				passes: null,
+				fails: null,
+				state: null,
+				time: null
+			};
 	
-					case true:
-						ProviderResults.results[lastIndex].fails += 1;
-						ProviderResults.results[lastIndex].error.push("Line " + json.scenarioResults[ndx].line + ": " + json.scenarioResults[ndx].error);
-						break;
+			for (let ndx = 0; ndx < json.scenarioResults.length; ndx++)
+			{
+				if (lastIndex !== -1 && lastSectionIndex === json.scenarioResults[ndx].sectionIndex)
+				{
+					switch (json.scenarioResults[ndx].failed)
+					{
+						case false:
+							results[lastIndex].passes.push({ line: json.scenarioResults[ndx].line });
+							break;
+		
+						case true:
+							results[lastIndex].state = ENTRY_STATE.FAIL;
+							
+							let fail: IFail = { line: 0, message: "", stepfails: [] };
+							fail.line = json.scenarioResults[ndx].line;
+							fail.message = json.scenarioResults[ndx].error;
+							
+							json.scenarioResults[ndx].stepResults.forEach((stepResult: any) =>
+							{
+								if (stepResult.result.status.trim().toLowerCase() === "failed")
+								{
+									let stepFail: IStepFail = 
+									{
+										line: stepResult.step.line,
+										text: `${stepResult.step.prefix} ${stepResult.step.text}`,
+										time: stepResult.result.millis,
+										message: stepResult.result.errorMessage,
+										call: []
+									};
+
+									if (stepResult.callResults)
+									{
+										stepResult.callResults.forEach((callResult: any) =>
+										{
+											if (callResult.failedCount > 0)
+											{
+												stepFail.call.push(getFileResults(callResult, depth + 1));
+											}
+										});
+									}
+
+									fail.stepfails.push(stepFail);
+								}
+							});
+	
+							results[lastIndex].fails.push(fail);
+							break;
+					}
 				}
+				else
+				{
+					result = 
+					{
+						uri: resultUri,
+						path: prefixedPath,
+						line: json.scenarioResults[ndx].line,
+						callArgs: (json.callArg) ? JSON.stringify(json.callArg) : null,
+						tags: json.scenarioResults[ndx].tags,
+						name: json.scenarioResults[ndx].name,
+						isFeature: false,
+						isOutline: (json.scenarioResults[ndx].exampleIndex === -1) ? false : true,
+						passes: [],
+						fails: [],
+						state: ENTRY_STATE.NONE,
+						time: json.scenarioResults[ndx].durationMillis
+					};
+	
+					switch (json.scenarioResults[ndx].failed)
+					{
+						case false:
+							result.passes.push({ line: json.scenarioResults[ndx].line });
+							result.state = ENTRY_STATE.PASS;
+							break;
+		
+						case true:
+							let fail: IFail = { line: 0, message: "", stepfails: [] };
+							fail.line = json.scenarioResults[ndx].line;
+							fail.message = json.scenarioResults[ndx].error;
+							
+							json.scenarioResults[ndx].stepResults.forEach((stepResult: any) =>
+							{
+								if (stepResult.result.status.trim().toLowerCase() === "failed")
+								{
+									let stepFail: IStepFail = 
+									{
+										line: stepResult.step.line,
+										text: `${stepResult.step.prefix} ${stepResult.step.text}`,
+										time: stepResult.result.millis,
+										message: stepResult.result.errorMessage,
+										call: []
+									};
+
+									if (stepResult.callResults)
+									{
+										stepResult.callResults.forEach((callResult: any) =>
+										{
+											if (callResult.failedCount > 0)
+											{
+												stepFail.call.push(getFileResults(callResult, depth + 1));
+											}
+										});
+									}
+
+									fail.stepfails.push(stepFail);
+								}
+							});
+	
+							result.fails.push(fail);
+							result.state = ENTRY_STATE.FAIL;
+							break;
+					}
+	
+					let targetIndex = results.findIndex((r) => r.name === result.name && r.path === result.path);
+					if (targetIndex === -1)
+					{
+						results.push(result);
+						targetIndex = results.length - 1;
+					}
+					else
+					{
+						results[targetIndex] = result;
+					}
+					
+					if (result.isOutline)
+					{
+						lastIndex = targetIndex;
+						lastSectionIndex = json.scenarioResults[ndx].sectionIndex;
+					}
+					else
+					{
+						lastIndex = -1;
+						lastSectionIndex = -1;
+					}
+				}
+			}
+
+			return results;
+		}
+
+		let fileResults = getFileResults(json);
+		fileResults.forEach((fr) =>
+		{
+			let targetIndex = ProviderResults.results.findIndex((r) => r.name === fr.name && r.path === fr.path);
+
+			if (targetIndex === -1)
+			{
+				ProviderResults.results.push(fr);
 			}
 			else
 			{
-				let prefixPath: string = json.prefixedPath;
-				let error = json.scenarioResults[ndx].error;
-
-				if (error)
-				{
-					error = ["Line " + json.scenarioResults[ndx].line + ": " + error];
-				}
-				else
-				{
-					error = [];
-				}
-
-				result = 
-				{
-					path: prefixPath.replace(/^classpath:/,''),
-					line: json.scenarioResults[ndx].line,
-					tags: json.scenarioResults[ndx].tags,
-					name: json.scenarioResults[ndx].name,
-					isFeature: false,
-					isOutline: (json.scenarioResults[ndx].exampleIndex === -1) ? false : true,
-					passes: 0,
-					fails: 0,
-					error: error,
-					state: ENTRY_STATE.NONE
-				};
-
-				switch (json.scenarioResults[ndx].failed)
-				{
-					case false:
-						result.passes = 1;
-						result.state = ENTRY_STATE.PASS;
-						break;
-	
-					case true:
-						result.fails = 1;
-						result.state = ENTRY_STATE.FAIL;
-						break;
-				}
-
-				let targetIndex = ProviderResults.results.findIndex(r => r.name === result.name && r.path === result.path);
-				if (targetIndex === -1)
-				{
-					ProviderResults.results.push(result);
-					targetIndex = ProviderResults.results.length - 1;
-				}
-				else
-				{
-					ProviderResults.results[targetIndex] = result;
-				}
-				
-				if (result.isOutline)
-				{
-					lastIndex = targetIndex;
-					lastSectionIndex = json.scenarioResults[ndx].sectionIndex;
-				}
-				else
-				{
-					lastIndex = -1;
-					lastSectionIndex = -1;
-				}
+				ProviderResults.results[targetIndex] = fr;
 			}
-		}
-		
-		let prefixPath: string = json.prefixedPath;
-
-		result = 
-		{
-			path: prefixPath.replace(/^classpath:/,''),
-			line: 0,
-			tags: null,
-			name: null,
-			isFeature: true,
-			isOutline: false,
-			passes: 0,
-			fails: 0,
-			error: [],
-			state: ENTRY_STATE.NONE
-		};
-		
-		let results = ProviderResults.results.filter(r => r.path === result.path && !r.isFeature);
-		result.passes = results.reduce((n, {passes}) => n + passes, 0);
-		result.fails = results.reduce((n, {fails}) => n + fails, 0);
-
-		results.forEach((res) =>
-		{
-			res.error.forEach((e) =>
-			{
-				result.error.push(e);
-			});
 		});
 
+		let prefixedPath: string = json.prefixedPath.replace(/^classpath:/,'');
+		let normalizedPrefixedPath: string = (path.sep === '/') ? prefixedPath.replace(/\\/g, '/') : prefixedPath.replace(/\//g, '\\');
+		let normalizedRootPath: string = (path.sep === '/') ? projectRootPath.replace(/\\/g, '/') : projectRootPath.replace(/\//g, '\\');
+		let resultFile: string = getChildAbsolutePath(normalizedRootPath, normalizedPrefixedPath);
+		let resultUri: vscode.Uri = vscode.Uri.file(resultFile);
+
+		let result = 
+		{
+			uri: resultUri,
+			path: prefixedPath,
+			line: 0,
+			callArgs: null,
+			tags: null,
+			name: json.name,
+			isFeature: true,
+			isOutline: false,
+			passes: [],
+			fails: [],
+			state: ENTRY_STATE.NONE,
+			time: null
+		};
 		
-		if (json.failedCount > 0 || result.fails > 0)
+		let results = ProviderResults.results.filter((r) => r.path === result.path && !r.isFeature);
+		result.passes = results.reduce((total, {passes}) => total.concat(passes), []);
+		result.fails = results.reduce((total, {fails}) => total.concat(fails), []);
+		result.time = results.reduce((total, {time}) => total + time, 0);
+		
+		if (json.failedCount > 0 || result.fails.length > 0)
 		{
 			result.state = ENTRY_STATE.FAIL;
 		}
@@ -220,7 +347,7 @@ export class ProviderResults implements IDisposable
 			result.state = ENTRY_STATE.PASS;
 		}
 		
-		let findIndex = ProviderResults.results.findIndex(r => r.line === result.line && r.path === result.path);
+		let findIndex = ProviderResults.results.findIndex((r) => r.line === result.line && r.path === result.path);
 		if (findIndex === -1)
 		{
 			ProviderResults.results.push(result);
@@ -242,28 +369,28 @@ export class ProviderResults implements IDisposable
 	{
 		let folderResult: IAggregateResult = 
 		{
-			passes: 0,
-			fails: 0,
+			passes: [],
+			fails: [],
 			state: ENTRY_STATE.NONE
 		};
 
 		if (ProviderResults.results.length > 0)
 		{
-			let workspaceFolder = vscode.workspace.workspaceFolders.filter(folder => folder.uri.scheme === 'file')[0];
+			let workspaceFolder = vscode.workspace.workspaceFolders.filter((folder) => folder.uri.scheme === 'file')[0];
 			let workspacePath = workspaceFolder.uri.path + '/';
 			let folderPath = uri.path.split(workspacePath)[1];
 		
-			let results = ProviderResults.results.filter(r => r.path.startsWith(folderPath) && r.isFeature);
+			let results = ProviderResults.results.filter((r) => r.path.startsWith(folderPath) && r.isFeature);
 			if (results.length > 0)
 			{
-				folderResult.passes = results.reduce((n, {passes}) => n + passes, 0);
-				folderResult.fails = results.reduce((n, {fails}) => n + fails, 0);
+				folderResult.passes = results.reduce((total, {passes}) => total.concat(passes), []);
+				folderResult.fails = results.reduce((total, {fails}) => total.concat(fails), []);
 	
-				if (folderResult.fails > 0)
+				if (folderResult.fails.length > 0)
 				{
 					folderResult.state = ENTRY_STATE.FAIL;
 				}
-				else if (folderResult.passes > 0)
+				else if (folderResult.passes.length > 0)
 				{
 					folderResult.state = ENTRY_STATE.PASS;
 				}
@@ -277,22 +404,22 @@ export class ProviderResults implements IDisposable
 	{
 		let fileResult: IAggregateResult = 
 		{
-			passes: 0,
-			fails: 0,
+			passes: [],
+			fails: [],
 			state: ENTRY_STATE.NONE
 		};
 
-		let results = ProviderResults.results.filter(r => uri.path.endsWith(r.path) && r.isFeature);
+		let results = ProviderResults.results.filter((r) => uri.path.endsWith(r.path) && r.isFeature);
 		if (results.length > 0)
 		{
-			fileResult.passes = results.reduce((n, {passes}) => n + passes, 0);
-			fileResult.fails = results.reduce((n, {fails}) => n + fails, 0);
+			fileResult.passes = results.reduce((total, {passes}) => total.concat(passes), []);
+			fileResult.fails = results.reduce((total, {fails}) => total.concat(fails), []);
 
-			if (fileResult.fails > 0)
+			if (fileResult.fails.length > 0)
 			{
 				fileResult.state = ENTRY_STATE.FAIL;
 			}
-			else if (fileResult.passes > 0)
+			else if (fileResult.passes.length > 0)
 			{
 				fileResult.state = ENTRY_STATE.PASS;
 			}
@@ -305,22 +432,22 @@ export class ProviderResults implements IDisposable
 	{
 		let fileTagResult: IAggregateResult = 
 		{
-			passes: 0,
-			fails: 0,
+			passes: [],
+			fails: [],
 			state: ENTRY_STATE.NONE
 		};
 
-		let results = ProviderResults.results.filter(r => uri.path.endsWith(r.path) && !r.isFeature && r.tags.includes(tag.replace(/^@/, '')));
+		let results = ProviderResults.results.filter((r) => uri.path.endsWith(r.path) && !r.isFeature && r.tags.includes(tag.replace(/^@/, '')));
 		if (results.length > 0)
 		{
-			fileTagResult.passes = results.reduce((n, {passes}) => n + passes, 0);
-			fileTagResult.fails = results.reduce((n, {fails}) => n + fails, 0);
+			fileTagResult.passes = results.reduce((total, {passes}) => total.concat(passes), []);
+			fileTagResult.fails = results.reduce((total, {fails}) => total.concat(fails), []);
 
-			if (fileTagResult.fails > 0)
+			if (fileTagResult.fails.length > 0)
 			{
 				fileTagResult.state = ENTRY_STATE.FAIL;
 			}
-			else if (fileTagResult.passes > 0)
+			else if (fileTagResult.passes.length > 0)
 			{
 				fileTagResult.state = ENTRY_STATE.PASS;
 			}
@@ -333,22 +460,22 @@ export class ProviderResults implements IDisposable
 	{
 		let tagResult: IAggregateResult = 
 		{
-			passes: 0,
-			fails: 0,
+			passes: [],
+			fails: [],
 			state: ENTRY_STATE.NONE
 		};
 
-		let results = ProviderResults.results.filter(r => !r.isFeature && r.tags.includes(tag.replace(/^@/, '')));
+		let results = ProviderResults.results.filter((r) => !r.isFeature && r.tags.includes(tag.replace(/^@/, '')));
 		if (results.length > 0)
 		{
-			tagResult.passes = results.reduce((n, {passes}) => n + passes, 0);
-			tagResult.fails = results.reduce((n, {fails}) => n + fails, 0);
+			tagResult.passes = results.reduce((total, {passes}) => total.concat(passes), []);
+			tagResult.fails = results.reduce((total, {fails}) => total.concat(fails), []);
 
-			if (tagResult.fails > 0)
+			if (tagResult.fails.length > 0)
 			{
 				tagResult.state = ENTRY_STATE.FAIL;
 			}
-			else if (tagResult.passes > 0)
+			else if (tagResult.passes.length > 0)
 			{
 				tagResult.state = ENTRY_STATE.PASS;
 			}
@@ -359,28 +486,14 @@ export class ProviderResults implements IDisposable
 
 	public static getTestResult(ted: ITestExecutionDetail): ENTRY_STATE
 	{
-		let path = ted.testUri.path;
-		let state = ENTRY_STATE.NONE;
-		
-		if (ted.testTitle.startsWith("Feature:"))
-		{
-			path = path + ":0";
-			let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path + ":" + e.line));	
-			if (filteredResults.length === 1)
-			{
-				state = filteredResults[0].state;
-			}
-		}
-		else
-		{
-			let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path) && ted.testTitle.endsWith(e.name));
-			if (filteredResults.length === 1)
-			{
-				state = filteredResults[0].state;
-			}
-		}
-	
-		return state;
+		let result = ProviderResults.getResult(ted);
+		return (result === null) ? ENTRY_STATE.NONE : result.state;
+	}
+
+	public static getTestTime(ted: ITestExecutionDetail): number
+	{
+		let result = ProviderResults.getResult(ted);
+		return (result === null) ? null : result.time;
 	}
 
 	public static getResult(ted: ITestExecutionDetail): IResult
@@ -391,7 +504,7 @@ export class ProviderResults implements IDisposable
 		if (ted.testTitle.startsWith("Feature:"))
 		{
 			path = path + ":0";
-			let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path + ":" + e.line));	
+			let filteredResults = ProviderResults.results.filter((e) => path.endsWith(e.path + ":" + e.line));	
 			if (filteredResults.length === 1)
 			{
 				result = filteredResults[0];
@@ -399,7 +512,7 @@ export class ProviderResults implements IDisposable
 		}
 		else
 		{
-			let filteredResults = ProviderResults.results.filter(e => path.endsWith(e.path) && ted.testTitle.endsWith(e.name));
+			let filteredResults = ProviderResults.results.filter((e) => path.endsWith(e.path) && ted.testTitle.endsWith(e.name));
 			if (filteredResults.length === 1)
 			{
 				result = filteredResults[0];
@@ -413,8 +526,8 @@ export class ProviderResults implements IDisposable
 	{
 		let summary: vscode.MarkdownString[] = [];
 
-		let results = ProviderResults.getResult(ted);
-		if (results)
+		let result = ProviderResults.getResult(ted);
+		if (result)
 		{
 			let summaryHeader = new vscode.MarkdownString();
 			let summaryFooter = new vscode.MarkdownString(undefined, true);
@@ -422,16 +535,20 @@ export class ProviderResults implements IDisposable
 			summaryHeader.appendCodeblock(ted.testTitle, 'karate');
 			summary.push(summaryHeader);
 
-			if (results.error)
+			if (result.fails)
 			{
-				results.error.forEach((error) =>
+				result.fails.forEach((f) =>
 				{
-					let summaryBody = new vscode.MarkdownString();
-					summaryBody.appendMarkdown(error);
+					let summaryBody = new vscode.MarkdownString(undefined, true);
+					summaryBody.isTrusted = true;
+					summaryBody.supportHtml = true;
+
+					let stackTrace: IStackTrace = ProviderResults.getStackTrace(result, f);
+					summaryBody.appendMarkdown(ProviderResults.getStackTraceMarkdown(stackTrace));
 					summary.push(summaryBody);
 				});
 
-				summaryFooter.appendMarkdown(`$(error) ${results.error.length} error(s)`);
+				summaryFooter.appendMarkdown(`$(error) ${result.fails.length} error(s)`);
 			}
 			else
 			{
@@ -447,22 +564,29 @@ export class ProviderResults implements IDisposable
 	public static getPartialSummary(ted: ITestExecutionDetail): vscode.MarkdownString
 	{
 		let summary = new vscode.MarkdownString(undefined, true);
+		summary.isTrusted = true;
+		summary.supportHtml = true;
 
-		let results = ProviderResults.getResult(ted);
-		if (results)
+		let result = ProviderResults.getResult(ted);
+		if (result)
 		{
 			summary.appendCodeblock(ted.testTitle, 'karate');
-
-			if (results.error)
+			summary.appendMarkdown('<hr/>');
+			summary.appendText('\n');
+			
+			if (result.fails)
 			{
-				if (results.error.length > 0)
+				if (result.fails.length > 0)
 				{
-					summary.appendMarkdown(`${results.error[0]}`);
+					let stackTrace: IStackTrace = ProviderResults.getStackTrace(result, result.fails[0]);
+					summary.appendMarkdown(ProviderResults.getStackTraceMarkdown(stackTrace, 30));
+					summary.appendText('\n');
+					summary.appendMarkdown('<hr/>');
 					summary.appendText('\n');
 
-					if (results.error.length > 1)
+					if (result.fails.length > 1)
 					{
-						summary.appendMarkdown(`$(error) ${results.error.length - 1} more error(s)...`);
+						summary.appendMarkdown(`$(error) ${result.fails.length - 1} more error(s)...`);
 					}
 					else
 					{
@@ -481,6 +605,131 @@ export class ProviderResults implements IDisposable
 		}
 
 		return summary;
+	}
+
+	private static getStackTrace(result: IResult, fail: IFail, frameLimiter: number = 100, depth: number = 0): IStackTrace
+	{
+		let stackTrace: IStackTrace = { error: fail.message, overflow: 0, frames: [] };
+
+		let stackFrame: IStackFrame = 
+		{
+			uri: result.uri,
+			line: fail.line,
+			code: result.name,
+			args: result.callArgs,
+			message: fail.message,
+			time: result.time,
+			depth: depth,
+			last: false
+		};
+
+		stackTrace.frames.unshift(stackFrame);
+
+		fail.stepfails.forEach((sf) =>
+		{
+			let stackFrame: IStackFrame = 
+			{
+				uri: result.uri,
+				line: sf.line,
+				code: sf.text,
+				args: result.callArgs,
+				message: sf.message,
+				time: sf.time,
+				depth: depth,
+				last: false
+			};
+
+			stackTrace.frames.unshift(stackFrame);
+
+			for (let ndx1 = 0; ndx1 < sf.call.length; ndx1++)
+			{
+				let _results: IResult[] = sf.call[ndx1];
+
+				for (let ndx2 = 0; ndx2 < _results.length; ndx2++)
+				{
+					let _result: IResult = _results[ndx2];
+
+					for (let ndx3 = 0; ndx3 < _result.fails.length; ndx3++)
+					{
+						let _stackTrace = ProviderResults.getStackTrace(_result, _result.fails[ndx3], frameLimiter, depth + 1);
+						stackTrace.frames = _stackTrace.frames.concat(stackTrace.frames);
+					}
+
+					stackTrace.frames[0].last = true;
+				}
+
+				stackTrace.frames[0].last = true;
+			}
+
+			stackTrace.frames[0].last = true;
+		});
+
+		stackTrace.frames[0].last = true;
+
+		if (depth === 0)
+		{
+			if (frameLimiter && stackTrace.frames.length > frameLimiter)
+			{
+				let overflow = stackTrace.frames.length - frameLimiter;
+				stackTrace.frames.splice(frameLimiter);
+				stackTrace.overflow = overflow;
+			}
+		}
+
+		return stackTrace;
+	}
+
+	private static getStackTraceMarkdown(stackTrace: IStackTrace, frameLimiter: number = null): string
+	{
+		let stackTraceMarkdown = '';
+
+		if (frameLimiter && frameLimiter > 0 && stackTrace.frames.length > frameLimiter)
+		{
+			let overflow = stackTrace.frames.length - frameLimiter;
+			stackTrace.overflow += overflow;
+			stackTrace.frames.splice(frameLimiter);
+		}
+
+		stackTrace.frames.forEach((f, ndx) =>
+		{
+			let markdownLine = '';
+
+			if (ndx > 0)
+			{
+				markdownLine = '<br/>';
+			}
+
+			if (!f.last)
+			{
+				markdownLine += `${'$(arrow-small-up)'.repeat(f.depth + 1)}`;
+			}
+			else
+			{
+				markdownLine += `${'$(arrow-small-right)'.repeat(f.depth) + '$(debug-breakpoint) '}`;
+			}
+
+			let linkText = path.basename(f.uri.fsPath);
+			let regexp: RegExp = new RegExp(`(.{${70 - (f.depth + 1 + linkText.length)}})..+`);
+			let lineText = f.code.replace(/^\*\s*/, '').replace(regexp, "$1&hellip;");
+			let frameArgs = encodeURIComponent(JSON.stringify([{ testUri: f.uri, testLine: f.line - 1 }]));
+			let frameCmd = `command:karateRunner.tests.open?${frameArgs}`;
+			let linkTooltip = `[time] ${f.time.toFixed(2)}ms - [error] ${escapeHtml(f.message)}`;
+			
+			if (f.args)
+			{
+				linkTooltip += ` - [args] ${escapeHtml(f.args)}`;
+			}
+
+			markdownLine += `${lineText} [${linkText}:${f.line}](${frameCmd} "${linkTooltip}")`;
+			stackTraceMarkdown += markdownLine;
+		});
+
+		if (stackTrace.overflow > 0)
+		{
+			stackTraceMarkdown += `<br/>${stackTrace.overflow} more frame(s)...`;
+		}
+
+		return stackTraceMarkdown;
 	}
 
 	public static get onSummaryResults(): vscode.Event<any>

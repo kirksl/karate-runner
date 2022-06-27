@@ -13,9 +13,10 @@ import ProviderDecorations from './providerDecorations';
 import ProviderDocumentSymbol from './providerDocumentSymbol';
 import ProviderTelemetry from './providerTelemetry';
 import { ServiceLocalStorage } from './serviceLocalStorage';
+//import { ProviderOutputChannel } from "./providerOutputChannel";
 //import ProviderFoldingRange from "./providerFoldingRange";
 
-import { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, runTagKarateTests, displayReportsTree, filterReportsTree, displayTestsTree, filterTestsTree, openExternalUri, openFileInEditor, moveLineUp, moveLineDown, cloneLine, deleteLine, openKarateSettings, toggleResultsInGutter } from "./commands";
+import { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, runTagKarateTests, displayReportsTree, filterReportsTree, displayTestsTree, filterTestsTree, openExternalUri, openFileInEditor, gotoLineNumber, moveLineUp, moveLineDown, cloneLine, deleteLine, openKarateSettings, toggleResultsInGutter } from "./commands";
 import { createTreeViewWatcher, showWhatsNew } from "./helper";
 import * as vscode from 'vscode';
 
@@ -26,6 +27,7 @@ let telemetryProvider = null;
 export function activate(context: vscode.ExtensionContext)
 {
 	//showWhatsNew(context);
+	//let outputChannelProvider = new ProviderOutputChannel();
 	ServiceLocalStorage.initialize(context.globalState);
 	telemetryProvider = new ProviderTelemetry(context);
 
