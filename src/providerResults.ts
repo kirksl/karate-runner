@@ -504,7 +504,7 @@ export class ProviderResults implements IDisposable
 		if (ted.testTitle.startsWith("Feature:"))
 		{
 			path = path + ":0";
-			let filteredResults = ProviderResults.results.filter((e) => path.endsWith(e.path + ":" + e.line));	
+			let filteredResults = ProviderResults.results.filter((e) => e.isFeature && path.endsWith(e.path + ":" + e.line));	
 			if (filteredResults.length === 1)
 			{
 				result = filteredResults[0];
@@ -512,10 +512,43 @@ export class ProviderResults implements IDisposable
 		}
 		else
 		{
-			let filteredResults = ProviderResults.results.filter((e) => path.endsWith(e.path) && ted.testTitle.endsWith(e.name));
+			let filteredResults = ProviderResults.results.filter((e) => path.endsWith(e.path) && !e.isFeature && ted.testTitle.endsWith(e.name));
 			if (filteredResults.length === 1)
 			{
 				result = filteredResults[0];
+			}
+			else
+			{
+				let testTitle = ted.testTitle;
+				if (testTitle.startsWith("Scenario Outline:") &&
+				    testTitle.indexOf("<") !== -1 &&
+					testTitle.indexOf(">") !== -1)
+				{
+					let newTestTitle = testTitle.replace(/^Scenario Outline:\s*/, "")
+						.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+						.replace(/<[^>]+>/g, "'*[^\\s]+'*");
+					
+					let regex = new RegExp(`^${newTestTitle}$`);
+					filteredResults = ProviderResults.results.filter((e) => path.endsWith(e.path) && regex.test(e.name));
+					if (filteredResults.length === 1)
+					{
+						result = filteredResults[0];
+					}
+					else
+					{
+						let newTestTitle = testTitle.replace(/^Scenario Outline:\s*/, "")
+						.replace(/\s+/g, "")
+						.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')
+						.replace(/<[^>]+>/g, "'*[^\\s]+'*")
+					
+						let regex = new RegExp(`^${newTestTitle}$`);
+						filteredResults = ProviderResults.results.filter((e) => path.endsWith(e.path) && regex.test(e.name.replace(/\s+/g, "")));
+						if (filteredResults.length === 1)
+						{
+							result = filteredResults[0];
+						}
+					}
+				}
 			}
 		}
 	

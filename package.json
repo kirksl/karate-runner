@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"appInsightsId": "a285938d-a115-44ea-be2a-588a243d5f2c",
 	"license": "MIT",
 	"author": {
@@ -18,7 +18,7 @@
 		"url": "https://github.com/sponsors/kirksl"
 	},
 	"engines": {
-		"vscode": "^1.68.0"
+		"vscode": "^1.74.0"
 	},
 	"categories": [
 		"Programming Languages",
@@ -550,6 +550,12 @@
 					"description": "Display Karate tests as a list (List), natural directory structure (Tree) or as a tag list (Tag) within Activity Bar.",
 					"scope": "resource"
 				},
+				"karateRunner.editor.inlineCompletion": {
+					"type": "boolean",
+					"default": true,
+					"description": "Toggle showing inline completion for Karate language (Experimental).",
+					"scope": "resource"
+				},
 				"karateRunner.editor.toggleResultsInGutter": {
 					"type": "boolean",
 					"default": true,
@@ -727,7 +733,7 @@
 		"@types/glob": "^7.2.0",
 		"@types/mocha": "^9.1.1",
 		"@types/node": "16.x",
-		"@types/vscode": "^1.68.0",
+		"@types/vscode": "^1.74.0",
 		"@typescript-eslint/eslint-plugin": "^5.27.0",
 		"@typescript-eslint/parser": "^5.27.0",
 		"@vscode/test-electron": "^2.1.3",

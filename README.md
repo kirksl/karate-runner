@@ -100,7 +100,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 ## Setup
 
 ### Versions
-- `VSCode Version 1.64.0` or greater. (Required)
+- `VSCode Version 1.74.0` or greater. (Required)
 - `Karate Version 0.9.3` or greater in your Karate projects. (Required)
 - `Karate Version 0.9.5` or greater in your Karate projects. (Required for Debugger or Karate Cli)
 - `Karate Version 1.0.0` or greater in your Karate projects. (Required for Tests View results)
