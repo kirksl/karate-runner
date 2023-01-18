@@ -65,6 +65,18 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 		this.refresh();
 	}
 
+	public setBadgeCount(failures: number)
+	{
+		if (failures && failures > 0)
+		{
+			this.treeView.badge = { tooltip: `${failures} failure(s)`, value: failures };
+		}
+		else
+		{
+			this.treeView.badge = undefined;
+		}
+	}
+
 	async getChildren(element?: IEntry): Promise<IEntry[]>
 	{
 		if (element)
@@ -267,6 +279,8 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 				}
 			});
 
+			this.setBadgeCount(aggregateFails);
+
 			entries[0].fails = aggregateFails;
 			entries[0].state = aggregateState;
 
@@ -289,6 +303,10 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 		for (let ndx = 0; ndx < testFilesFiltered.length; ndx++)
 		{
 			let tedArray = await getTestExecutionDetail(testFilesFiltered[ndx], ENTRY_TYPE.FILE);
+			if (tedArray.length <= 0)
+			{
+				continue;
+			}
 
 			if (tedArray[0].testIgnored && this.hideIgnored)
 			{
@@ -446,9 +464,14 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 			else
 			{
 				entryType = ENTRY_TYPE.FILE;
-				let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(uri, entryType);
-				testIgnored = tedArray[0].testIgnored;
 
+				let tedArray: ITestExecutionDetail[] = await getTestExecutionDetail(uri, entryType);
+				if (tedArray.length <= 0)
+				{
+					continue;
+				}
+
+				testIgnored = tedArray[0].testIgnored;
 				if (testIgnored && this.hideIgnored)
 				{
 					continue;
@@ -496,6 +519,11 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 		for (let ndx = 0; ndx < testFilesFiltered.length; ndx++)
 		{
 			let tedArray = await getTestExecutionDetail(testFilesFiltered[ndx], ENTRY_TYPE.FILE);
+			if (tedArray.length <= 0)
+			{
+				continue;
+			}
+
 			if (tedArray[0].testIgnored && this.hideIgnored)
 			{
 				continue;

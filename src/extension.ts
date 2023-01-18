@@ -9,6 +9,7 @@ import ProviderCodeLens from "./providerCodeLens";
 import ProviderDefinition from "./providerDefinition";
 import ProviderHoverRunDebug from './providerHoverRunDebug';
 import ProviderCompletionItem from './providerCompletionItem';
+import ProviderInlineCompletionItem from './providerInlineCompletionItem';
 import ProviderDecorations from './providerDecorations';
 import ProviderDocumentSymbol from './providerDocumentSymbol';
 import ProviderTelemetry from './providerTelemetry';
@@ -42,6 +43,7 @@ export function activate(context: vscode.ExtensionContext)
 	let definitionProvider = new ProviderDefinition();
 	let hoverRunDebugProvider = new ProviderHoverRunDebug(context);
 	let completionItemProvider = new ProviderCompletionItem();
+	let inlineCompletionItemProvider = new ProviderInlineCompletionItem();
 	let decorationsProvider = new ProviderDecorations(context);
 	let documentSymbolProvider = new ProviderDocumentSymbol();
 	//let foldingRangeProvider = new ProviderFoldingRange();

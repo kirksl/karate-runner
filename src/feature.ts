@@ -521,5 +521,6 @@ export
 	Feature,
 	ISection,
 	IUriToken,
-	ILineToken
+	ILineToken,
+	SECTION_TYPE
 };
