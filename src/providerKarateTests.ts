@@ -55,6 +55,7 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 		this.filterTags = (String(vscode.workspace.getConfiguration('karateRunner.tests').get('toTargetByTag'))).split(",");
 		this.hideIgnored = Boolean(vscode.workspace.getConfiguration('karateRunner.tests').get('hideIgnored'));
 		this.displayType = String(vscode.workspace.getConfiguration('karateRunner.tests').get('activityBarDisplayType'));
+		this.setBadgeCount();
 		this._onDidChangeTreeData.fire();
 		ProviderKarateTests._onRefreshEnd.fire(null);
 	}
@@ -65,11 +66,13 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 		this.refresh();
 	}
 
-	public setBadgeCount(failures: number)
+	public async setBadgeCount()
 	{
-		if (failures && failures > 0)
+		let workspaceFolders: IEntry[] = await this.getWorkspaceFolders();
+
+		if (workspaceFolders && workspaceFolders[0].fails > 0)
 		{
-			this.treeView.badge = { tooltip: `${failures} failure(s)`, value: failures };
+			this.treeView.badge = { tooltip: `${workspaceFolders[0].fails} failure(s)`, value: workspaceFolders[0].fails };
 		}
 		else
 		{
@@ -278,8 +281,6 @@ class ProviderKarateTests implements vscode.TreeDataProvider<IEntry>, IDisposabl
 					aggregateState = ENTRY_STATE.FAIL;
 				}
 			});
-
-			this.setBadgeCount(aggregateFails);
 
 			entries[0].fails = aggregateFails;
 			entries[0].state = aggregateState;

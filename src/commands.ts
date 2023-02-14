@@ -1,4 +1,4 @@
-import { getProjectDetail, getTestExecutionDetail, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail, getLightIcon, getDarkIcon } from "./helper";
+import { isPortFree, getProjectDetail, getTestExecutionDetail, getActiveFeatureFile, IProjectDetail, ITestExecutionDetail, getLightIcon, getDarkIcon } from "./helper";
 import { Feature, ISection } from "./feature";
 import { ENTRY_TYPE } from "./types/entry";
 import ProviderStatusBar from "./providerStatusBar";
@@ -10,9 +10,44 @@ import open = require('open');
 import ProviderKarateTests from "./providerKarateTests";
 import ProviderReports from "./providerReports";
 
+let debugPortNumber: number = 0;
 let debugLineNumber: number = 0;
 let debugFeatureFile: string = '';
 
+
+// Authority (http://www.iana.org)
+// 
+//      0-1023 - System Ports or Well Known Ports are assigned
+//  1024-49151 - User Ports or Registered Ports are assigned
+// 49152-65535 - Dynamic Ports or Private/Ephemeral Ports are unassigned and free for private use
+async function getDebugPort(useCache: boolean = false): Promise<string>
+{
+	let userPortNumber = Number(vscode.workspace.getConfiguration('karateRunner.debugger').get('serverPort'));
+	if (userPortNumber >= 0)
+	{
+		debugPortNumber = userPortNumber;
+		return userPortNumber.toString();
+	}
+
+	if (useCache)
+	{
+		return debugPortNumber.toString();
+	}
+	
+	const PORT_MIN = 49152;
+	const PORT_MAX = 65535;
+
+	for(let port = PORT_MIN; port <= PORT_MAX; port++)
+	{
+		if (await isPortFree(port))
+		{
+			debugPortNumber = port;
+			return port.toString();		
+		}
+	}
+
+	throw "Ports unavailable in private class range: 49152-65535";
+}
 
 async function smartPaste()
 {
@@ -857,6 +892,7 @@ function toggleResultsInGutter()
 export
 {
 	smartPaste,
+	getDebugPort,
 	getDebugFile,
 	getDebugBuildFile,
 	debugKarateTest,

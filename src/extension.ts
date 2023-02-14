@@ -17,7 +17,7 @@ import { ServiceLocalStorage } from './serviceLocalStorage';
 //import { ProviderOutputChannel } from "./providerOutputChannel";
 //import ProviderFoldingRange from "./providerFoldingRange";
 
-import { smartPaste, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, runTagKarateTests, displayReportsTree, filterReportsTree, displayTestsTree, filterTestsTree, openExternalUri, openFileInEditor, gotoLineNumber, moveLineUp, moveLineDown, cloneLine, deleteLine, openKarateSettings, toggleResultsInGutter } from "./commands";
+import { smartPaste, getDebugPort, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, runTagKarateTests, displayReportsTree, filterReportsTree, displayTestsTree, filterTestsTree, openExternalUri, openFileInEditor, gotoLineNumber, moveLineUp, moveLineDown, cloneLine, deleteLine, openKarateSettings, toggleResultsInGutter } from "./commands";
 import { createTreeViewWatcher, showWhatsNew } from "./helper";
 import * as vscode from 'vscode';
 
@@ -51,6 +51,7 @@ export function activate(context: vscode.ExtensionContext)
 	let karateFile = { language: "karate", scheme: "file" };
 
 	let smartPasteCommand = vscode.commands.registerCommand("karateRunner.paste", smartPaste);
+	let getDebugPortCommand = vscode.commands.registerCommand("karateRunner.getDebugPort", () => getDebugPort());
 	let getDebugFileCommand = vscode.commands.registerCommand("karateRunner.getDebugFile", getDebugFile);
 	let getDebugBuildFileCommand = vscode.commands.registerCommand("karateRunner.getDebugBuildFile", getDebugBuildFile);
 	let debugTestCommand = vscode.commands.registerCommand("karateRunner.tests.debug", debugKarateTest);
@@ -163,6 +164,7 @@ export function activate(context: vscode.ExtensionContext)
 	});
 
 	context.subscriptions.push(smartPasteCommand);
+	context.subscriptions.push(getDebugPortCommand);
 	context.subscriptions.push(getDebugFileCommand);
 	context.subscriptions.push(getDebugBuildFileCommand);
 	context.subscriptions.push(debugTestCommand);
