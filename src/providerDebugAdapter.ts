@@ -1,10 +1,10 @@
-import { getProjectDetail, IProjectDetail } from "./helper";
-import fs = require("fs");
+import { getDebugPort } from "./commands";
+import { isPortFree, getProjectDetail, IProjectDetail } from "./helper";
 import * as vscode from 'vscode';
 
 class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
 {
-	createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor>
+	async createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): Promise<vscode.ProviderResult<vscode.DebugAdapterDescriptor>>
 	{
 		let projectRootPath = "";
 		let settingsTimeout = Number(vscode.workspace.getConfiguration('karateRunner.debugger').get('serverPortTimeout'));
@@ -22,12 +22,9 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
 			projectRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 		}
 
-		let relativePattern = new vscode.RelativePattern(projectRootPath, '**/karate-debug-port.txt');
-		let watcher = vscode.workspace.createFileSystemWatcher(relativePattern);
 		let debugCanceledByUser = false;
-		let debugPortFile = null;
-
-		let getDebugPort = (task: vscode.TaskExecution) =>
+		let debugPort = Number(await getDebugPort(true));
+		let waitDebugServer = (task: vscode.TaskExecution) =>
 		{
 			return new Promise<number>((resolve, reject) =>
 			{
@@ -50,7 +47,7 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
 
 					await new Promise((resolve, reject) =>
 					{
-						let interval = setInterval(() =>
+						let interval = setInterval(async () =>
 						{
 							if (debugCanceledByUser)
 							{
@@ -60,13 +57,12 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
 								reject(new Error("Aborting debugger.  Canceled by user."));
 							}
 
-							if (debugPortFile !== null)
+							let portFree = await isPortFree(debugPort);
+							if (!portFree)
 							{
 								clearInterval(interval);
 								clearTimeout(timeout);
-								let port = fs.readFileSync(debugPortFile.fsPath, { encoding: 'utf8' });
-	
-								resolve(parseInt(port));
+								resolve(debugPort);
 							}
 							else
 							{
@@ -88,18 +84,6 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
 			});
 		};
   
-		watcher.onDidCreate((e) =>
-		{
-			watcher.dispose();
-			debugPortFile = e;
-		});
-  
-		watcher.onDidChange((e) =>
-		{
-			watcher.dispose();
-			debugPortFile = e;
-		});
-  
 		let seo: vscode.ShellExecutionOptions = { cwd: projectRootPath };
 		let exec = new vscode.ShellExecution(session.configuration.karateCli, seo);
 		let task = new vscode.Task
@@ -113,7 +97,7 @@ class ProviderDebugAdapter implements vscode.DebugAdapterDescriptorFactory
 		);
   
 		return vscode.tasks.executeTask(task)
-			.then((task) => getDebugPort(task))
+			.then((task) => waitDebugServer(task))
 			.then((port) => new vscode.DebugAdapterServer(port));
 	}
 }

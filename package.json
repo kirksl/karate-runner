@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"appInsightsId": "a285938d-a115-44ea-be2a-588a243d5f2c",
 	"license": "MIT",
 	"author": {
@@ -106,6 +106,10 @@
 				"command": "karateRunner.paste",
 				"title": "Karate Smart Paste",
 				"enablement": "editorTextFocus && editorLangId == karate"
+			},
+			{
+				"command": "karateRunner.getDebugPort",
+				"title": "Get Debug Port"
 			},
 			{
 				"command": "karateRunner.getDebugFile",
@@ -491,6 +495,12 @@
 					"description": "Display reports as a list (List) or natural directory structure (Tree) within Activity Bar.",
 					"scope": "resource"
 				},
+				"karateRunner.debugger.serverPort": {
+					"type": "number",
+					"default": -1,
+					"description": "Default port number for connecting with debug server.  Set to -1 to use dynamic port number.",
+					"scope": "resource"
+				},
 				"karateRunner.debugger.serverPortTimeout": {
 					"type": "number",
 					"default": 60,
@@ -552,7 +562,7 @@
 				},
 				"karateRunner.editor.inlineCompletion": {
 					"type": "boolean",
-					"default": true,
+					"default": false,
 					"description": "Toggle showing inline completion for Karate language (Experimental).",
 					"scope": "resource"
 				},
@@ -593,7 +603,7 @@
 							"karateCli": {
 								"type": "string",
 								"description": "[karateCli]\n\nThis property specifies the command to start Karate Debug Server.",
-								"default": "${config:karateRunner.karateJar.commandLineArgs} -d"
+								"default": "${config:karateRunner.karateJar.commandLineArgs} -d ${command:karateRunner.getDebugPort}"
 							},
 							"debugPreStep": {
 								"type": "string",
@@ -613,7 +623,7 @@
 							"request": "launch",
 							"feature": "^\"\\${command:karateRunner.getDebugFile}\"",
 							"karateOptions": "",
-							"karateCli": "^\"mvn test-compile -f \\\"\\${command:karateRunner.getDebugBuildFile}\\\" exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args=\\\"-d\\\" -Dexec.classpathScope=\\\"test\\\" \\${config:karateRunner.karateRunner.commandLineArgs}\""
+							"karateCli": "^\"mvn test-compile -f \\\"\\${command:karateRunner.getDebugBuildFile}\\\" exec:java -Dexec.mainClass=com.intuit.karate.cli.Main -Dexec.args=\\\"-d \\${command:karateRunner.getDebugPort}\\\" -Dexec.classpathScope=\\\"test\\\" \\${config:karateRunner.karateRunner.commandLineArgs}\""
 						}
 					},
 					{
@@ -625,7 +635,7 @@
 							"request": "launch",
 							"feature": "^\"\\${command:karateRunner.getDebugFile}\"",
 							"karateOptions": "",
-							"karateCli": "^\"gradle compileTestJava -b \\\"\\${command:karateRunner.getDebugBuildFile}\\\" karateExecute -DmainClass=com.intuit.karate.cli.Main --args=\\\"-d\\\" \\${config:karateRunner.karateRunner.commandLineArgs}\""
+							"karateCli": "^\"gradle compileTestJava -b \\\"\\${command:karateRunner.getDebugBuildFile}\\\" karateExecute -DmainClass=com.intuit.karate.cli.Main --args=\\\"-d \\${command:karateRunner.getDebugPort}\\\" \\${config:karateRunner.karateRunner.commandLineArgs}\""
 						}
 					},
 					{
@@ -637,7 +647,7 @@
 							"request": "launch",
 							"feature": "^\"\\${command:karateRunner.getDebugFile}\"",
 							"karateOptions": "",
-							"karateCli": "^\"npm run test -d -- -d \\${config:karateRunner.karateRunner.commandLineArgs}\""
+							"karateCli": "^\"npm run test -d -- -d \\${command:karateRunner.getDebugPort} \\${config:karateRunner.karateRunner.commandLineArgs}\""
 						}
 					}
 				]

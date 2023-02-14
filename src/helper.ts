@@ -2,10 +2,10 @@ import { ServiceLocalStorage } from './serviceLocalStorage';
 import { openExternalUrl } from "./commands";
 import { ENTRY_TYPE } from "./types/entry";
 import path = require("path");
+import net = require('net');
 import fs = require("fs");
 import * as vscode from 'vscode';
-
-let os = require('os');
+import os = require('os');
 let dns = require('dns').promises;
 
 interface IProjectDetail
@@ -29,6 +29,28 @@ interface ITestExecutionDetail
 	codelensRunTitle: string;
 	codelensDebugTitle: string;
 	codelensLine: number;
+}
+
+async function isPortFree(port: number): Promise<boolean>
+{
+	return new Promise((resolve) =>
+	{
+		var server = net.createServer();
+		server.unref();
+
+		server.listen({host: 'localhost', port: port, exclusive: true }, () =>
+		{
+			server.close(() =>
+			{
+				resolve(true);
+			});
+		});
+
+		server.on('error', () =>
+		{
+			resolve(false);
+		});
+	});
 }
 
 function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetail
@@ -482,6 +504,7 @@ function escapeHtml(html: string): string
 
 export
 {
+	isPortFree,
 	getProjectDetail,
 	getTestExecutionDetail,
 	getTestExecutionDetailTags,
