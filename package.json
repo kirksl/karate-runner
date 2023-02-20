@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"appInsightsId": "a285938d-a115-44ea-be2a-588a243d5f2c",
 	"license": "MIT",
 	"author": {

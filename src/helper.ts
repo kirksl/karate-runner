@@ -33,24 +33,31 @@ interface ITestExecutionDetail
 
 async function isPortFree(port: number): Promise<boolean>
 {
-	return new Promise((resolve) =>
+    return new Promise((resolve, reject) =>
 	{
-		var server = net.createServer();
-		server.unref();
+        let s = net.createServer();
 
-		server.listen({host: 'localhost', port: port, exclusive: true }, () =>
+        s.once('error', (err) =>
 		{
-			server.close(() =>
+            s.close();
+            if (err["code"] == "EADDRINUSE")
 			{
-				resolve(true);
-			});
-		});
+                resolve(false);
+            }
+			else
+			{
+                resolve(false);
+            }
+        });
 
-		server.on('error', () =>
+        s.once('listening', () =>
 		{
-			resolve(false);
-		});
-	});
+            resolve(true);
+            s.close();
+        });
+	
+        s.listen(port);
+    });
 }
 
 function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetail
