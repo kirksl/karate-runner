@@ -348,7 +348,7 @@ function getChildAbsolutePath(basePath: string, childPath: string): string
 			}
 			else
 			{
-				if (newBasePath.toLowerCase().endsWith(childPath))
+				if (newBasePath.toLowerCase().endsWith(childPath.toLowerCase()))
 				{
 					result = newBasePath;
 				}
