@@ -286,12 +286,7 @@ async function runKarateTest(args = null)
 	let projectRootPath = projectDetail.projectRoot;
 	let runFilePath = projectDetail.runFile;
 	
-	if (runFilePath === "")
-	{
-		return;
-	}
-	
-	if (!runFilePath.toLowerCase().endsWith(standaloneBuildFile))
+	if (runFilePath !== "" && !runFilePath.toLowerCase().endsWith(standaloneBuildFile))
 	{
 		if (!runFilePath.toLowerCase().endsWith(javaScriptBuildFile))
 		{
