@@ -285,15 +285,10 @@ async function runKarateTest(args = null)
 	let projectDetail: IProjectDetail = getProjectDetail(targetTestUri, targetTestUriType);
 	let projectRootPath = projectDetail.projectRoot;
 	let runFilePath = projectDetail.runFile;
-	
-	if (runFilePath === "")
-	{
-		return;
-	}
-	
-    let karateEnv = String(vscode.workspace.getConfiguration('karateRunner.core').get('environment')).trim();
+		
+  let karateEnv = String(vscode.workspace.getConfiguration('karateRunner.core').get('environment')).trim();
 
-	if (!runFilePath.toLowerCase().endsWith(standaloneBuildFile))
+	if (runFilePath !== "" && !runFilePath.toLowerCase().endsWith(standaloneBuildFile))
 	{
 		if (!runFilePath.toLowerCase().endsWith(javaScriptBuildFile))
 		{
@@ -320,7 +315,7 @@ async function runKarateTest(args = null)
 				runPhases = "test";
 			}
 			
-            let karateRunnerEnv = (karateEnv === "") ? "" : ` -Dkarate.env=${karateEnv}`;
+      let karateRunnerEnv = (karateEnv === "") ? "" : ` -Dkarate.env=${karateEnv}`;
 			let karateRunnerArgs = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('commandLineArgs'));
 			
 			if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateCli').get('overrideKarateRunner')))

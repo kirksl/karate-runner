@@ -62,6 +62,7 @@ async function isPortFree(port: number): Promise<boolean>
 
 function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetail
 {
+    let defaultRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 	let filePathArray = uri.fsPath.split(path.sep);
 	let projectRootPath = "";
 	let runFilePath = "";
@@ -115,6 +116,12 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetai
 			runFilePath = runFileTestPath + path.sep + javaScriptBuildFile;
 			break;
 		}
+
+        if (defaultRootPath == runFileTestPath)
+        {
+            projectRootPath = defaultRootPath;
+            break;
+        }
 
 		filePathArray.pop();
 	}
