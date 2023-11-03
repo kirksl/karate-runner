@@ -285,7 +285,9 @@ async function runKarateTest(args = null)
 	let projectDetail: IProjectDetail = getProjectDetail(targetTestUri, targetTestUriType);
 	let projectRootPath = projectDetail.projectRoot;
 	let runFilePath = projectDetail.runFile;
-	
+		
+  let karateEnv = String(vscode.workspace.getConfiguration('karateRunner.core').get('environment')).trim();
+
 	if (runFilePath !== "" && !runFilePath.toLowerCase().endsWith(standaloneBuildFile))
 	{
 		if (!runFilePath.toLowerCase().endsWith(javaScriptBuildFile))
@@ -313,6 +315,7 @@ async function runKarateTest(args = null)
 				runPhases = "test";
 			}
 			
+      let karateRunnerEnv = (karateEnv === "") ? "" : ` -Dkarate.env=${karateEnv}`;
 			let karateRunnerArgs = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('commandLineArgs'));
 			
 			if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateCli').get('overrideKarateRunner')))
@@ -338,7 +341,7 @@ async function runKarateTest(args = null)
 					// mvn clean test-compile -f pom.xml exec:java -Dexec.mainClass='com.intuit.karate.cli.Main' -Dexec.args='file.feature' -Dexec.classpathScope='test'
 					runCommand = `${mavenCmd} ${runPhases} ${mavenBuildFileSwitch} "${runFilePath}"`;
 					runCommand += ` exec:java -Dexec.mainClass="com.intuit.karate.cli.Main" -Dexec.args="${karateOptions}"`;
-					runCommand += ` -Dexec.classpathScope="test" ${karateRunnerArgs}`;
+					runCommand += ` -Dexec.classpathScope="test" ${karateRunnerArgs}${karateRunnerEnv}`;
 				}
 				
 				if (runFilePath.toLowerCase().endsWith(gradleGroovyBuildFile)|| runFilePath.toLowerCase().endsWith(gradleKotlinBuildFile))
@@ -346,7 +349,7 @@ async function runKarateTest(args = null)
 					// gradle clean test -b build.gradle karateExecute -DmainClass='com.intuit.karate.cli.Main' --args='file.feature'
 					runCommand = `${gradleCmd} ${runPhases} ${gradleBuildFileSwitch} "${runFilePath}"`;
 					runCommand += ` karateExecute -DmainClass="com.intuit.karate.cli.Main" --args="${karateOptions}"`;
-					runCommand += ` ${karateRunnerArgs}`;
+					runCommand += ` ${karateRunnerArgs}${karateRunnerEnv}`;
 				}
 				
 				if (runCommand === null)
@@ -390,7 +393,7 @@ async function runKarateTest(args = null)
 						return;
 					}
 						
-					runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} "-Dkarate.options=${karateOptions}" ${karateRunnerArgs}`;
+					runCommand = `${runCommandPrefix} "${runFilePath}" -Dtest=${karateRunner} "-Dkarate.options=${karateOptions}" ${karateRunnerArgs}${karateRunnerEnv}`;
 				}
 					
 				if (runFilePath.toLowerCase().endsWith(gradleGroovyBuildFile)|| runFilePath.toLowerCase().endsWith(gradleKotlinBuildFile))
@@ -402,7 +405,7 @@ async function runKarateTest(args = null)
 						return;
 					}
 						
-					runCommand = `${runCommandPrefix} "${runFilePath}" --tests ${karateRunner} -Dkarate.options="${karateOptions}" ${karateRunnerArgs}`;
+					runCommand = `${runCommandPrefix} "${runFilePath}" --tests ${karateRunner} -Dkarate.options="${karateOptions}" ${karateRunnerArgs}${karateRunnerEnv}`;
 				}
 			}
 		}
@@ -420,6 +423,7 @@ async function runKarateTest(args = null)
 	}
 	else
 	{
+        let karateJarEnv = (karateEnv === "") ? "" : ` -e ${karateEnv}`;
 		let karateJarArgs = String(vscode.workspace.getConfiguration('karateRunner.karateJar').get('commandLineArgs'));
 			
 		if (karateJarArgs === undefined || karateJarArgs === "")
@@ -427,7 +431,7 @@ async function runKarateTest(args = null)
 			return;
 		}
 			
-		runCommand = `${karateJarArgs} "${karateJarOptions}"`;
+		runCommand = `${karateJarArgs} "${karateJarOptions}"${karateJarEnv}`;
 	}
 		
 	let relativePattern = new vscode.RelativePattern(projectRootPath, String(vscode.workspace.getConfiguration('karateRunner.reports').get('toTargetByGlob')));
@@ -482,6 +486,7 @@ async function runKarateTest(args = null)
 		if (e.execution.task.name == 'Karate Runner')
 		{
 			ProviderStatusBar.setExecutionState(false);
+            ProviderStatusBar.setStatus();
 			isTaskExecuting = false;
 			watcher.dispose();
 					
@@ -500,7 +505,7 @@ async function runKarateTest(args = null)
 		reportUrisFound = [];
 	});
 			
-	ProviderStatusBar.reset();
+	ProviderStatusBar.resetStatus();
 	ProviderExecutions.executionArgs = args;
 			
 	let showProgress = (task: vscode.TaskExecution) =>
@@ -528,6 +533,7 @@ async function runKarateTest(args = null)
 				
 	let isTaskExecuting = true;
 	ProviderStatusBar.setExecutionState(true);
+    ProviderStatusBar.setStatus();
 				
 	vscode.tasks.executeTask(task).then((task) => showProgress(task));
 }
@@ -874,14 +880,26 @@ function deleteLine(args)
 
 function openKarateSettings()
 {
-	vscode.commands.executeCommand('workbench.action.openWorkspaceSettings');
-	vscode.commands.executeCommand('workbench.action.openSettings', 'Karate Runner');
+    vscode.commands.executeCommand('workbench.action.openWorkspaceSettings', 'Karate Runner');
 }
 
 function toggleResultsInGutter()
 {
 	let value = Boolean(vscode.workspace.getConfiguration('karateRunner.editor').get('toggleResultsInGutter'))
 	vscode.workspace.getConfiguration().update('karateRunner.editor.toggleResultsInGutter', !value);
+}
+
+async function setEnvironment()
+{
+    let env = await vscode.window.showInputBox
+    (
+        {
+            prompt: "Karate Environment",
+            value: String(vscode.workspace.getConfiguration('karateRunner.core').get('environment'))
+        }
+    );
+
+    await vscode.workspace.getConfiguration().update('karateRunner.core.environment', env);
 }
 
 export
@@ -907,5 +925,6 @@ export
 	cloneLine,
 	deleteLine,
 	openKarateSettings,
-	toggleResultsInGutter
+	toggleResultsInGutter,
+    setEnvironment
 };

@@ -59,19 +59,19 @@ class ProviderTelemetry implements IDisposable
 
 			let extTelemetryNow = new Date();
 			let extTelemetryCurrent = extTelemetryNow.setDate(extTelemetryNow.getDate());
-			let extTelemetryLast = ServiceLocalStorage.instance.getValue(TELEMETRY_KEY);
+			let extTelemetryLast = ServiceLocalStorage.instance.getValue<number>(TELEMETRY_KEY);
 
 			if (rateLimit)
 			{
 				if (extTelemetryLast == null || extTelemetryCurrent > extTelemetryLast)
 				{
-					ServiceLocalStorage.instance.setValue(TELEMETRY_KEY, extTelemetryNow.setDate(extTelemetryNow.getDate() + 1));
+					ServiceLocalStorage.instance.setValue<number>(TELEMETRY_KEY, extTelemetryNow.setDate(extTelemetryNow.getDate() + 1));
 					ProviderTelemetry.telemetryReporter.sendTelemetryEvent(eventName, eventProps);	
 				}
 			}
 			else
 			{
-				ServiceLocalStorage.instance.setValue(TELEMETRY_KEY, extTelemetryNow.setDate(extTelemetryNow.getDate() + 1));
+				ServiceLocalStorage.instance.setValue<number>(TELEMETRY_KEY, extTelemetryNow.setDate(extTelemetryNow.getDate() + 1));
 				ProviderTelemetry.telemetryReporter.sendTelemetryEvent(eventName, eventProps);
 			}
 		}
