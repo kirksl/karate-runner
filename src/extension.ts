@@ -17,7 +17,7 @@ import { ServiceLocalStorage } from './serviceLocalStorage';
 //import { ProviderOutputChannel } from "./providerOutputChannel";
 //import ProviderFoldingRange from "./providerFoldingRange";
 
-import { smartPaste, getDebugPort, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, runTagKarateTests, displayReportsTree, filterReportsTree, displayTestsTree, filterTestsTree, openExternalUri, openFileInEditor, gotoLineNumber, moveLineUp, moveLineDown, cloneLine, deleteLine, openKarateSettings, toggleResultsInGutter } from "./commands";
+import { smartPaste, getDebugPort, getDebugFile, getDebugBuildFile, debugKarateTest, runKarateTest, runAllKarateTests, runTagKarateTests, displayReportsTree, filterReportsTree, displayTestsTree, filterTestsTree, openExternalUri, openFileInEditor, gotoLineNumber, moveLineUp, moveLineDown, cloneLine, deleteLine, openKarateSettings, toggleResultsInGutter, setEnvironment } from "./commands";
 import { createTreeViewWatcher, showWhatsNew } from "./helper";
 import * as vscode from 'vscode';
 
@@ -69,7 +69,8 @@ export function activate(context: vscode.ExtensionContext)
 	let refreshTestsTreeCommand = vscode.commands.registerCommand("karateRunner.tests.refreshTree", () => karateTestsProvider.refresh());
 	let filterReportsTreeCommand = vscode.commands.registerCommand("karateRunner.reports.filterTree", () => filterReportsTree(context));
 	let filterTestsTreeCommand = vscode.commands.registerCommand("karateRunner.tests.filterTree", () => filterTestsTree(context));
-	let clearResultsCommand = vscode.commands.registerCommand("karateRunner.tests.clearResults", () => { karateTestsProvider.clearResults(); decorationsProvider.triggerUpdateDecorations(); ProviderStatusBar.reset(); });
+    let setEnvironmentCommand = vscode.commands.registerCommand("karateRunner.tests.setEnvironment", () => setEnvironment());
+    let clearResultsCommand = vscode.commands.registerCommand("karateRunner.tests.clearResults", () => { karateTestsProvider.clearResults(); decorationsProvider.triggerUpdateDecorations(); ProviderStatusBar.resetStatus(); });
 	let openSettingsCommand = vscode.commands.registerCommand("karateRunner.tests.openSettings", openKarateSettings);
 	let toggleResultsInGutterCommand = vscode.commands.registerCommand("karateRunner.editor.toggleResultsInGutter", toggleResultsInGutter);
 	let openFileCommand = vscode.commands.registerCommand("karateRunner.tests.open", openFileInEditor);
@@ -182,6 +183,7 @@ export function activate(context: vscode.ExtensionContext)
 	context.subscriptions.push(refreshTestsTreeCommand);
 	context.subscriptions.push(filterReportsTreeCommand);
 	context.subscriptions.push(filterTestsTreeCommand);
+    context.subscriptions.push(setEnvironmentCommand);
 	context.subscriptions.push(clearResultsCommand);
 	context.subscriptions.push(openSettingsCommand);
 	context.subscriptions.push(toggleResultsInGutterCommand);

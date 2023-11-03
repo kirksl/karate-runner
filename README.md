@@ -38,7 +38,7 @@ A `Karate` `Activity Bar` will be added to VSCode.  Clicking on the Activity Bar
 A `Smart Paste` option will be added to detect paste operations into feature files.  If a `curl` command is detected it will be transformed into Karate syntax and pasted into the VSCode Editor.
 
 ### Status Bar
-A `Karate` `Status Bar` will be added to VSCode showing results for the last execution.  The `Karate` `Status Bar` background will additionally be colored red when the last execution's failure percentage exceeds the defined threshold in Karate Runner settings.   Clicking `Karate` `Status Bar` will reveal historical results executed from `Codelens` or `Karate` `Activity Bar`.  Clicking historical results will re-execute the command which produced those results.
+A `Karate` `Status Bar` will be added to VSCode showing results for the last execution as well as the currently defined `karate.env` at setting `Karate Runner › Core: Environment`.  The `Karate` `Status Bar` background will additionally be colored red when the last execution's failure percentage exceeds the defined threshold in Karate Runner settings.   Clicking `Karate` `Status Bar` will reveal historical results executed from `Codelens` or `Karate` `Activity Bar`.  Clicking historical results will re-execute the command which produced those results.
 
 *Note this feature is dependent on Karate providing a results file under the root of your project.*
 *For Karate Version < 1.0 a file called results-json.txt*
@@ -100,7 +100,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 ## Setup
 
 ### Versions
-- `VSCode Version 1.74.0` or greater. (Required)
+- `VSCode Version 1.83.0` or greater. (Required)
 - `Karate Version 0.9.3` or greater in your Karate projects. (Required)
 - `Karate Version 0.9.5` or greater in your Karate projects. (Required for Debugger or Karate Cli)
 - `Karate Version 1.0.0` or greater in your Karate projects. (Required for Tests View results)
@@ -111,6 +111,7 @@ A `Peek` option will be added to the `Control-Click` or `Right-Click` context me
 ### Execution
 - Ensure an `execution option` (`karate.jar`, `pom.xml (Maven)`, `build.gradle (Gradle Groovy)`, `build.gradle.kts (Gradle Kotlin)`, `package.json (NPM, Yarn, etc)`) exists at the root of your project.
 - This extension will detect which `execution option` exists at your project root and execute the appropriate command.
+- Note if an `execution option` is not specified this extension will still attempt to run the command provided at `Karate Runner › Karate Jar: Command Line Args`.  This can be useful if you are using facilities such as `JBang`.
 - Note if multiple `execution options` exist `karate.jar` will be favored and used first, followed by `pom.xml (Maven)`, then `build.gradle (Gradle Groovy)`, then `build.gradle.kts (Gradle Kotlin)` and lastly `package.json (NPM, Yarn, etc)`.
 
 *Note Javascript package managers such as NPM, Yarn, etc are only supported on Mac and Linux at this time as there is currently an outstanding bug in Karate wherein Windows file paths are not supported.*
