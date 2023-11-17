@@ -5,12 +5,12 @@ import * as vscode from 'vscode';
 
 class ProviderStatusBar
 {
-    private static passed: number = 0;
-    private static failed: number = 0;
-    private static thresholdViolation: boolean = false;
-    private static env: string = "-";
-    private static executing: string = "";
-    private static tooltip: vscode.MarkdownString;
+	private static passed: number = 0;
+	private static failed: number = 0;
+	private static thresholdViolation: boolean = false;
+	private static env: string = "-";
+	private static executing: string = "";
+	private static tooltip: vscode.MarkdownString;
 
 	private static statusBarItem: vscode.StatusBarItem;
 	private static statusBarCommand: vscode.Disposable;
@@ -22,8 +22,8 @@ class ProviderStatusBar
 		ProviderStatusBar.statusBarCommand = vscode.commands.registerCommand(ProviderStatusBar.statusBarCommandId, ProviderExecutions.showExecutionHistory);
 		ProviderStatusBar.statusBarItem.command = ProviderStatusBar.statusBarCommandId;
 		ProviderStatusBar.statusBarItem.name = "Karate Runner";
-        ProviderStatusBar.setEnvironment();      
-        ProviderStatusBar.resetStatus();
+		ProviderStatusBar.setEnvironment();      
+		ProviderStatusBar.resetStatus();
 
 		context.subscriptions.push(ProviderStatusBar.statusBarItem);
 		context.subscriptions.push(ProviderStatusBar.statusBarCommand);
@@ -34,59 +34,59 @@ class ProviderStatusBar
 		{
 			if (e.affectsConfiguration("karateRunner.core.environment"))
 			{
-                ProviderStatusBar.setEnvironment();
-                ProviderStatusBar.setStatus();
+				ProviderStatusBar.setEnvironment();
+				ProviderStatusBar.setStatus();
 			}
 		});
 	}
 
-    private static setResults(passed: number, failed: number)
-    {
-        ProviderStatusBar.passed = passed;
-        ProviderStatusBar.failed = failed;
+	private static setResults(passed: number, failed: number)
+	{
+		ProviderStatusBar.passed = passed;
+		ProviderStatusBar.failed = failed;
 
 		let failureActual = (passed + failed == 0) ? 0 : failed / (passed + failed);
 		let failureThreshold = parseFloat(vscode.workspace.getConfiguration('karateRunner.statusBar').get('colorOnFailureThreshold')) / 100;
 
 		if (failureActual >= failureThreshold)
 		{
-            ProviderStatusBar.thresholdViolation = true;
-        }
-        else
-        {
-            ProviderStatusBar.thresholdViolation = false;
-        }
-    }
+			ProviderStatusBar.thresholdViolation = true;
+		}
+		else
+		{
+			ProviderStatusBar.thresholdViolation = false;
+		}
+	}
 
-    public static setEnvironment()
-    {
-        let env = String(vscode.workspace.getConfiguration('karateRunner.core').get('environment'));
+	public static setEnvironment()
+	{
+		let env = String(vscode.workspace.getConfiguration('karateRunner.core').get('environment'));
 
-        if (env.trim() === "")
-        {
-            ProviderStatusBar.env = "-";
-        }
-        else
-        {
-            ProviderStatusBar.env = env;
-        }
-    }
+		if (env.trim() === "")
+		{
+			ProviderStatusBar.env = "-";
+		}
+		else
+		{
+			ProviderStatusBar.env = env;
+		}
+	}
 
-    public static setExecutionState(executing: boolean)
-    {
-        ProviderStatusBar.executing = executing ? "  $(sync~spin)" : "";
-    }
+	public static setExecutionState(executing: boolean)
+	{
+		ProviderStatusBar.executing = executing ? "  $(sync~spin)" : "";
+	}
 
-    public static setTooltip(tooltip: vscode.MarkdownString)
-    {
-        ProviderStatusBar.tooltip = tooltip;
-    }
+	public static setTooltip(tooltip: vscode.MarkdownString)
+	{
+		ProviderStatusBar.tooltip = tooltip;
+	}
 
-    public static setStatus()
-    {
-        ProviderStatusBar.statusBarItem.text = `Karate $(pass) ${ProviderStatusBar.passed} $(error) ${ProviderStatusBar.failed} $(vm) ${ProviderStatusBar.env}${ProviderStatusBar.executing}`;
+	public static setStatus()
+	{
+		ProviderStatusBar.statusBarItem.text = `Karate $(pass) ${ProviderStatusBar.passed} $(error) ${ProviderStatusBar.failed} $(vm) ${ProviderStatusBar.env}${ProviderStatusBar.executing}`;
 
-        ProviderStatusBar.statusBarItem.tooltip = ProviderStatusBar.tooltip;
+		ProviderStatusBar.statusBarItem.tooltip = ProviderStatusBar.tooltip;
 
 		if (ProviderStatusBar.thresholdViolation)
 		{
@@ -97,14 +97,15 @@ class ProviderStatusBar
 			ProviderStatusBar.statusBarItem.backgroundColor = undefined;
 		}
 
-        ProviderStatusBar.statusBarItem.show();
-    }
+		ProviderStatusBar.statusBarItem.show();
+	}
 
 	private static getFooter(): string
 	{
 		let footer: string = "\n\n";
 		const clearResults = `command:karateRunner.tests.clearResults`;
 		const openSettings = `command:karateRunner.tests.openSettings`;
+		const setEnvironment = `command:karateRunner.tests.setEnvironment`;
 
 		if (ProviderExecutions.executionArgs !== null)
 		{
@@ -113,7 +114,8 @@ class ProviderStatusBar
 			footer += `[$(debug-rerun)](${runCmd} "Re-Run")&nbsp;&nbsp;`;
 		}
 
-		footer += `[$(clear-all)](${clearResults} "Clear Results")`;
+		footer += `[$(vm)](${setEnvironment} "Set Environment")`;
+		footer += `&nbsp;&nbsp;[$(clear-all)](${clearResults} "Clear Results")`;
 		footer += `&nbsp;&nbsp;[$(gear)](${openSettings} "Open Settings")`;
 		footer += `&nbsp;&nbsp;&nbsp;&nbsp;[$(github)](https://github.com/karatelabs/karate "Karate")`;
 		footer += `&nbsp;&nbsp;[$(extensions)](https://marketplace.visualstudio.com/items?itemName=kirkslota.karate-runner "Karate Runner")`;
@@ -123,7 +125,7 @@ class ProviderStatusBar
 	
 	public static resetStatus()
 	{
-        ProviderStatusBar.setResults(0, 0);
+		ProviderStatusBar.setResults(0, 0);
 
 		let tooltip = new vscode.MarkdownString(undefined, true);
 		tooltip.isTrusted = true;
@@ -131,8 +133,8 @@ class ProviderStatusBar
 		tooltip.appendMarkdown(`No Results`);
 		tooltip.appendMarkdown(ProviderStatusBar.getFooter());
 
-        ProviderStatusBar.setTooltip(tooltip);
-        ProviderStatusBar.setStatus();
+		ProviderStatusBar.setTooltip(tooltip);
+		ProviderStatusBar.setStatus();
 	}
 	
 	private static setFromResults(json)
@@ -180,15 +182,15 @@ ${resultsStats}
 		
 		if ("featuresPassed" in json)
 		{
-            ProviderStatusBar.setResults(json.scenariosPassed, json.scenariosfailed);
-            ProviderStatusBar.setTooltip(tooltip);
-            ProviderStatusBar.setStatus();
+			ProviderStatusBar.setResults(json.scenariosPassed, json.scenariosfailed);
+			ProviderStatusBar.setTooltip(tooltip);
+			ProviderStatusBar.setStatus();
 		}
 		else
 		{
-            ProviderStatusBar.setResults(json.passed, json.failed);
-            ProviderStatusBar.setTooltip(tooltip);
-            ProviderStatusBar.setStatus();
+			ProviderStatusBar.setResults(json.passed, json.failed);
+			ProviderStatusBar.setTooltip(tooltip);
+			ProviderStatusBar.setStatus();
 		}
 	}
 }

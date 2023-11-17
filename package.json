@@ -7,7 +7,7 @@
 		"type": "git",
 		"url": "https://github.com/kirksl/karate-runner"
 	},
-	"version": "1.2.4",
+	"version": "1.2.5",
 	"appInsightsId": "a285938d-a115-44ea-be2a-588a243d5f2c",
 	"license": "MIT",
 	"author": {
@@ -163,7 +163,7 @@
 					"dark": "resources/dark/vm.svg"
 				}
 			},
-            {
+			{
 				"command": "karateRunner.tests.clearResults",
 				"title": "Clear Results",
 				"icon": {
@@ -270,6 +270,10 @@
 			{
 				"command": "karateRunner.editor.toggleResultsInGutter",
 				"title": "Toggle Results In Gutter"
+			},
+			{
+				"command": "karateRunner.editor.alignDataTables",
+				"title": "Align Data Tables"
 			}
 		],
 		"menus": {
@@ -300,11 +304,11 @@
 					"when": "view == karate-reports",
 					"group": "navigation@3"
 				},
-                {
-                    "command": "karateRunner.tests.setEnvironment",
+				{
+					"command": "karateRunner.tests.setEnvironment",
 					"when": "view == karate-tests",
 					"group": "navigation@1"
-                },
+				},
 				{
 					"command": "karateRunner.tests.clearResults",
 					"when": "view == karate-tests",
@@ -402,19 +406,29 @@
 			],
 			"KarateRunner.editor.menu": [
 				{
-					"command": "karateRunner.tests.clearResults",
+					"command": "karateRunner.editor.alignDataTables",
 					"when": "resourceLangId == karate",
 					"group": "navigation@1"
 				},
 				{
-					"command": "karateRunner.tests.openSettings",
+					"command": "karateRunner.tests.setEnvironment",
 					"when": "resourceLangId == karate",
 					"group": "navigation@2"
 				},
 				{
-					"command": "karateRunner.editor.toggleResultsInGutter",
+					"command": "karateRunner.tests.clearResults",
 					"when": "resourceLangId == karate",
 					"group": "navigation@3"
+				},
+				{
+					"command": "karateRunner.tests.openSettings",
+					"when": "resourceLangId == karate",
+					"group": "navigation@4"
+				},
+				{
+					"command": "karateRunner.editor.toggleResultsInGutter",
+					"when": "resourceLangId == karate",
+					"group": "navigation@5"
 				}
 			]
 		},
@@ -432,12 +446,12 @@
 			"type": "object",
 			"title": "Karate Runner",
 			"properties": {
-                "karateRunner.core.environment": {
-                    "type": "string",
-                    "default": "",
-                    "description": "Environment to test against.  Karate Runner will use this value to set the 'karate.env' system property.",
-                    "scope": "resource"
-                },
+				"karateRunner.core.environment": {
+					"type": "string",
+					"default": "",
+					"description": "Environment to test against.  Karate Runner will use this value to set the 'karate.env' system property.",
+					"scope": "resource"
+				},
 				"karateRunner.karateJar.commandLineArgs": {
 					"type": "string",
 					"default": "java -cp karate.jar com.intuit.karate.Main",
@@ -589,6 +603,18 @@
 					"type": "boolean",
 					"default": true,
 					"description": "Toggle showing results within the editor's gutter for feature files.",
+					"scope": "resource"
+				},
+				"karateRunner.alignDataTables.PreserveWhitespace": {
+					"type": "boolean",
+					"default": true,
+					"description": "Preserve whitespace within cells when aligning data tables.",
+					"scope": "resource"
+				},
+				"karateRunner.alignDataTables.Indent": {
+					"type": "number",
+					"default": 0,
+					"description": "Number of spaces to indent data table rows from parent (eg Examples: | * table | * set | * replace).",
 					"scope": "resource"
 				}
 			}
@@ -757,7 +783,7 @@
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile",
 		"test": "node ./out/test/runTest.js",
-        "checktypes": "tsc --noEmit"
+		"checktypes": "tsc --noEmit"
 	},
 	"devDependencies": {
 		"@types/glob": "^7.2.0",

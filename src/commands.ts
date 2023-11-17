@@ -315,7 +315,7 @@ async function runKarateTest(args = null)
 				runPhases = "test";
 			}
 			
-      let karateRunnerEnv = (karateEnv === "") ? "" : ` -Dkarate.env=${karateEnv}`;
+			let karateRunnerEnv = (karateEnv === "") ? "" : ` -Dkarate.env=${karateEnv}`;
 			let karateRunnerArgs = String(vscode.workspace.getConfiguration('karateRunner.karateRunner').get('commandLineArgs'));
 			
 			if (Boolean(vscode.workspace.getConfiguration('karateRunner.karateCli').get('overrideKarateRunner')))
@@ -423,7 +423,7 @@ async function runKarateTest(args = null)
 	}
 	else
 	{
-        let karateJarEnv = (karateEnv === "") ? "" : ` -e ${karateEnv}`;
+		let karateJarEnv = (karateEnv === "") ? "" : ` -e ${karateEnv}`;
 		let karateJarArgs = String(vscode.workspace.getConfiguration('karateRunner.karateJar').get('commandLineArgs'));
 			
 		if (karateJarArgs === undefined || karateJarArgs === "")
@@ -486,7 +486,7 @@ async function runKarateTest(args = null)
 		if (e.execution.task.name == 'Karate Runner')
 		{
 			ProviderStatusBar.setExecutionState(false);
-            ProviderStatusBar.setStatus();
+			ProviderStatusBar.setStatus();
 			isTaskExecuting = false;
 			watcher.dispose();
 					
@@ -533,8 +533,8 @@ async function runKarateTest(args = null)
 				
 	let isTaskExecuting = true;
 	ProviderStatusBar.setExecutionState(true);
-    ProviderStatusBar.setStatus();
-				
+	ProviderStatusBar.setStatus();
+
 	vscode.tasks.executeTask(task).then((task) => showProgress(task));
 }
 
@@ -880,7 +880,7 @@ function deleteLine(args)
 
 function openKarateSettings()
 {
-    vscode.commands.executeCommand('workbench.action.openWorkspaceSettings', 'Karate Runner');
+	vscode.commands.executeCommand('workbench.action.openWorkspaceSettings', 'Karate Runner');
 }
 
 function toggleResultsInGutter()
@@ -891,15 +891,119 @@ function toggleResultsInGutter()
 
 async function setEnvironment()
 {
-    let env = await vscode.window.showInputBox
-    (
-        {
-            prompt: "Karate Environment",
-            value: String(vscode.workspace.getConfiguration('karateRunner.core').get('environment'))
-        }
-    );
+	let env = await vscode.window.showInputBox
+	(
+		{
+			prompt: "Karate Environment",
+			value: String(vscode.workspace.getConfiguration('karateRunner.core').get('environment'))
+		}
+	);
 
-    await vscode.workspace.getConfiguration().update('karateRunner.core.environment', env);
+	if (env !== undefined)
+	{
+		await vscode.workspace.getConfiguration().update('karateRunner.core.environment', env);
+	}
+}
+
+function alignDataTables() {
+	let preserveWhitespace = (Boolean(vscode.workspace.getConfiguration('karateRunner.alignDataTables').get('PreserveWhitespace')));
+	let indent = Number(vscode.workspace.getConfiguration('karateRunner.alignDataTables').get('Indent'));
+
+	vscode.window.visibleTextEditors.forEach((editor) =>
+	{
+		if (editor.document.languageId !== 'karate')
+		{
+			return;
+		}
+
+		let edits: { range: vscode.Range, newLine: string }[] = [];
+		let feature: Feature = new Feature(editor.document);
+		let sections: ISection[] = feature.getTestSections();
+
+		sections.forEach((section) =>
+		{
+			let dataTableSections: ISection[] = feature.getDataTableSections(section);
+			dataTableSections.forEach((dataTableSection) =>
+			{
+				let columnWidths: number[] = [];
+				let startIndex: number = -1;
+				for(let line = dataTableSection.startLine; line <= dataTableSection.endLine; line++)
+				{
+					let lineAt = editor.document.lineAt(line);
+					let text = lineAt.text.trim();
+
+					if (line == dataTableSection.startLine)
+					{
+						startIndex = lineAt.firstNonWhitespaceCharacterIndex + indent;
+					}
+
+					if (text.match(/^\|.+\|$/))
+					{
+						let cells = text.split('|').slice(1, -1);
+						cells.forEach((c, idx) => 
+						{
+							let cell: string;
+							if (preserveWhitespace)
+							{
+								cell = c;
+							}
+							else
+							{
+								cell = c.trim();
+							}
+
+							if (!columnWidths[idx] || cell.length > columnWidths[idx])
+							{
+								columnWidths[idx] = cell.length;
+							}
+						});
+					}
+				}
+
+				for(let line = dataTableSection.startLine; line <= dataTableSection.endLine; line++)
+				{
+					let lineAt = editor.document.lineAt(line);
+					let text = lineAt.text.trim();
+
+					if (text.match(/^\|.+\|$/))
+					{
+						let cells = text.split('|').slice(1, -1);
+						let newLine = ' '.repeat(startIndex) + '|';
+						cells.forEach((c, idx) => 
+						{
+							let newCell = c.trim();
+
+							let cellWidth: number;
+							if (preserveWhitespace)
+							{
+								cellWidth = columnWidths[idx] - newCell.length - 1;
+							}
+							else
+							{
+								cellWidth = columnWidths[idx] - newCell.length + 1;
+							}
+
+							newCell = ` ${newCell}`;
+							newCell = newCell + ' '.repeat(cellWidth);
+
+							newLine += newCell + '|';
+						});
+
+						let range = new vscode.Range(line, 0, line, lineAt.text.length);
+						edits.push({ range: range, newLine: newLine });
+					}
+				}
+			});
+		});
+
+		editor.edit((editBuilder: vscode.TextEditorEdit) =>
+		{
+			edits.forEach((edit) => 
+			{
+				editBuilder.replace(edit.range, edit.newLine);
+			});
+		});
+	});
 }
 
 export
@@ -926,5 +1030,6 @@ export
 	deleteLine,
 	openKarateSettings,
 	toggleResultsInGutter,
-    setEnvironment
+	setEnvironment,
+	alignDataTables
 };
