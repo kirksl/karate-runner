@@ -1,6 +1,7 @@
 import { getDarkIcon, getLightIcon, getTestExecutionDetail, ITestExecutionDetail } from "./helper";
 import { ProviderResults } from "./providerResults";
 import { ENTRY_TYPE, ENTRY_STATE } from "./types/entry";
+import { Feature, ISection } from "./feature";
 import * as vscode from 'vscode';
 
 class ProviderDecorations
@@ -76,7 +77,7 @@ class ProviderDecorations
 			}
 
 			await this.updateResultDecorations(editor);
-			this.updateTableRowNumberDecorations(editor);
+			this.updateDataTableDecorations(editor);
 		});
 	}
 
@@ -216,69 +217,59 @@ class ProviderDecorations
 		editor.setDecorations(this.decorTableResultGutterFail, decorTableResultGutterFail);
 	}
 
-	public updateTableRowNumberDecorations(editor: vscode.TextEditor)
+	public updateDataTableDecorations(editor: vscode.TextEditor)
 	{
-		let foundTables = false;
-		let foundTableHeaders = false;
-		let tableDataRow = 1;
-		let decorTableRowNumber: vscode.DecorationOptions[] = [];
+		let edits: vscode.DecorationOptions[] = [];
+		let feature: Feature = new Feature(editor.document);
+		let sections: ISection[] = feature.getTestSections();
 
-		for (let line = 0; line < editor.document.lineCount; line++)
+		sections.forEach((section) =>
 		{
-			let lineText = editor.document.lineAt(line).text.trim();
-			if (foundTables)
+			let dataTableSections: ISection[] = feature.getDataTableSections(section);
+			dataTableSections.forEach((dataTableSection) =>
 			{
-				if (lineText.length > 1 && lineText.startsWith('|') && lineText.endsWith('|'))
+				let foundHeader = false;
+				let tableRowNum = 1;
+				let tableEdits: vscode.DecorationOptions[] = [];
+				for(let line = dataTableSection.startLine; line <= dataTableSection.endLine; line++)
 				{
-					if (foundTableHeaders)
+					let lineAt = editor.document.lineAt(line);
+					let text = lineAt.text.trim();
+
+					if (text.match(/^\|.+\|$/))
 					{
-						let decorOptions: vscode.DecorationOptions =
+						if (foundHeader)
 						{
-							renderOptions:
+							let decorOptions: vscode.DecorationOptions =
 							{
-								after:
+								renderOptions:
 								{
-									contentText: `${tableDataRow.toString()}`
-								}
-							},
-							range: new vscode.Range(line, 0, line, lineText.length)
+									after:
+									{
+										contentText: `${tableRowNum.toString()}`
+									}
+								},
+								range: new vscode.Range(line, 0, line, text.length)
+							}
+	
+							tableEdits.push(decorOptions);
+							tableRowNum++;
 						}
-
-						decorTableRowNumber.push(decorOptions);
-						tableDataRow++;
-					}
-					else
-					{
-						foundTableHeaders = true;
+						else
+						{
+							foundHeader = true;
+						}
 					}
 				}
-				else
+
+				if (tableEdits.length > 1)
 				{
-					if (tableDataRow == 2)
-					{
-						decorTableRowNumber.pop();
-					}
-
-					tableDataRow = 1;
-					foundTableHeaders = false;
-					foundTables = false;
+					edits = edits.concat(tableEdits);
 				}
-			}
-			else
-			{
-				if (lineText.startsWith('Examples:') || lineText.startsWith('* table'))
-				{
-					foundTables = true;
-				}
-			}
-		}
+			});
+		});
 
-		if (tableDataRow == 2)
-		{
-			decorTableRowNumber.pop();
-		}
-
-		editor.setDecorations(this.decorTableRowNumber, decorTableRowNumber);
+		editor.setDecorations(this.decorTableRowNumber, edits);
 	}
 
 	private getTestResultDecorType(state: ENTRY_STATE, gutterIcon: Boolean): vscode.TextEditorDecorationType

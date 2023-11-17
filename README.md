@@ -56,7 +56,11 @@ Test Results are rolling results meaning they will accumulate and reset only whe
 *Note this feature is dependent on Karate Version >= 1.0 and Karate providing result files under the root of your project within a /karate-reports directory.  Each file must end with a format of `.karate-json.txt`.*
 
 ### Editor Menu Bar
-A `Karate` `Editor Menu` will be added to the VSCode Editor Menu Bar for feature files.  A menu option will be added to open Karate Runner settings, clear test results from Tests view and the gutter for feature files and finally to toggle showing test results within the gutter for feature files.
+A `Karate` `Editor Menu` will be added to the VSCode Editor Menu Bar for open feature files.  The menu will have the following options:
+- `Align Data Tables` to align delimiters (`|`) for all gherkin data tables
+- `Clear Results` to clear test results from the gutter including from the `Tests` view
+- `Open Settings` to open Karate Runner settings
+- `Toggle Results In Gutter` to toggle showing or hiding test results within the gutter
 
 ### Peek
 A `Peek` option will be added to the `Control-Click` or `Right-Click` context menu in the VSCode Editor.  Clicking `Peek > Peek Definition` on a string or reference (or any combination of if concat'd) which equates to an existing file will display the contents of that file within an `Inline Peek Editor`.  

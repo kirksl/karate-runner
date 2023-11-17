@@ -521,7 +521,7 @@ export class ProviderResults implements IDisposable
 			{
 				let testTitle = ted.testTitle;
 				if (testTitle.startsWith("Scenario Outline:") &&
-				    testTitle.indexOf("<") !== -1 &&
+					testTitle.indexOf("<") !== -1 &&
 					testTitle.indexOf(">") !== -1)
 				{
 					let newTestTitle = testTitle.replace(/^Scenario Outline:\s*/, "")

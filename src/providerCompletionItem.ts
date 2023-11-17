@@ -105,7 +105,7 @@ class ProviderCompletionItem implements vscode.CompletionItemProvider
 						let fNormalized = filePath.substring(baseDir.length + 1);
 
 						if (!fNormalized.startsWith(`build${path.sep}`) &&
-						    !fNormalized.startsWith(`target${path.sep}`) &&
+							!fNormalized.startsWith(`target${path.sep}`) &&
 							!fNormalized.startsWith(`node_modules${path.sep}`) &&
 							fNormalized.match(/^\./) === null
 						   )

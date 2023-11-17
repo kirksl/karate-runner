@@ -33,36 +33,36 @@ interface ITestExecutionDetail
 
 async function isPortFree(port: number): Promise<boolean>
 {
-    return new Promise((resolve, reject) =>
+	return new Promise((resolve, reject) =>
 	{
-        let s = net.createServer();
+		let s = net.createServer();
 
-        s.once('error', (err) =>
+		s.once('error', (err) =>
 		{
-            s.close();
-            if (err["code"] == "EADDRINUSE")
+			s.close();
+			if (err["code"] == "EADDRINUSE")
 			{
-                resolve(false);
-            }
+				resolve(false);
+			}
 			else
 			{
-                resolve(false);
-            }
-        });
+				resolve(false);
+			}
+		});
 
-        s.once('listening', () =>
+		s.once('listening', () =>
 		{
-            resolve(true);
-            s.close();
-        });
+			resolve(true);
+			s.close();
+		});
 	
-        s.listen(port);
-    });
+		s.listen(port);
+	});
 }
 
 function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetail
 {
-    let defaultRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
+	let defaultRootPath = vscode.workspace.workspaceFolders[0].uri.fsPath;
 	let filePathArray = uri.fsPath.split(path.sep);
 	let projectRootPath = "";
 	let runFilePath = "";
@@ -117,11 +117,11 @@ function getProjectDetail(uri: vscode.Uri, type: vscode.FileType): IProjectDetai
 			break;
 		}
 
-        if (defaultRootPath == runFileTestPath)
-        {
-            projectRootPath = defaultRootPath;
-            break;
-        }
+		if (defaultRootPath == runFileTestPath)
+		{
+			projectRootPath = defaultRootPath;
+			break;
+		}
 
 		filePathArray.pop();
 	}

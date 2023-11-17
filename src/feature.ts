@@ -31,7 +31,10 @@ const SECTION_TYPE =
 	BACKGROUND: 'background:',
 	SCENARIO: 'scenario:',
 	SCENARIO_OUTLINE: 'scenario outline:',
-	EXAMPLES: 'example:',
+	SET: '* set',
+	REPLACE: '* replace',
+	TABLE: '* table',
+	EXAMPLES: 'examples:',
 	TAG: '@',
 	COMMENT: '#'
 };
@@ -332,7 +335,7 @@ class Feature
 					title: lineText,
 					type: this.getSectionType(lineText),
 					startLine: line,
-					endLine: this.document.lineCount
+					endLine: this.document.lineCount - 1
 				};
 
 				if (line > 0)
@@ -356,6 +359,75 @@ class Feature
 		}
 
 		return this.sections;
+	}
+
+	public getDataTableSections(section: ISection): ISection[]
+	{
+		let tableSections: ISection[] = [];
+		let tableSection: ISection;
+		let inTableSection = false;
+		let documentLineCount = this.document.lineCount - 1;
+
+		let getTableSectionType = (line: string): string =>
+		{
+			if (this.isSetSection(line)) { return SECTION_TYPE.SET; }
+			if (this.isReplaceSection(line)) { return SECTION_TYPE.REPLACE; }
+			if (this.isTableSection(line)) { return SECTION_TYPE.TABLE; }
+			if (this.isExamplesSection(line)) { return SECTION_TYPE.EXAMPLES; }
+
+			return null;
+		}
+
+		let initTableSection = (line: number, lineText: string): void =>
+		{
+			let sectionType = getTableSectionType(lineText);
+			if (sectionType !== null)
+			{
+				inTableSection = true;
+
+				tableSection =
+				{
+					tag: "",
+					title: lineText,
+					type: sectionType,
+					startLine: line,
+					endLine: line
+				};
+			}
+		}
+
+		for (let line = section.startLine; line <= section.endLine; line++)
+		{
+			let lineText = this.getLine(line).text.trim();
+			let isLastSectionLine = line === section.endLine;
+			let isLastDocumentLine = line === documentLineCount;
+
+			if (inTableSection)
+			{
+				if (lineText.match(/^\|.+\|$/))
+				{
+					tableSection.endLine = line;
+
+					if (isLastSectionLine || isLastDocumentLine)
+					{
+						inTableSection = false;
+						tableSections.push(tableSection);
+					}
+				}
+				else
+				{
+					inTableSection = false;
+					tableSections.push(tableSection);
+					initTableSection(line, lineText);
+				}
+			}
+			else
+			{
+				initTableSection(line, lineText);
+			}
+		}
+
+		return tableSections;
 	}
 
 	public dereferenceToken(token: ILineToken): vscode.TextLine
@@ -419,6 +491,21 @@ class Feature
 		return line.toLowerCase().trim().startsWith(SECTION_TYPE.SCENARIO_OUTLINE);
 	}
 
+	public isSetSection(line: string): boolean
+	{
+		return line.toLowerCase().trim().startsWith(SECTION_TYPE.SET);
+	}
+
+	public isReplaceSection(line: string): boolean
+	{
+		return line.toLowerCase().trim().startsWith(SECTION_TYPE.REPLACE);
+	}
+
+	public isTableSection(line: string): boolean
+	{
+		return line.toLowerCase().trim().startsWith(SECTION_TYPE.TABLE);
+	}
+
 	public isExamplesSection(line: string): boolean
 	{
 		return line.toLowerCase().trim().startsWith(SECTION_TYPE.EXAMPLES);
@@ -440,6 +527,9 @@ class Feature
 		if (this.isFeatureSection(line)) { return true; }
 		if (this.isScenarioSection(line)) { return true; }
 		if (this.isScenarioOutlineSection(line)) { return true; }
+		if (this.isSetSection(line)) { return true; }
+		if (this.isReplaceSection(line)) { return true; }
+		if (this.isTableSection(line)) { return true; }
 		if (this.isExamplesSection(line)) { return true; }
 		if (this.isTagSection(line)) { return true; }
 		if (this.isCommentSection(line)) { return true; }
@@ -453,6 +543,16 @@ class Feature
 		if (this.isBackgroundSection(line)) { return true; }
 		if (this.isScenarioSection(line)) { return true; }
 		if (this.isScenarioOutlineSection(line)) { return true; }
+
+		return false;
+	}
+
+	public isDataTableSection(line: string): boolean
+	{
+		if (this.isSetSection(line)) { return true; }
+		if (this.isReplaceSection(line)) { return true; }
+		if (this.isTableSection(line)) { return true; }
+		if (this.isExamplesSection(line)) { return true; }
 
 		return false;
 	}

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Feature } from "./feature";
 import { ENTRY_TYPE } from "./types/entry";
 
 class ProviderHoverRunDebug implements vscode.HoverProvider
@@ -10,7 +11,7 @@ class ProviderHoverRunDebug implements vscode.HoverProvider
 		this.extensionContext = context;
 	}
 
-	private getFooter(line): string
+	private getFooter(line: number): string
 	{
 		let footer: string = "";
 		const lineArg = encodeURIComponent(JSON.stringify([[line]]));
@@ -23,6 +24,7 @@ class ProviderHoverRunDebug implements vscode.HoverProvider
 		footer += `&nbsp;&nbsp;[$(chevron-down)](${moveRowDown} "Move Row Down")`;
 		footer += `&nbsp;&nbsp;[$(chrome-restore)](${cloneRow} "Clone Row")`;
 		footer += `&nbsp;&nbsp;[$(trash)](${removeRow} "Delete Row")`;
+		footer += `&nbsp;&nbsp;|&nbsp;&nbsp;Line: ${line + 1}`;
 
 		return footer;
 	}
@@ -41,12 +43,13 @@ class ProviderHoverRunDebug implements vscode.HoverProvider
 					let lineText = document.lineAt(line).text;
 					if (!lineText.trim().startsWith('|'))
 					{
-						if (lineText.trim().startsWith('Examples:') || lineText.trim().startsWith('* table'))
+						let feature = new Feature(document);
+						if (feature.isDataTableSection(lineText))
 						{
 							let contents = new vscode.MarkdownString(undefined, true);
 							contents.isTrusted = true;
 
-							if (lineText.trim().startsWith('Examples:'))
+							if (feature.isExamplesSection(lineText))
 							{
 								const feature = `${document.uri.fsPath}:${position.line + 1}`;
 								const runArgs = encodeURIComponent(JSON.stringify([[{ karateOptions: feature, karateJarOptions: feature, testUri: document.uri, fileType: ENTRY_TYPE.TEST }]]));
@@ -55,7 +58,7 @@ class ProviderHoverRunDebug implements vscode.HoverProvider
 								const debugCmd = `command:karateRunner.tests.debug?${debugArgs}`;
 	
 								contents.appendMarkdown(`[Karate: Run](${runCmd} "Karate: Run")`);
-								contents.appendMarkdown(' | ');
+								contents.appendMarkdown('&nbsp;&nbsp;|&nbsp;&nbsp;');
 								contents.appendMarkdown(`[Karate: Debug](${debugCmd} "Karate: Debug")`);
 								contents.appendMarkdown(`\n\n`);
 							}
