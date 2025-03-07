@@ -286,7 +286,19 @@ async function runKarateTest(args = null)
 	let projectRootPath = projectDetail.projectRoot;
 	let runFilePath = projectDetail.runFile;
 		
-  let karateEnv = String(vscode.workspace.getConfiguration('karateRunner.core').get('environment')).trim();
+	let karateEnv = String(vscode.workspace.getConfiguration('karateRunner.core').get('environment')).trim();
+
+	const javaRuntimes: any[] = vscode.workspace.getConfiguration('java.configuration').get('runtimes', []);
+
+	let javaHome = vscode.workspace.getConfiguration('karateRunner.java')?.get('home') ||
+		vscode.workspace.getConfiguration('java.import.gradle')?.get('java.home') ||
+		vscode.workspace.getConfiguration('java')?.get('home') ||
+		javaRuntimes.find(runtime => runtime.default)?.path;
+
+	let env = {};
+	if (javaHome) {
+		env['JAVA_HOME'] = javaHome;
+	}
 
 	if (runFilePath !== "" && !runFilePath.toLowerCase().endsWith(standaloneBuildFile))
 	{
@@ -297,7 +309,7 @@ async function runKarateTest(args = null)
 				if (os.platform() == 'win32')
 				{
 					mavenCmd = "mvnw";
-					gradleCmd = "gradlew";
+					gradleCmd = `${vscode.workspace.workspaceFolders[0].uri.fsPath}\\gradlew.bat`; // Updated to use absolute path
 				}
 				else
 				{
@@ -454,7 +466,7 @@ async function runKarateTest(args = null)
 		}
 	});
 		
-	let seo: vscode.ShellExecutionOptions = { cwd: projectRootPath };
+	let seo: vscode.ShellExecutionOptions = { cwd: projectRootPath, env: env };
 	if (os.platform() == 'win32')
 	{
 		seo.executable = "cmd.exe";

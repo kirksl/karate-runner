@@ -616,6 +616,12 @@
 					"default": 0,
 					"description": "Number of spaces to indent data table rows from parent (eg Examples: | * table | * set | * replace).",
 					"scope": "resource"
+				},
+				"karateRunner.java.home": {
+					"type": "string",
+					"default": "",
+					"description": "Override java.home specifically for karate runner. Only applies when using Maven or Gradle.",
+					"scope": "resource"
 				}
 			}
 		},
